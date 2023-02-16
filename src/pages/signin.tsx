@@ -1,6 +1,7 @@
+import React from "react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Slink from "@/components/slink";
 import { useRouter } from "next/router";
 
