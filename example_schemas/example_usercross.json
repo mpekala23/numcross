@@ -1,0 +1,25 @@
+// json template for a user having filling out a 
+// crossword (at any stage, can be empty, partially filled, 
+// or completely filled)
+{
+    "user_id" : 1123092130,
+    "puzzle_id" : 123123,
+    "num_rows" : 2,
+    "num_cols" : 2,
+    "puzzle" : [
+        // each square contains 
+        // 1. whether that grid is fillable or not
+        // 2. true if the square has been filled by the user, false otherwise
+        // 3. the number the user has filled in
+        [
+            ["fillable", true, 2], 
+            ["fillable", true, 3]
+        ],
+        [
+            ["fillable", false, -1], 
+            ["fillable", false, -1]
+        ]
+    ], 
+    "finished" : true, // is the puzzle finished correctly
+    "locked" : true // might be unneccesary, indicates if the user is still allowed to edit answers, might want to lock on completion
+}

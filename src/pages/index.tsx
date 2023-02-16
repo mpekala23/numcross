@@ -1,14 +1,13 @@
 import Head from 'next/head'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
+import { Crossword } from '@/components/crossword'
 
 export default function Home() {
   return (
     <>
       <Head>
       </Head>
-      <main className={styles.main}>
-        
+      <main>
+        <Crossword schema={{ gridSize: [3, 3] }} />
       </main>
     </>
   )

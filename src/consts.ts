@@ -1,0 +1,1 @@
+export const CELL_MATCH = new RegExp("^\\d{1,5}$");
