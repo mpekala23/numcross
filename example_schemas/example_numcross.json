@@ -1,28 +1,36 @@
 {
-    "id" : 123123,
-    "difficulty" : "easy", // And other puzzle metadata
-    "type" : "daily",
-    "theme" : "None",
-    "date" : "2/8/2022", // or however you store a date in a crossword
-    "num_rows" : 2,
-    "num_cols" : 2, 
-    "puzzle" : [
-        // each square in the grid is represented as an array
-        // the array contains the following information
-        // 1. whether the square is fillable or auto colored black
-        // 2. the clue number of the square if a clue number exists (or -1 if the square does not have a clue number)
-        // 3. whether an across clue exists for this square
-        // 4. the across clue if one exists, else ""
-        // 5. whether a down clue exists for this square
-        // 6. the down clue if one exists, else ""
-        // 7. the digit that should go into this square, -1 if no number should go into it bc it is not fillable
-        [   
-            [ "fillable", 1, true, "Sum of the digits is 5", true, "A power of 2",  1], 
-            [ "fillable", 2, false, "", true, "A squared prime", 4] 
-        ],
-        [  
-            [ "fillable", 3, true, "Solution to the title of an Ariana Grande song", false, "", 6 ], 
-            [ "fillable", -1, false, "", false, "", 9]
-        ] 
+  "id": 123123,
+  "difficulty": "easy", // And other puzzle metadata
+  "type": "daily",
+  "theme": "None",
+  "date": "2/8/2022", // or however you store a date in a crossword
+  "num_rows": 2,
+  "num_cols": 2,
+  "puzzle": [
+    // each square in the grid is represented as an array
+    // the array contains the following information
+    // 1. whether the square is fillable or auto colored black
+    // 2. the clue number of the square if a clue number exists (or -1 if the square does not have a clue number)
+    // 3. whether an across clue exists for this square
+    // 4. the across clue if one exists, else ""
+    // 5. whether a down clue exists for this square
+    // 6. the down clue if one exists, else ""
+    // 7. the digit that should go into this square, -1 if no number should go into it bc it is not fillable
+    [
+      ["fillable", 1, true, "Sum of the digits is 5", true, "A power of 2", 1],
+      ["fillable", 2, false, "", true, "A squared prime", 4]
+    ],
+    [
+      [
+        "fillable",
+        3,
+        true,
+        "Solution to the title of an Ariana Grande song",
+        false,
+        "",
+        6
+      ],
+      ["fillable", -1, false, "", false, "", 9]
     ]
+  ]
 }
