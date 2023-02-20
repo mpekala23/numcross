@@ -1,8 +1,21 @@
-import Head from 'next/head'
-import { Crossword } from '@/components/crossword'
-import React from "react";
+import Head from "next/head";
+import { Crossword } from "@/components/crossword";
+import React, { useEffect } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function Home() {
+  const supabaseClient = useSupabaseClient();
+
+  useEffect(() => {
+    supabaseClient
+      .from("puzzles")
+      .select("*")
+      .then((res) => {
+        const { data, error } = res;
+        console.log(data, error);
+      });
+  }, [supabaseClient]);
+
   return (
     <>
       <Head>

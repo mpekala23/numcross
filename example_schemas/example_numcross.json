@@ -4,9 +4,9 @@
   "type": "daily",
   "theme": "None",
   "date": "2/8/2022", // or however you store a date in a crossword
-  "num_rows": 2,
-  "num_cols": 2,
   "puzzle": [
+    "num_rows": 2,
+    "num_cols": 2,
     // each square in the grid is represented as an array
     // the array contains the following information
     // 1. whether the square is fillable or auto colored black
