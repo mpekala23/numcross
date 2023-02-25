@@ -4,21 +4,17 @@ import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from 'lodash';
 
 type CrosswordSchema = {
-    gridSize: [number, number]
-}
+  gridSize: [number, number];
+};
 
 // Format: (rowidx, colidx): value
 type CrosswordFilling = {
-    [key: string]: number
+  [key: string]: number;
 };
 
 type CrosswordProps = {
-    schema: CrosswordSchema
-}
-
-const cellKey = (colidx: number, rowidx: number) => {
-    return `${colidx},${rowidx}`;
-}
+  schema: CrosswordSchema;
+};
 
 export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
     const [currFilling, setCurrFilling] = useState<CrosswordFilling>({});

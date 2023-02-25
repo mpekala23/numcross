@@ -1,7 +1,5 @@
 import { FunctionComponent, useCallback } from 'react';
 import styles from '@/styles/cell.module.css';
-import classNames from "classnames";
-import { CELL_MATCH } from '@/consts';
 
 type CellProps = {
     rowidx: number,

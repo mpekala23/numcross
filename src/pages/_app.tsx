@@ -10,21 +10,21 @@ export default function App({
   Component,
   pageProps,
 }: AppProps<{ initialSession: Session }>) {
-  /*const [supabaseClient] = useState(() =>
+  const [supabaseClient] = useState(() =>
     createBrowserSupabaseClient({
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
       supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_KEY,
     })
-  );*/
+  );
 
   return (
-    /*<SessionContextProvider
+    <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
-    >*/
+    >
       <Layout>
         <Component {...pageProps} />
       </Layout>
-    //</SessionContextProvider>
+    </SessionContextProvider>
   );
 }
