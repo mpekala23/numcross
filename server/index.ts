@@ -23,7 +23,7 @@ app
 
     server.post("/api/add_puzzle", async (req, res) => {
       console.log("POST /api/add_puzzle");
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("puzzles")
         .insert({
           live_date: req.body.live_date,
@@ -33,7 +33,15 @@ app
           theme: req.body.theme,
         })
         .select();
-      console.log(data, error);
+      if (error) {
+        res.status(500).send("Error");
+      } else {
+        res.send("OK");
+      }
+    });
+
+    server.post("/api/update_attempt", async (req, res) => {
+      console.log(req.body);
       res.send("OK");
     });
 
