@@ -2,6 +2,8 @@ import express from "express";
 import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
+import { Attempt } from "@/types/types";
+import { cellKey } from "./utils";
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
@@ -40,9 +42,35 @@ app
       }
     });
 
-    server.post("/api/update_attempt", async (req, res) => {
-      console.log(req.body);
-      res.send("OK");
+    server.post("/api/check_attempt", async (req, res) => {
+      const attempt: Attempt = req.body;
+      const { data, error } = await supabase
+        .from("puzzles")
+        .select()
+        .eq("id", attempt.puzzleId)
+        .single();
+      if (error) {
+        res.status(500).send("Error: Can't load puzzle");
+        return;
+      }
+
+      let correct = true;
+      const shape = data.solution.shape;
+      for (let rx = 0; rx < shape[0]; rx++) {
+        for (let cx = 0; cx < shape[1]; cx++) {
+          const answer = data.solution.answers[rx][cx];
+          if (answer === "blank") continue;
+          const guess = attempt.scratch[cellKey(rx, cx)];
+          if (guess !== answer) {
+            correct = false;
+            break;
+          }
+        }
+      }
+
+      res.send({
+        correct,
+      });
     });
 
     server.get("*", (req, res) => {

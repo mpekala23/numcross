@@ -1,30 +1,30 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useEffect, useState } from "react";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useApi from "@/hooks/useApi";
+import { Attempt, Numcross } from "@/types/types";
 
 export default function Home() {
-  const supabaseClient = useSupabaseClient();
-  const { getTodaysPuzzle } = useApi();
-  const [puzzle, setPuzzle] = useState<Puzzzle | null>(null);
+  const { getTodaysNumcross, submitAttempt } = useApi();
+  const [numcross, setNumcross] = useState<Numcross | null>(null);
+  const attempt: Attempt = {
+    puzzleId: numcross?.id || 1,
+    startTime: new Date().toISOString(),
+    hasCheated: false,
+    scratch: {},
+  };
 
   useEffect(() => {
     const init = async () => {
-      if (puzzle) return;
-      const today = await getTodaysPuzzle();
-      setPuzzle(today);
+      if (numcross) return;
+      const today = await getTodaysNumcross();
+      setNumcross(today);
     };
     init();
-  }, [getTodaysPuzzle, puzzle]);
+  }, [getTodaysNumcross, numcross]);
 
-  const updateAttempt = async () => {
-    const resp = await fetch("/api/update_attempt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ attempt: "test" }),
-    });
-    console.log("resp", resp);
+  const doSubmitAttempt = async () => {
+    await submitAttempt(attempt);
   };
 
   return (
@@ -39,7 +39,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <button onClick={updateAttempt}>Submit</button>
+        <button onClick={doSubmitAttempt}>Submit</button>
         <Crossword schema={{ gridSize: [3, 3] }} />
       </main>
     </>

@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider, Session } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import Layout from "@/components/layout";
+import { Toaster } from "react-hot-toast";
 
 export default function App({
   Component,
@@ -25,6 +26,7 @@ export default function App({
       <Layout>
         <Component {...pageProps} />
       </Layout>
+      <Toaster />
     </SessionContextProvider>
   );
 }

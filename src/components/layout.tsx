@@ -6,7 +6,7 @@ interface Props {
 
 export default function Layout({ children }: Props) {
   return (
-    <div className="bg-slate-100 flex flex-col w-screen h-screen p-8 justify-center align-center">
+    <div className="bg-slate-100 flex flex-col w-screen min-h-screen p-8 justify-center align-center">
       {children}
     </div>
   );
