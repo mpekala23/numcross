@@ -3,22 +3,14 @@ import { FunctionComponent, useState, useCallback } from "react";
 import { Range, cellKey } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
+import { Puzzle, Scratch } from "@/types/types";
 
-type CrosswordSchema = {
-  gridSize: [number, number];
-};
+interface Props {
+  puzzle: Puzzle;
+}
 
-// Format: (rowidx, colidx): value
-type CrosswordFilling = {
-  [key: string]: number;
-};
-
-type CrosswordProps = {
-  schema: CrosswordSchema;
-};
-
-export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
-  const [currFilling, setCurrFilling] = useState<CrosswordFilling>({});
+export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
+  const [currFilling, setCurrFilling] = useState<Scratch>({});
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
   const [wordRow, setWordRow] = useState(true);
@@ -64,10 +56,10 @@ export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
   };
 
   return (
-    <div className={`grid p-8 gap-4 grid-cols-${schema.gridSize[1]}`}>
-      {Range(schema.gridSize[0])
+    <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
+      {Range(puzzle.shape[0])
         .map((rowidx) =>
-          Range(schema.gridSize[1]).map((colidx) => (
+          Range(puzzle.shape[1]).map((colidx) => (
             <Cell
               key={cellKey(rowidx, colidx)}
               rowidx={rowidx}

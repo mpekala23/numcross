@@ -7,7 +7,7 @@ import classNames from "classnames";
 type CellProps = {
   rowidx: number;
   colidx: number;
-  value: number | undefined;
+  value: number | null;
   onUpdate: (rowidx: number, colidx: number, value?: number) => void;
   onClick: (rowidx: number, colidx: number) => void;
   state: CellState;

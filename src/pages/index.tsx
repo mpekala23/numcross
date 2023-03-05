@@ -5,7 +5,7 @@ import useApi from "@/hooks/useApi";
 import { Attempt, Numcross } from "@/types/types";
 
 export default function Home() {
-  const { getTodaysNumcross, submitAttempt } = useApi();
+  const { getTodaysNumcross, checkAttempt } = useApi();
   const [numcross, setNumcross] = useState<Numcross | null>(null);
   const attempt: Attempt = {
     puzzleId: numcross?.id || 1,
@@ -23,9 +23,11 @@ export default function Home() {
     init();
   }, [getTodaysNumcross, numcross]);
 
-  const doSubmitAttempt = async () => {
-    await submitAttempt(attempt);
+  const doCheckAttempt = async () => {
+    await checkAttempt(attempt);
   };
+
+  if (!numcross) return <div>Loading...</div>;
 
   return (
     <>
@@ -39,8 +41,8 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <button onClick={doSubmitAttempt}>Submit</button>
-        <Crossword schema={{ gridSize: [3, 3] }} />
+        <button onClick={doCheckAttempt}>Submit</button>
+        <Crossword puzzle={numcross.puzzle} />
       </main>
     </>
   );

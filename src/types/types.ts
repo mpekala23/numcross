@@ -65,7 +65,7 @@ export interface Numcross {
   difficulty: Difficulty;
   theme: string;
   puzzle: Puzzle;
-  solution: Solution;
+  solution?: Solution;
 }
 
 export type Scratch = { [key: string]: number | null };
