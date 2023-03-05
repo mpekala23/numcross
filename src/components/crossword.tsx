@@ -2,21 +2,21 @@ import { FunctionComponent, useState, useCallback } from 'react';
 import { Range } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from 'lodash';
+import { Puzzle } from "@/types/types";
 
-type CrosswordSchema = {
-  gridSize: [number, number];
-};
-
-// Format: (rowidx, colidx): value
 type CrosswordFilling = {
   [key: string]: number;
 };
 
 type CrosswordProps = {
-  schema: CrosswordSchema;
+  puzzle: Puzzle;
 };
 
-export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
+const cellKey = (colidx: number, rowidx: number) => {
+    return `${colidx},${rowidx}`;
+};
+
+export const Crossword: FunctionComponent<CrosswordProps> = ({ puzzle }) => {
     const [currFilling, setCurrFilling] = useState<CrosswordFilling>({});
     const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
     const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
@@ -44,7 +44,6 @@ export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
     }, [setWordRow, setFocusedRow, setFocusedCol, focusedCol, focusedRow]);
 
     const getState = (rowidx: number, colidx: number) => {
-        if()
         if(focusedRow == rowidx && focusedCol == colidx) {
             return CellState.ACTIVE_LETTER;
         }
@@ -55,9 +54,9 @@ export const Crossword: FunctionComponent<CrosswordProps> = ({ schema }) => {
     }
 
     return (
-        <div className={`grid p-8 gap-4 grid-cols-${schema.gridSize[1]}`}>
-            {Range(schema.gridSize[0]).map((rowidx) => 
-                    Range(schema.gridSize[1]).map((colidx) => <Cell 
+        <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
+            {Range(puzzle.shape[0]).map((rowidx) => 
+                    Range(puzzle.shape[1]).map((colidx) => <Cell 
                         key={cellKey(rowidx, colidx)}
                         rowidx={rowidx} colidx={colidx}
                         value={currFilling[cellKey(rowidx, colidx)]} onUpdate={onUpdate} onClick={onClick}

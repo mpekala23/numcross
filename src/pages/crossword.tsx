@@ -1,20 +1,20 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { EXAMPLE_PUZZLE } from "@/examples/puzzles";
+import { Puzzle } from "@/types/types";
 
-export default function Home() {
+export default function CrosswordPage() {
   const supabaseClient = useSupabaseClient();
+  const [puzzle, setPuzzle] = useState<Puzzle | undefined>(EXAMPLE_PUZZLE[0]);
+
+  const getPuzzle = useCallback(async () => {    
+  }, [supabaseClient]);
 
   useEffect(() => {
-    supabaseClient
-      .from("puzzles")
-      .select("*")
-      .then((res) => {
-        const { data, error } = res;
-        console.log(data, error);
-      });
-  }, [supabaseClient]);
+    getPuzzle().catch(console.error);
+  }, [getPuzzle]);
 
   return (
     <>
@@ -27,7 +27,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Crossword schema={{ gridSize: [3, 3] }} />
+      {puzzle && <Crossword puzzle={puzzle} /> }
     </>
   );
 }
