@@ -1,19 +1,36 @@
 import React from "react";
-import { FunctionComponent, useState, useCallback } from "react";
+import { FunctionComponent, useState, useCallback, useEffect } from "react";
 import { Range, cellKey } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
-import { Puzzle, Scratch } from "@/types/types";
+import {
+  Puzzle,
+  Scratch,
+  DownClue,
+  AcrossClue,
+  FillableClue,
+  AcrossAndDownClue,
+} from "@/types/types";
 
 interface Props {
   puzzle: Puzzle;
 }
 
+type ClueMappingsEntryCell = {
+  row: number;
+  col: number;
+  across: boolean;
+};
+type ClueMappingsEntry = ClueMappingsEntryCell[];
+type ClueMappingsRow = ClueMappingsEntry[];
+type ClueMappings = ClueMappingsRow[];
+
 export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
   const [currFilling, setCurrFilling] = useState<Scratch>({});
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
-  const [wordRow, setWordRow] = useState(true);
+  const [clueIdx, setClueIdx] = useState(0);
+  const [clueMappings, setClueMappings] = useState<ClueMappings>([]);
 
   const onUpdate = useCallback(
     (rowidx: number, colidx: number, value?: number) => {
@@ -30,25 +47,86 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
     [setCurrFilling]
   );
 
+  useEffect(() => {
+    let maps: ClueMappings = [];
+    for (let i = 0; i < puzzle.shape[0]; i++) {
+      let rowMap: ClueMappingsRow = [];
+      for (let j = 0; j < puzzle.shape[1]; j++) {
+        let mapEntry: ClueMappingsEntry = [];
+
+        for (let j2 = j; j2 >= 0; j2--) {
+          if (puzzle.clues[i]?.[j2]?.type === "blank") {
+            break;
+          }
+          if ((puzzle.clues[i]?.[j2] as AcrossClue).acrossClue !== undefined) {
+            mapEntry.push({ row: i, col: j2, across: true });
+          }
+        }
+        for (let i2 = i; i2 >= 0; i2--) {
+          if (puzzle.clues[i2]?.[j]?.type === "blank") {
+            break;
+          }
+          if ((puzzle.clues[i2]?.[j] as DownClue).downClue !== undefined) {
+            mapEntry.push({ row: i2, col: j, across: false });
+          }
+        }
+
+        rowMap.push(mapEntry);
+      }
+      maps.push(rowMap);
+    }
+    setClueMappings(maps);
+  }, [setClueMappings, puzzle]);
+
   const onClick = useCallback(
     (rowidx: number, colidx: number) => {
+      const clues = clueMappings[rowidx]?.[colidx] ?? [];
+
+      if (clues.length === 0) {
+        return;
+      }
+
       if (rowidx === focusedRow && colidx === focusedCol) {
-        setWordRow((w) => !w);
+        setClueIdx((idx) => (idx + 1) % clues.length);
       } else {
+        setClueIdx(0);
         setFocusedRow(rowidx);
         setFocusedCol(colidx);
       }
     },
-    [setWordRow, setFocusedRow, setFocusedCol, focusedCol, focusedRow]
+    [
+      setFocusedRow,
+      setFocusedCol,
+      setClueIdx,
+      focusedCol,
+      focusedRow,
+      clueMappings,
+    ]
   );
 
   const getState = (rowidx: number, colidx: number) => {
+    if (puzzle.clues[rowidx]?.[colidx]?.type === "blank") {
+      return CellState.INVALID;
+    }
+
+    if (focusedRow === undefined || focusedCol === undefined) {
+      return CellState.INACTIVE;
+    }
+
     if (focusedRow === rowidx && focusedCol === colidx) {
       return CellState.ACTIVE_LETTER;
     }
+
+    const isAcross = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx]?.across;
+
+    if (isAcross === undefined) {
+      // Should never trigger
+      return CellState.INACTIVE;
+    }
+
     if (
-      (focusedRow === rowidx && wordRow) ||
-      (focusedCol === colidx && !wordRow)
+      (focusedRow === rowidx && isAcross) ||
+      (focusedCol === colidx && !isAcross)
     ) {
       return CellState.ACTIVE_WORD;
     }
@@ -64,6 +142,9 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
               key={cellKey(rowidx, colidx)}
               rowidx={rowidx}
               colidx={colidx}
+              number={
+                (puzzle.clues[rowidx]?.[colidx] as FillableClue)?.clueNumber
+              }
               value={currFilling[cellKey(rowidx, colidx)]}
               onUpdate={onUpdate}
               onClick={onClick}

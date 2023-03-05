@@ -1,7 +1,17 @@
 .square {
-    aspect-ratio: 1/1;
+  aspect-ratio: 1/1;
+}
+
+.wrap {
+  position: relative;
 }
 
 .fullLine {
-    line-height: 100%;
+  line-height: 100%;
+}
+
+.number {
+  position: absolute;
+  left: 5px;
+  top: 5px;
 }

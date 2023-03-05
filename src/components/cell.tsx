@@ -11,6 +11,7 @@ type CellProps = {
   onUpdate: (rowidx: number, colidx: number, value?: number) => void;
   onClick: (rowidx: number, colidx: number) => void;
   state: CellState;
+  number: number | null | undefined;
 };
 
 export enum CellState {
@@ -39,6 +40,7 @@ export const Cell: FunctionComponent<CellProps> = ({
   colidx,
   value,
   state,
+  number,
   onUpdate,
   onClick,
 }) => {
@@ -68,18 +70,21 @@ export const Cell: FunctionComponent<CellProps> = ({
       )}
     >
       {state !== CellState.INVALID && (
-        <input
-          pattern={CELL_MATCH.toString()}
-          className={classNames(
-            styles.square,
-            "w-full h-full text-center",
-            colors[state],
-            "hover:" + hoverColors[state] + " hover:cursor-pointer"
-          )}
-          value={value ?? ""}
-          onChange={onChange}
-          onClick={onSelect}
-        ></input>
+        <div className={styles.wrap}>
+          <div className={styles.number}>{number}</div>
+          <input
+            pattern={CELL_MATCH.toString()}
+            className={classNames(
+              styles.square,
+              "w-full h-full text-center",
+              colors[state],
+              "hover:" + hoverColors[state] + " hover:cursor-pointer"
+            )}
+            value={value ?? ""}
+            onChange={onChange}
+            onClick={onSelect}
+          ></input>
+        </div>
       )}
     </div>
   );
