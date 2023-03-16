@@ -66,4 +66,11 @@ values
         'test',
         '{"clues":[[{"type":"fillable","downClue":"The answer is 36","acrossClue":"The answer is 36","clueNumber":1},{"type":"fillable","downClue":"The answer is 64","clueNumber":2}],[{"type":"fillable","acrossClue":"The answer is 64","clueNumber":3},{"type":"fillable","clueNumber":null}]],"shape":[2,2]}',
         '{"shape":[2,2],"answers":[[3,6],[6,4]]}'
+    ),
+    (
+        '2023-03-17',
+        'daily',
+        'test',
+        '{"shape": [3,2], "clues": [[{"type": "fillable", "clueNumber": 1, "acrossClue": "The smallest two digits in this puzzle", "downClue": "The 3 digits are the first three multiples of an integer, in order"}, {"type": "fillable", "clueNumber": 2, "downClue": "A power of 4"}], [{"type": "fillable", "clueNumber": 3, "acrossClue": "Age when you become a senior, according to Medicare"}, {"type": "fillable", "clueNumber": null}], [{"type": "fillable", "clueNumber": 4, "acrossClue": "When subtracted by its reverse, yields 27"}, {"type": "fillable", "clueNumber": null}]]}',
+        '{"shape": [3,2], "answers": [[3,2],[6,5],[9,6]]}'
     );
