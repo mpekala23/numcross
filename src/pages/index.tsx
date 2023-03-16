@@ -5,6 +5,7 @@ import useApi from "@/hooks/useApi";
 import { Attempt, Numcross, Scratch } from "@/types/types";
 import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
+import useModal from "@/hooks/useModal";
 
 export default function Home() {
   const { getTodaysNumcross, checkAttempt, updateAttempt } = useApi();
@@ -12,6 +13,8 @@ export default function Home() {
   const [scratch, setScratch] = useState<Scratch>({});
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [hasSolved, setHasSolved] = useState<boolean>(false);
+  const [SuccessModal, openSuccess] = useModal();
 
   useEffect(() => {
     // Helper function to do the get
@@ -49,27 +52,40 @@ export default function Home() {
     });
   }, [scratch]);
 
+  // Do the check attempt
+  // NOTE: Short circuits if the attempt is null or if
+  // the puzzle has already been solved
   const doCheckAttempt = useCallback(async () => {
-    if (!attempt) return;
+    if (!attempt || hasSolved) return;
     const apiResult = await checkAttempt(attempt);
     if (apiResult?.correct) {
-      toast("Puzzle solved!", { icon: "✅" });
+      setHasSolved(true);
     } else {
       toast("Puzzle incorrect", { icon: "😑" });
     }
     return;
-  }, [attempt, checkAttempt]);
+  }, [attempt, checkAttempt, hasSolved, setHasSolved]);
 
   // Update the attempt over API on change
   // Check the attempt if it's full
+  // NOTE: Short circuits if the attempt is null or if
+  // the puzzle has already been solved
   useEffect(() => {
-    if (attempt) {
+    if (attempt && !hasSolved) {
       updateAttempt(attempt);
       if (numcross?.puzzle && isAttemptFull(attempt, numcross?.puzzle)) {
         doCheckAttempt();
       }
     }
-  }, [attempt, updateAttempt, numcross?.puzzle, doCheckAttempt]);
+  }, [attempt, hasSolved, updateAttempt, numcross?.puzzle, doCheckAttempt]);
+
+  // Fun stuff on solve
+  useEffect(() => {
+    if (hasSolved) {
+      toast("Puzzle solved!", { icon: "🎉" });
+      openSuccess();
+    }
+  }, [hasSolved, openSuccess]);
 
   if (!numcross) return <div>Loading...</div>;
 
@@ -92,6 +108,12 @@ export default function Home() {
           scratch={scratch}
           setScratch={setScratch}
         />
+        <SuccessModal>
+          <div>
+            <h1>Success!</h1>
+            <p>You solved the puzzle!</p>
+          </div>
+        </SuccessModal>
       </main>
     </>
   );

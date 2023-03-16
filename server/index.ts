@@ -148,7 +148,27 @@ app
         }
 
         // This correct attempt is associated with an already existing
-        // user, create a row in the solves table
+        // user
+
+        // First check if there's already a row in the solves table
+        const { data: checkData } = await supabase
+          .from("solves")
+          .select()
+          .eq("uid", userId)
+          .eq("pid", attempt.puzzleId)
+          .single();
+
+        if (checkData) {
+          // If there is, we're done
+          res.send({
+            status: "ok",
+            correct,
+            saved: true,
+          });
+          return;
+        }
+
+        // If not, we need to insert a row into the solves table
         const { error: solveError } = await supabase
           .from("solves")
           .upsert({

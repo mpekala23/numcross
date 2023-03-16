@@ -34,52 +34,59 @@ export default function useApi() {
     return { numcross: data.numcross, attempt: data.attempt };
   }, [user?.id]);
 
-  const checkAttempt: (
-    attempt: Attempt
-  ) => Promise<CheckAttemptResp | null> = async (attempt) => {
-    // Then check if the attempt is correct
-    const check_req: CheckAttemptReq = {
-      attempt,
-      userId: user ? user.id : null,
-    };
-    const { data, error } = await postJSON<CheckAttemptResp>(
-      "/api/check_attempt",
-      check_req
+  const checkAttempt: (attempt: Attempt) => Promise<CheckAttemptResp | null> =
+    useCallback(
+      async (attempt) => {
+        // Then check if the attempt is correct
+        const check_req: CheckAttemptReq = {
+          attempt,
+          userId: user ? user.id : null,
+        };
+        const { data, error } = await postJSON<CheckAttemptResp>(
+          "/api/check_attempt",
+          check_req
+        );
+
+        if (error || !data) {
+          toast("There was an error submitting your attempt.", { icon: "🚫" });
+          return null;
+        }
+
+        if (data.correct && user?.id && !data.saved) {
+          // User is logged in and the attempt is correct, but something
+          // went wrong saving the attempt
+          toast("There was an error saving your solve.", { icon: "🚫" });
+        }
+
+        return data;
+      },
+      [user]
     );
 
-    if (error || !data) {
-      toast("There was an error submitting your attempt.", { icon: "🚫" });
-      return null;
-    }
-
-    if (user?.id && !data.saved) {
-      toast("There was an error saving your solve.", { icon: "🚫" });
-    }
-
-    return data;
-  };
-
-  const updateAttempt: (attempt: Attempt) => Promise<null> = async (
-    attempt
-  ) => {
-    // First save the attempt
-    if (!user) {
-      // Store the attempt in local storage
-      storeAttempt(attempt);
-    } else {
-      // Store the attempt in the database
-      const { error } = await supabaseClient.from("attempts").upsert({
-        uid: user.id,
-        pid: attempt.puzzleId,
-        jsonb: attempt.scratch,
-        has_cheated: attempt.hasCheated,
-      });
-      if (error) {
-        toast("There was an updating submitting your attempt.", { icon: "🚫" });
+  const updateAttempt: (attempt: Attempt) => Promise<null> = useCallback(
+    async (attempt) => {
+      // First save the attempt
+      if (!user) {
+        // Store the attempt in local storage
+        storeAttempt(attempt);
+      } else {
+        // Store the attempt in the database
+        const { error } = await supabaseClient.from("attempts").upsert({
+          uid: user.id,
+          pid: attempt.puzzleId,
+          jsonb: attempt.scratch,
+          has_cheated: attempt.hasCheated,
+        });
+        if (error) {
+          toast("There was an updating submitting your attempt.", {
+            icon: "🚫",
+          });
+        }
       }
-    }
-    return null;
-  };
+      return null;
+    },
+    [user, storeAttempt, supabaseClient]
+  );
 
   return {
     getTodaysNumcross,
