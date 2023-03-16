@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FunctionComponent, useState, useCallback } from "react";
 import { Range, cellKey } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
@@ -7,17 +7,22 @@ import { Puzzle, Scratch } from "@/types/types";
 
 interface Props {
   puzzle: Puzzle;
+  scratch: Scratch;
+  setScratch: React.Dispatch<React.SetStateAction<Scratch>>;
 }
 
-export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
-  const [currFilling, setCurrFilling] = useState<Scratch>({});
+export const Crossword: FunctionComponent<Props> = ({
+  puzzle,
+  scratch,
+  setScratch,
+}) => {
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
   const [wordRow, setWordRow] = useState(true);
 
   const onUpdate = useCallback(
     (rowidx: number, colidx: number, value?: number) => {
-      setCurrFilling((s) => {
+      setScratch((s) => {
         let s2 = cloneDeep(s);
         if (value === undefined) {
           delete s2[cellKey(rowidx, colidx)];
@@ -27,7 +32,7 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
         return s2;
       });
     },
-    [setCurrFilling]
+    [setScratch]
   );
 
   const onClick = useCallback(
@@ -64,7 +69,7 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
               key={cellKey(rowidx, colidx)}
               rowidx={rowidx}
               colidx={colidx}
-              value={currFilling[cellKey(rowidx, colidx)]}
+              value={scratch[cellKey(rowidx, colidx)]}
               onUpdate={onUpdate}
               onClick={onClick}
               state={getState(rowidx, colidx)}

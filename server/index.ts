@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
 import { Attempt, Solution } from "@/types/types";
 import { cellKey } from "./utils";
-import { CheckAttemptReq } from "@/types/api";
+import { CheckAttemptReq, TodaysNumcrossReq } from "@/types/api";
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
@@ -24,25 +24,49 @@ app
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: true }));
 
-    server.get("/api/todays_numcross", async (_, res) => {
-      console.log("GET /api/todays_numcross");
-      const { data, error } = await supabase
-        .from("puzzles")
-        .select("*")
-        .order("live_date", { ascending: false })
-        .single();
-      if (error) {
-        res.status(500).send({
-          status: "error",
-          errorMessage: "Error: Can't get puzzle",
-        });
-      } else {
-        res.send({
-          status: "ok",
-          numcross: data,
-        });
+    server.get(
+      "/api/todays_numcross",
+      async (req: { query: TodaysNumcrossReq }, res) => {
+        console.log("GET /api/todays_numcross");
+        const { data, error } = await supabase
+          .from("puzzles")
+          .select("*")
+          .order("live_date", { ascending: false })
+          .single();
+        if (error) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't get puzzle",
+          });
+        } else {
+          // Try to load the users attempt from DB
+          const { uid } = req.query;
+          let attempt: Attempt | undefined = undefined;
+          if (uid) {
+            const { data: attemptData, error: attemptError } = await supabase
+              .from("attempts")
+              .select("*")
+              .single();
+            if (attemptData && !attemptError) {
+              attempt = {
+                startTime: attemptData.start_time,
+                puzzleId: attemptData.pid,
+                hasCheated: attemptData.has_cheated,
+                scratch: attemptData.jsonb,
+              };
+            }
+          }
+          const numcross = data;
+          // Wipe solution information before handing response to client
+          numcross.solution = undefined;
+          res.send({
+            status: "ok",
+            numcross,
+            attempt,
+          });
+        }
       }
-    });
+    );
 
     server.post("/api/add_puzzle", async (req, res) => {
       console.log("POST /api/add_puzzle");
@@ -125,9 +149,20 @@ app
 
         // This correct attempt is associated with an already existing
         // user, create a row in the solves table
-        // Attempt is correct, create a row in the solves table
+        const { error: solveError } = await supabase
+          .from("solves")
+          .upsert({
+            uid: userId,
+            pid: attempt.puzzleId,
+            start_time: attempt.startTime,
+            end_time: new Date(),
+            did_cheat: attempt.hasCheated,
+          })
+          .select();
+
         res.send({
           correct,
+          saved: !solveError,
         });
       }
     );

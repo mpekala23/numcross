@@ -3,9 +3,12 @@ import { Attempt, Numcross, Puzzle, Solution } from "./types";
 interface RespBase {}
 
 // GET todays_numcross
-export interface TodaysNumcrossReq {}
+export interface TodaysNumcrossReq {
+  uid?: string;
+}
 export interface TodaysNumcrossResp extends RespBase {
   numcross: Numcross;
+  attempt?: Attempt;
 }
 
 // POST add_puzzle
@@ -25,4 +28,5 @@ export interface CheckAttemptReq {
 }
 export interface CheckAttemptResp extends RespBase {
   correct: boolean;
+  saved?: boolean;
 }
