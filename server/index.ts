@@ -3,7 +3,7 @@ import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
 import { Attempt, Solution } from "@/types/types";
-import { cellKey } from "./utils";
+import { cellKey, getESTDatestring } from "./utils";
 import { CheckAttemptReq, TodaysNumcrossReq } from "@/types/api";
 
 const IS_DEV = process.env.NODE_ENV !== "production";
@@ -28,10 +28,16 @@ app
       "/api/todays_numcross",
       async (req: { query: TodaysNumcrossReq }, res) => {
         console.log("GET /api/todays_numcross");
+
+        // Will get the current date in format yyyy-mm-dd and fetch
+        // the most recent puzzle that was/is live on or before this date
+        const todaysDatestring = getESTDatestring();
         const { data, error } = await supabase
           .from("puzzles")
           .select("*")
+          .lte("live_date", todaysDatestring)
           .order("live_date", { ascending: false })
+          .limit(1)
           .single();
         if (error) {
           res.status(500).send({

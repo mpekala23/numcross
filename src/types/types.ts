@@ -76,3 +76,10 @@ export interface Attempt {
   hasCheated: boolean;
   scratch: Scratch;
 }
+
+export interface Solve {
+  puzzleId: number;
+  startTime: string;
+  endTime: string;
+  didCheat: boolean;
+}

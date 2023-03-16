@@ -13,7 +13,7 @@ import { useCallback } from "react";
 export default function useApi() {
   const supabaseClient = useSupabaseClient();
   const user = useUser();
-  const { storeAttempt } = useStorage();
+  const { storeAttempt, mineAttempt } = useStorage();
 
   const getTodaysNumcross: () => Promise<{
     numcross: Numcross;
@@ -31,8 +31,15 @@ export default function useApi() {
       return null;
     }
 
+    if (!user?.id) {
+      // If the user is not logged in, try to load their attempt
+      // from local storage
+      const attempt = mineAttempt(data.numcross.id);
+      return { numcross: data.numcross, attempt };
+    }
+
     return { numcross: data.numcross, attempt: data.attempt };
-  }, [user?.id]);
+  }, [user?.id, mineAttempt]);
 
   const checkAttempt: (attempt: Attempt) => Promise<CheckAttemptResp | null> =
     useCallback(
