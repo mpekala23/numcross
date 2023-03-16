@@ -26,7 +26,6 @@ export async function getJSON<Type>(
     const json = await resp.json();
     return { data: json, error: null };
   } catch (e) {
-    console.log("caught", e);
     const error = e as Error;
     return { data: null, error };
   }
@@ -64,4 +63,8 @@ export function isAttemptFull(attempt: Attempt, puzzle: Puzzle): boolean {
     }
   }
   return true;
+}
+
+export function asPercentage(num: number, denom: number): number {
+  return Math.round((num / denom) * 100);
 }

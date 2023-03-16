@@ -2,8 +2,9 @@ import {
   CheckAttemptReq,
   CheckAttemptResp,
   TodaysNumcrossResp,
+  UserStatsResp,
 } from "@/types/api";
-import { Attempt, Numcross } from "@/types/types";
+import { Attempt, Numcross, UserStats } from "@/types/types";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
 import useStorage from "./useStorage";
@@ -35,7 +36,7 @@ export default function useApi() {
       // If the user is not logged in, try to load their attempt
       // from local storage
       const attempt = mineAttempt(data.numcross.id);
-      return { numcross: data.numcross, attempt };
+      return { numcross: data.numcross, attempt: attempt || undefined };
     }
 
     return { numcross: data.numcross, attempt: data.attempt };
@@ -95,9 +96,35 @@ export default function useApi() {
     [user, storeAttempt, supabaseClient]
   );
 
+  const getStats: () => Promise<UserStats | null> = useCallback(async () => {
+    // Users must be logged in to get stats?
+    // TODO: What do we want the incentive structure to be here?
+    // Maybe ideally we just give them limited stats and then prompt them
+    // to create an account.
+    if (!user) {
+      // Right now no stats for non-logged-in users
+      return null;
+    }
+    const { data, error } = await getJSON<UserStatsResp>("/api/user_stats", {
+      uid: user?.id,
+    });
+    if (error || !data) {
+      toast("There was an error getting your stats.", { icon: "🚫" });
+      return null;
+    }
+    return {
+      numPlayed: data.numPlayed,
+      numSolved: data.numSolved,
+      currentStreak: data.currentStreak,
+      maxStreak: data.maxStreak,
+      averageSolveTime: data.averageSolveTime,
+    };
+  }, [user]);
+
   return {
     getTodaysNumcross,
     checkAttempt,
     updateAttempt,
+    getStats,
   };
 }

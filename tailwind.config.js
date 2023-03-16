@@ -6,8 +6,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        // For titles and important things
         Rubik: ["Rubik", ...defaultTheme.fontFamily.sans],
         title: ["Rubik", ...defaultTheme.fontFamily.sans],
+        // Next are to override defaults for body and normal
+        sans: ["Nunito", ...defaultTheme.fontFamily.sans],
         body: ["Nunito", ...defaultTheme.fontFamily.sans],
       },
     },

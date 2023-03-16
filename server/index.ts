@@ -3,8 +3,25 @@ import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
 import { Attempt, Solution } from "@/types/types";
-import { cellKey, getESTDatestring } from "./utils";
-import { CheckAttemptReq, TodaysNumcrossReq } from "@/types/api";
+import {
+  cellKey,
+  getAverageSolveTime,
+  getESTDatestring,
+  getStreaks,
+} from "./utils";
+import {
+  AddPuzzleReq,
+  AddPuzzleResp,
+  CheckAttemptReq,
+  CheckAttemptResp,
+  TodaysNumcrossReq,
+  TodaysNumcrossResp,
+  TypedRequestBody,
+  TypedRequestQuery,
+  TypedResponse,
+  UserStatsReq,
+  UserStatsResp,
+} from "@/types/api";
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
@@ -26,7 +43,10 @@ app
 
     server.get(
       "/api/todays_numcross",
-      async (req: { query: TodaysNumcrossReq }, res) => {
+      async (
+        req: TypedRequestQuery<TodaysNumcrossReq>,
+        res: TypedResponse<TodaysNumcrossResp>
+      ) => {
         console.log("GET /api/todays_numcross");
 
         // Will get the current date in format yyyy-mm-dd and fetch
@@ -52,6 +72,8 @@ app
             const { data: attemptData, error: attemptError } = await supabase
               .from("attempts")
               .select("*")
+              .eq("uid", uid)
+              .eq("pid", data.pid)
               .single();
             if (attemptData && !attemptError) {
               attempt = {
@@ -74,32 +96,42 @@ app
       }
     );
 
-    server.post("/api/add_puzzle", async (req, res) => {
-      console.log("POST /api/add_puzzle");
-      const { error } = await supabase
-        .from("puzzles")
-        .insert({
-          live_date: req.body.live_date,
-          puzzle: req.body.puzzle,
-          solution: req.body.solution,
-          difficulty: req.body.difficulty,
-          theme: req.body.theme,
-        })
-        .select();
-      if (error) {
-        res.status(500).send({
-          errorMessage: "Error: Can't add puzzle",
-        });
-      } else {
-        res.send({
-          status: "ok",
-        });
+    server.post(
+      "/api/add_puzzle",
+      async (
+        req: TypedRequestBody<AddPuzzleReq>,
+        res: TypedResponse<AddPuzzleResp>
+      ) => {
+        console.log("POST /api/add_puzzle");
+        const { error } = await supabase
+          .from("puzzles")
+          .insert({
+            live_date: req.body.live_date,
+            puzzle: req.body.puzzle,
+            solution: req.body.solution,
+            difficulty: req.body.difficulty,
+            theme: req.body.theme,
+          })
+          .select();
+        if (error) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't add puzzle",
+          });
+        } else {
+          res.send({
+            status: "ok",
+          });
+        }
       }
-    });
+    );
 
     server.post(
       "/api/check_attempt",
-      async (req: { body: CheckAttemptReq }, res) => {
+      async (
+        req: TypedRequestBody<CheckAttemptReq>,
+        res: TypedResponse<CheckAttemptResp>
+      ) => {
         // Get the relevant puzzle
         const { attempt, userId } = req.body;
         const { data, error } = await supabase
@@ -187,8 +219,76 @@ app
           .select();
 
         res.send({
+          status: "ok",
           correct,
           saved: !solveError,
+        });
+      }
+    );
+
+    server.get(
+      "/api/user_stats",
+      async (
+        req: TypedRequestQuery<UserStatsReq>,
+        res: TypedResponse<UserStatsResp>
+      ) => {
+        console.log("GET /api/user_stats");
+        const { uid } = req.query;
+
+        // Get all their attempts
+        const { data: attemptsData, error: attemptsError } = await supabase
+          .from("attempts")
+          .select("*")
+          .eq("uid", uid)
+          .order("start_time", { ascending: false });
+        if (attemptsError) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't get user stats",
+          });
+          return;
+        }
+
+        // Get all their solves
+        const { data: solvesData, error: solvesError } = await supabase
+          .from("solves")
+          .select("*")
+          .eq("uid", uid)
+          .order("end_time", { ascending: false });
+        if (solvesError) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't get user stats",
+          });
+          return;
+        }
+
+        const numPlayed = attemptsData.length;
+        const numSolved = solvesData.length;
+
+        const solvedIds: number[] = solvesData.map((solve) => solve.pid);
+        const { data: solvedPuzzles, error: solvedPuzzlesError } =
+          await supabase.from("puzzles").select("*").in("id", solvedIds);
+
+        // Relatively coarse way of dealing with an error from the supabase
+        let currentStreak = -1;
+        let maxStreak = -1;
+        if (!solvedPuzzlesError) {
+          const streaks = getStreaks(solvedPuzzles);
+          currentStreak = streaks.currentStreak;
+          maxStreak = streaks.maxStreak;
+        }
+
+        const averageSolveTime =
+          solvesData.length > 0 ? getAverageSolveTime(solvesData) : undefined;
+
+        res.send({
+          status: "ok",
+          numPlayed,
+          numSolved,
+          currentStreak,
+          maxStreak,
+          averageSolveTime,
         });
       }
     );
