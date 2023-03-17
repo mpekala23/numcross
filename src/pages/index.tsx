@@ -6,6 +6,7 @@ import { Attempt, Numcross, Scratch } from "@/types/types";
 import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
+import { Numpad } from "@/components/numpad";
 
 export default function Home() {
   const { getTodaysNumcross, checkAttempt, updateAttempt } = useApi();
@@ -108,6 +109,7 @@ export default function Home() {
           scratch={scratch}
           setScratch={setScratch}
         />
+        <Numpad />
         <SuccessModal>
           <div>
             <h1>Success!</h1>

@@ -4,6 +4,7 @@ import { Range, cellKey } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
 import { Puzzle, Scratch } from "@/types/types";
+import { useNumpad } from "@/hooks/useNumpad";
 
 interface Props {
   puzzle: Puzzle;
@@ -19,6 +20,7 @@ export const Crossword: FunctionComponent<Props> = ({
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
   const [wordRow, setWordRow] = useState(true);
+  const { numpadVal } = useNumpad();
 
   const onUpdate = useCallback(
     (rowidx: number, colidx: number, value?: number) => {
