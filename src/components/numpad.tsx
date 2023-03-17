@@ -45,7 +45,7 @@ export function Numpad() {
   return (
     <div className="w-full flex flex-col justify-evenly items-center">
       <div className="w-full flex">
-        {NumberCell(1, handleNumberClick, "border-t-4 borderl-4 border-r-4")}
+        {NumberCell(1, handleNumberClick, "border-t-4 border-l-4")}
         {NumberCell(2, handleNumberClick, "border-t-4")}
         {NumberCell(3, handleNumberClick, "border-t-4 border-r-4")}
       </div>
@@ -55,9 +55,14 @@ export function Numpad() {
         {NumberCell(6, handleNumberClick, "border-r-4")}
       </div>
       <div className="w-full flex">
+        {NumberCell(7, handleNumberClick, "border-l-4 ")}
+        {NumberCell(8, handleNumberClick, "")}
+        {NumberCell(9, handleNumberClick, "border-r-4 ")}
+      </div>
+      <div className="w-full flex">
         {NumberCell(" ", handleNumberClick, "border-l-4 border-b-4")}
-        {NumberCell(9, handleNumberClick, "border-b-4")}
-        {NumberCell("x", handleNumberClick, "border-r-4 border-b-4")}
+        {NumberCell("x", handleNumberClick, "border-b-4")}
+        {NumberCell(" ", handleNumberClick, "border-r-4 border-b-4")}
       </div>
     </div>
   );

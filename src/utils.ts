@@ -68,3 +68,17 @@ export function isAttemptFull(attempt: Attempt, puzzle: Puzzle): boolean {
 export function asPercentage(num: number, denom: number): number {
   return Math.round((num / denom) * 100);
 }
+
+export function safeParse(numStr: string): number | undefined {
+  if (numStr === "0") return 0;
+  if (numStr === "1") return 1;
+  if (numStr === "2") return 2;
+  if (numStr === "3") return 3;
+  if (numStr === "4") return 4;
+  if (numStr === "5") return 5;
+  if (numStr === "6") return 6;
+  if (numStr === "7") return 7;
+  if (numStr === "8") return 8;
+  if (numStr === "9") return 9;
+  return undefined;
+}

@@ -73,7 +73,7 @@ app
               .from("attempts")
               .select("*")
               .eq("uid", uid)
-              .eq("pid", data.pid)
+              .eq("pid", data.id)
               .single();
             if (attemptData && !attemptError) {
               attempt = {

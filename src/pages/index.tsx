@@ -27,6 +27,7 @@ export default function Home() {
       }
       const { numcross, attempt } = result;
       setNumcross(numcross);
+      console.log("ATTEMPT", attempt);
       setAttempt(
         attempt || {
           puzzleId: numcross.id,
