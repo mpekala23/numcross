@@ -41,6 +41,7 @@ export const Cell: FunctionComponent<CellProps> = ({
   colidx,
   value,
   state,
+  number,
   onClick,
 }) => {
   const contRef = useRef<HTMLDivElement>(null);
@@ -77,21 +78,24 @@ export const Cell: FunctionComponent<CellProps> = ({
       )}
     >
       {state !== CellState.INVALID && (
-        <input
-          ref={inputRef}
-          pattern={CELL_MATCH.toString()}
-          className={classNames(
-            styles.square,
-            "w-full h-full text-center",
-            colors[state],
-            "hover:" + hoverColors[state] + " hover:cursor-pointer",
-            "focus:outline-none",
-            "caret-transparent",
-            `text-[${fontSize}px]`
-          )}
-          value={value ?? ""}
-          onClick={onSelect}
-        ></input>
+        <div className={styles.wrap}>
+          <div className={styles.number}>{number}</div>
+          <input
+            ref={inputRef}
+            pattern={CELL_MATCH.toString()}
+            className={classNames(
+              styles.square,
+              "w-full h-full text-center",
+              colors[state],
+              "hover:" + hoverColors[state] + " hover:cursor-pointer",
+              "focus:outline-none",
+              "caret-transparent",
+              `text-[${fontSize}px]`
+            )}
+            value={value ?? ""}
+            onClick={onSelect}
+          />
+        </div>
       )}
     </div>
   );

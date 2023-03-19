@@ -28,6 +28,7 @@ export default function useApi() {
       }
     );
     if (error || !data?.numcross) {
+      console.error(error);
       toast("There was an error getting today's puzzle.", { icon: "🚫" });
       return null;
     }
