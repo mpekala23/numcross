@@ -1,4 +1,4 @@
-import { Attempt, Puzzle } from "./types/types";
+import { Attempt, Puzzle, Settings } from "./types/types";
 
 export const Range = (n: number) => {
   return Array.from(Array(n).keys());
@@ -82,3 +82,8 @@ export function safeParse(numStr: string): number | undefined {
   if (numStr === "9") return 9;
   return undefined;
 }
+
+export const DEFAULT_SETTINGS: Settings = {
+  fillMode: "nextEmpty",
+  deleteMode: "previous",
+};

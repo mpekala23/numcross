@@ -2,7 +2,7 @@ import useApi from "@/hooks/useApi";
 import { UserStats } from "@/types/types";
 import { useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback, useEffect, useState } from "react";
-import Slink from "./slink";
+import Slink from "../components/slink";
 import { asPercentage } from "@/utils";
 
 interface Props {

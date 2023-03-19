@@ -93,3 +93,25 @@ export interface UserStats {
   maxStreak: number;
   averageSolveTime?: number;
 }
+
+export type FillMode = "next" | "nextEmpty" | "stay";
+export type DeleteMode = "previous" | "stay";
+
+export interface Settings {
+  fillMode: FillMode;
+  deleteMode: DeleteMode;
+}
+
+export type NumpadVal =
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | ""
+  | "nothing";

@@ -12,6 +12,7 @@ import {
   FillableClue,
 } from "@/types/types";
 import { useNumpad } from "@/hooks/useNumpad";
+import useSettings from "@/hooks/useSettings";
 
 interface Props {
   puzzle: Puzzle;
@@ -38,9 +39,12 @@ export const Crossword: FunctionComponent<Props> = ({
   const [clueIdx, setClueIdx] = useState(0);
   const [clueMappings, setClueMappings] = useState<ClueMappings>([]);
   const { numpadVal, setNumpadVal } = useNumpad();
+  const { settings } = useSettings();
 
-  // A function to move to the next square after a square has been filled in
+  // A function to manipulate the cursor according to the settings
+  // after a cell has been filled in
   const incrementFocus = useCallback(() => {
+    if (settings.fillMode === "stay") return;
     if (focusedRow === undefined || focusedCol === undefined) return;
 
     const startRow = focusedRow;
@@ -64,7 +68,11 @@ export const Crossword: FunctionComponent<Props> = ({
           continue;
         }
         const key = cellKey(newRow, newCol);
-        if (key in scratch && scratch[key] !== null) {
+        if (
+          settings.fillMode === "nextEmpty" &&
+          key in scratch &&
+          scratch[key] !== null
+        ) {
           newCol++;
           continue;
         }
@@ -87,7 +95,11 @@ export const Crossword: FunctionComponent<Props> = ({
           continue;
         }
         const key = cellKey(newRow, newCol);
-        if (key in scratch && scratch[key] !== null) {
+        if (
+          settings.fillMode === "nextEmpty" &&
+          key in scratch &&
+          scratch[key] !== null
+        ) {
           newRow++;
           continue;
         }
@@ -106,6 +118,68 @@ export const Crossword: FunctionComponent<Props> = ({
     scratch,
     setFocusedCol,
     setFocusedRow,
+    settings,
+  ]);
+
+  // A function to manipulate the cursor according to the settings
+  // after a cell has been deleted
+  const decrementFocus = useCallback(() => {
+    if (settings.deleteMode === "stay") return;
+    if (focusedRow === undefined || focusedCol === undefined) return;
+
+    const startRow = focusedRow;
+    const startCol = focusedCol;
+
+    const isAcross = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx]?.across;
+
+    if (isAcross === undefined) return;
+
+    if (isAcross) {
+      let newRow = focusedRow;
+      let newCol = focusedCol - 1;
+      while (!(newRow === startRow && newCol === startCol)) {
+        if (newCol < 0) {
+          newCol = puzzle.shape[1] - 1;
+          newRow = (newRow - 1 + puzzle.shape[0]) % puzzle.shape[0];
+          continue;
+        }
+        if (puzzle.clues[newRow][newCol].type === "blank") {
+          newCol--;
+          continue;
+        }
+        // We've ended up at a non-blank square that's not filled in
+        setFocusedRow(newRow);
+        setFocusedCol(newCol);
+        break;
+      }
+    } else {
+      let newRow = focusedRow - 1;
+      let newCol = focusedCol;
+      while (!(newRow === startRow && newCol === startCol)) {
+        if (newRow < 0) {
+          newRow = puzzle.shape[0] - 1;
+          newCol = (newCol - 1 + puzzle.shape[1]) % puzzle.shape[1];
+          continue;
+        }
+        if (puzzle.clues[newRow][newCol].type === "blank") {
+          newRow--;
+          continue;
+        }
+        // We've ended up at a non-blank square that's not filled in
+        setFocusedRow(newRow);
+        setFocusedCol(newCol);
+        break;
+      }
+    }
+  }, [
+    focusedCol,
+    focusedRow,
+    clueIdx,
+    clueMappings,
+    puzzle,
+    setFocusedCol,
+    setFocusedRow,
+    settings,
   ]);
 
   const onUpdate = useCallback(
@@ -160,8 +234,13 @@ export const Crossword: FunctionComponent<Props> = ({
     if (numpadVal === "nothing") return;
     const numeric = safeParse(numpadVal);
     onUpdate(focusedRow, focusedCol, numeric);
-    console.log("numpadVal", numpadVal);
-    if (numpadVal !== undefined && numpadVal !== "") incrementFocus();
+    if (numpadVal !== undefined) {
+      if (numpadVal === "") {
+        decrementFocus();
+      } else {
+        incrementFocus();
+      }
+    }
     setNumpadVal("nothing");
   }, [
     focusedRow,
@@ -170,6 +249,7 @@ export const Crossword: FunctionComponent<Props> = ({
     onUpdate,
     setNumpadVal,
     incrementFocus,
+    decrementFocus,
   ]);
 
   const onClick = useCallback(

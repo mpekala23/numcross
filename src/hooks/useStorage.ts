@@ -1,4 +1,5 @@
-import { Attempt, Solve } from "@/types/types";
+import { Attempt, Settings, Solve } from "@/types/types";
+import { DEFAULT_SETTINGS } from "@/utils";
 import { useCallback } from "react";
 
 export default function useStorage() {
@@ -34,10 +35,27 @@ export default function useStorage() {
     [mineSolve]
   );
 
+  const mineSettings: () => Settings = useCallback(() => {
+    const settings = localStorage.getItem("settings");
+    if (!settings) {
+      return DEFAULT_SETTINGS;
+    }
+    return JSON.parse(settings);
+  }, []);
+
+  const storeSettings: (settings: Settings) => void = useCallback(
+    (settings: Settings) => {
+      localStorage.setItem("settings", JSON.stringify(settings));
+    },
+    []
+  );
+
   return {
     storeAttempt,
     mineAttempt,
     storeSolve,
     mineSolve,
+    mineSettings,
+    storeSettings,
   };
 }

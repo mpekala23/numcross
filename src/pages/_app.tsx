@@ -4,9 +4,12 @@ import type { AppProps } from "next/app";
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider, Session } from "@supabase/auth-helpers-react";
 import { useState } from "react";
-import Layout from "@/components/layout";
+import Layout from "@/common/layout";
 import { Toaster } from "react-hot-toast";
 import { NumpadContext } from "@/context/NumpadContext";
+import { SettingsContext } from "@/context/SettingsContext";
+import { NumpadVal, Settings } from "@/types/types";
+import { DEFAULT_SETTINGS } from "@/utils";
 
 export default function App({
   Component,
@@ -19,7 +22,8 @@ export default function App({
     })
   );
 
-  const [numpadVal, setNumpadVal] = useState<string>("");
+  const [numpadVal, setNumpadVal] = useState<NumpadVal>("");
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
   return (
     <SessionContextProvider
@@ -27,10 +31,12 @@ export default function App({
       initialSession={pageProps.initialSession}
     >
       <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-        <Toaster />
+        <SettingsContext.Provider value={{ settings, setSettings }}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+          <Toaster />
+        </SettingsContext.Provider>
       </NumpadContext.Provider>
     </SessionContextProvider>
   );
