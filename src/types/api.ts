@@ -5,9 +5,6 @@ interface RespBase {
   status: "ok" | "error";
   errorMessage?: string;
 }
-interface OkResp extends RespBase {
-  status: "ok";
-}
 interface ErrorResp extends RespBase {
   status: "error";
   errorMessage: string;

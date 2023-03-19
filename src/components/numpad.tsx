@@ -1,10 +1,11 @@
 import React, { useCallback } from "react";
 import { BackspaceIcon } from "@heroicons/react/24/outline";
 import { useNumpad } from "@/hooks/useNumpad";
+import { NumpadVal } from "@/types/types";
 
 function NumberCell(
   num: number | string,
-  handleClick: (str: string) => void,
+  handleClick: (str: NumpadVal) => void,
   className?: string
 ) {
   const actuallyHandleClick = () => {
@@ -14,7 +15,7 @@ function NumberCell(
     } else if (num === " ") {
       return;
     }
-    handleClick(num.toString());
+    handleClick(num.toString() as NumpadVal);
   };
 
   return (
@@ -36,7 +37,7 @@ export function Numpad() {
   const { setNumpadVal } = useNumpad();
 
   const handleNumberClick = useCallback(
-    (numStr: string) => {
+    (numStr: NumpadVal) => {
       setNumpadVal(numStr);
     },
     [setNumpadVal]

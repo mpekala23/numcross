@@ -2,7 +2,7 @@ import express from "express";
 import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
-import { Attempt, Solution } from "@/types/types";
+import { Attempt, Solution } from "../src/types/types";
 import {
   cellKey,
   getAverageSolveTime,
@@ -21,9 +21,10 @@ import {
   TypedResponse,
   UserStatsReq,
   UserStatsResp,
-} from "@/types/api";
+} from "../src/types/api";
 
-const IS_DEV = process.env.NODE_ENV !== "production";
+const IS_DEV = process.env.NODE_ENV !== "production" && true;
+console.log(IS_DEV, "IS_DEV");
 const app = next({ dev: IS_DEV });
 const handle = app.getRequestHandler();
 

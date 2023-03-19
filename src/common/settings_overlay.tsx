@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import useSettings from "@/hooks/useSettings";
 import { RadioGroup } from "@headlessui/react";
 import { Settings, FillMode, DeleteMode } from "@/types/types";
-import { CheckIcon } from "@heroicons/react/24/outline";
 
 interface Props {
   closeModal: () => void;
