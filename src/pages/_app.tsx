@@ -8,6 +8,7 @@ import Layout from "@/common/layout";
 import { Toaster } from "react-hot-toast";
 import { NumpadContext } from "@/context/NumpadContext";
 import { SettingsContext } from "@/context/SettingsContext";
+import { ConfettiContext } from "@/context/ConfettiContext";
 import { NumpadVal, Settings } from "@/types/types";
 import { DEFAULT_SETTINGS } from "@/utils";
 
@@ -22,8 +23,9 @@ export default function App({
     })
   );
 
-  const [numpadVal, setNumpadVal] = useState<NumpadVal>("");
+  const [numpadVal, setNumpadVal] = useState<NumpadVal>("nothing");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [confetti, setConfetti] = useState<number>(0);
 
   return (
     <SessionContextProvider
@@ -32,10 +34,14 @@ export default function App({
     >
       <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>
         <SettingsContext.Provider value={{ settings, setSettings }}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-          <Toaster />
+          <ConfettiContext.Provider
+            value={{ confetti, startConfetti: setConfetti }}
+          >
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+            <Toaster />
+          </ConfettiContext.Provider>
         </SettingsContext.Provider>
       </NumpadContext.Provider>
     </SessionContextProvider>

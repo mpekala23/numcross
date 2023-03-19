@@ -1,13 +1,17 @@
+import React from "react";
 import { FunctionComponent } from "react";
 
 interface Props {
-  text: string;
-  number: number;
-  across: boolean;
+  text?: string;
+  number?: number;
+  across?: boolean;
 }
 
 export const Clue: FunctionComponent<Props> = ({ text, number, across }) => {
-  const line = `#${number} ${across ? "Across" : "Down"}: ${text}`;
+  const line =
+    text === undefined || number === undefined || across === undefined
+      ? "Tap a square above to get started"
+      : `#${number} ${across ? "Across" : "Down"}: ${text}`;
 
   return (
     <div

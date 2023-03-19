@@ -94,6 +94,7 @@ export const Cell: FunctionComponent<CellProps> = ({
             )}
             value={value ?? ""}
             onClick={onSelect}
+            readOnly
           />
         </div>
       )}

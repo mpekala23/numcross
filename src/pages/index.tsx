@@ -7,6 +7,7 @@ import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
+import SolvedOverlay from "@/common/solved_overlay";
 
 export default function Home() {
   const { getTodaysNumcross, checkAttempt, updateAttempt } = useApi();
@@ -15,7 +16,7 @@ export default function Home() {
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const [hasSolved, setHasSolved] = useState<boolean>(false);
-  const [SuccessModal, openSuccess] = useModal();
+  const [SolvedModal, openSolved, closeSolved] = useModal();
 
   useEffect(() => {
     // Helper function to do the get
@@ -84,9 +85,9 @@ export default function Home() {
   useEffect(() => {
     if (hasSolved) {
       toast("Puzzle solved!", { icon: "🎉" });
-      openSuccess();
+      openSolved();
     }
-  }, [hasSolved, openSuccess]);
+  }, [hasSolved, openSolved]);
 
   if (!numcross) return <div>Loading...</div>;
 
@@ -110,12 +111,9 @@ export default function Home() {
           setScratch={setScratch}
         />
         <Numpad />
-        <SuccessModal>
-          <div>
-            <h1>Success!</h1>
-            <p>You solved the puzzle!</p>
-          </div>
-        </SuccessModal>
+        <SolvedModal>
+          <SolvedOverlay closeModal={closeSolved} />
+        </SolvedModal>
       </main>
     </>
   );

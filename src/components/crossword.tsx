@@ -4,13 +4,7 @@ import { Range, cellKey, safeParse } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
 import { Clue } from "@/components/clue";
-import {
-  Puzzle,
-  Scratch,
-  AcrossClue,
-  DownClue,
-  FillableClue,
-} from "@/types/types";
+import { Puzzle, Scratch, AcrossClue, DownClue } from "@/types/types";
 import { useNumpad } from "@/hooks/useNumpad";
 import useSettings from "@/hooks/useSettings";
 
@@ -271,6 +265,8 @@ export const Crossword: FunctionComponent<Props> = ({
             if (isAcross !== undefined) {
               desiredIdx = clues.findIndex((v) => v.across === isAcross);
             }
+          } else {
+            desiredIdx = clues.findIndex((v) => v.across);
           }
           return desiredIdx >= 0 ? desiredIdx : 0;
         });
@@ -343,25 +339,26 @@ export const Crossword: FunctionComponent<Props> = ({
       <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
         {Range(puzzle.shape[0])
           .map((rowidx) =>
-            Range(puzzle.shape[1]).map((colidx) => (
-              <Cell
-                key={cellKey(rowidx, colidx)}
-                rowidx={rowidx}
-                colidx={colidx}
-                number={clueNumber}
-                value={scratch[cellKey(rowidx, colidx)]}
-                onClick={onClick}
-                state={getState(rowidx, colidx)}
-              />
-            ))
+            Range(puzzle.shape[1]).map((colidx) => {
+              const clue = puzzle.clues[rowidx]?.[colidx];
+              const thisClueNumber =
+                clue && clue.type === "fillable" ? clue.clueNumber : undefined;
+              return (
+                <Cell
+                  key={cellKey(rowidx, colidx)}
+                  rowidx={rowidx}
+                  colidx={colidx}
+                  number={thisClueNumber}
+                  value={scratch[cellKey(rowidx, colidx)]}
+                  onClick={onClick}
+                  state={getState(rowidx, colidx)}
+                />
+              );
+            })
           )
           .flat()}
       </div>
-      {clueText !== undefined &&
-        clueNumber !== undefined &&
-        clueAcross !== undefined && (
-          <Clue text={clueText} number={clueNumber} across={clueAcross} />
-        )}
+      <Clue text={clueText} number={clueNumber} across={clueAcross} />
     </>
   );
 };
