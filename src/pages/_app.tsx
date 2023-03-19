@@ -6,6 +6,7 @@ import { SessionContextProvider, Session } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import Layout from "@/components/layout";
 import { Toaster } from "react-hot-toast";
+import { NumpadContext } from "@/context/NumpadContext";
 
 export default function App({
   Component,
@@ -18,15 +19,19 @@ export default function App({
     })
   );
 
+  const [numpadVal, setNumpadVal] = useState<string>("");
+
   return (
     <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-      <Toaster />
+      <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+        <Toaster />
+      </NumpadContext.Provider>
     </SessionContextProvider>
   );
 }

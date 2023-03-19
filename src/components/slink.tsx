@@ -5,11 +5,16 @@ interface Props {
   href: string;
   className?: string;
   children: string;
+  onClick?: () => void;
 }
 
-export default function Slink({ href, className, children }: Props) {
+export default function Slink({ href, className, children, onClick }: Props) {
   return (
-    <Link className={`${className || ""} underline`} href={href}>
+    <Link
+      onClick={onClick}
+      className={`${className || ""} underline`}
+      href={href}
+    >
       {children}
     </Link>
   );

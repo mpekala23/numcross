@@ -1,11 +1,25 @@
-import { Attempt, Numcross, Puzzle, Solution } from "./types";
+import { Attempt, Numcross, Puzzle, Solution, UserStats } from "./types";
+import { Send, Response } from "express-serve-static-core";
 
-interface RespBase {}
+interface RespBase {
+  status: "ok" | "error";
+  errorMessage?: string;
+}
+interface OkResp extends RespBase {
+  status: "ok";
+}
+interface ErrorResp extends RespBase {
+  status: "error";
+  errorMessage: string;
+}
 
 // GET todays_numcross
-export interface TodaysNumcrossReq {}
+export interface TodaysNumcrossReq {
+  uid?: string;
+}
 export interface TodaysNumcrossResp extends RespBase {
   numcross: Numcross;
+  attempt?: Attempt;
 }
 
 // POST add_puzzle
@@ -25,4 +39,27 @@ export interface CheckAttemptReq {
 }
 export interface CheckAttemptResp extends RespBase {
   correct: boolean;
+  saved?: boolean;
+}
+
+// GET user_stats
+export interface UserStatsReq {
+  uid: string;
+}
+export interface UserStatsResp extends RespBase, UserStats {}
+
+/* ------------------ */
+// START HELPER STUFF FOR EXPRESS BACKEND
+
+export interface TypedRequestBody<T> extends Express.Request {
+  body: T;
+}
+export interface TypedRequestQuery<T> extends Express.Request {
+  query: T;
+}
+
+type DataOrError<T> = T | ErrorResp;
+export interface TypedResponse<T> extends Response {
+  json: Send<DataOrError<T>, this>;
+  send: Send<DataOrError<T>, this>;
 }

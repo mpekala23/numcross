@@ -56,14 +56,3 @@ values
         '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
         '2023-02-17 04:32:46.892482+00'
     );
-
-insert into puzzles
-    (live_date, difficulty, theme, puzzle, solution)
-values
-    (
-        '2023-02-15',
-        'daily',
-        'test',
-        '{"clues":[[{"type":"fillable","downClue":"The answer is 36","acrossClue":"The answer is 36","clueNumber":1},{"type":"fillable","downClue":"The answer is 64","clueNumber":2}],[{"type":"fillable","acrossClue":"The answer is 64","clueNumber":3},{"type":"fillable","clueNumber":null}]],"shape":[2,2]}',
-        '{"shape":[2,2],"answers":[[3,6],[6,4]]}'
-    );

@@ -1,3 +1,5 @@
+export type Nullable<T> = T | null;
+
 export type ClueType = "blank" | "fillable";
 
 interface ClueBase {
@@ -75,4 +77,19 @@ export interface Attempt {
   startTime: string;
   hasCheated: boolean;
   scratch: Scratch;
+}
+
+export interface Solve {
+  puzzleId: number;
+  startTime: string;
+  endTime: string;
+  didCheat: boolean;
+}
+
+export interface UserStats {
+  numPlayed: number;
+  numSolved: number;
+  currentStreak: number;
+  maxStreak: number;
+  averageSolveTime?: number;
 }
