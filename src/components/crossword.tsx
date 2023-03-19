@@ -3,13 +3,13 @@ import { FunctionComponent, useState, useCallback, useEffect } from "react";
 import { Range, cellKey } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
+import { Clue } from "@/components/clue";
 import {
   Puzzle,
   Scratch,
   DownClue,
   AcrossClue,
   FillableClue,
-  AcrossAndDownClue,
 } from "@/types/types";
 
 interface Props {
@@ -89,7 +89,17 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
       if (rowidx === focusedRow && colidx === focusedCol) {
         setClueIdx((idx) => (idx + 1) % clues.length);
       } else {
-        setClueIdx(0);
+        setClueIdx((idx) => {
+          let desiredIdx = -1;
+          if (focusedRow !== undefined && focusedCol !== undefined) {
+            const isAcross =
+              clueMappings[focusedRow]?.[focusedCol]?.[idx]?.across;
+            if (isAcross !== undefined) {
+              desiredIdx = clues.findIndex((v) => v.across === isAcross);
+            }
+          }
+          return desiredIdx >= 0 ? desiredIdx : 0;
+        });
         setFocusedRow(rowidx);
         setFocusedCol(colidx);
       }
@@ -133,26 +143,31 @@ export const Crossword: FunctionComponent<Props> = ({ puzzle }) => {
     return CellState.INACTIVE;
   };
 
+  const clueText = "";
+
   return (
-    <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
-      {Range(puzzle.shape[0])
-        .map((rowidx) =>
-          Range(puzzle.shape[1]).map((colidx) => (
-            <Cell
-              key={cellKey(rowidx, colidx)}
-              rowidx={rowidx}
-              colidx={colidx}
-              number={
-                (puzzle.clues[rowidx]?.[colidx] as FillableClue)?.clueNumber
-              }
-              value={currFilling[cellKey(rowidx, colidx)]}
-              onUpdate={onUpdate}
-              onClick={onClick}
-              state={getState(rowidx, colidx)}
-            />
-          ))
-        )
-        .flat()}
-    </div>
+    <>
+      <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
+        {Range(puzzle.shape[0])
+          .map((rowidx) =>
+            Range(puzzle.shape[1]).map((colidx) => (
+              <Cell
+                key={cellKey(rowidx, colidx)}
+                rowidx={rowidx}
+                colidx={colidx}
+                number={
+                  (puzzle.clues[rowidx]?.[colidx] as FillableClue)?.clueNumber
+                }
+                value={currFilling[cellKey(rowidx, colidx)]}
+                onUpdate={onUpdate}
+                onClick={onClick}
+                state={getState(rowidx, colidx)}
+              />
+            ))
+          )
+          .flat()}
+      </div>
+      <Clue text={clueText} />
+    </>
   );
 };
