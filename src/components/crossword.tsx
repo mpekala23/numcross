@@ -237,7 +237,26 @@ export const Crossword: FunctionComponent<Props> = ({
     return CellState.INACTIVE;
   };
 
-  const clueText = "";
+  // Get the current clue text
+  let clueText: undefined | string = undefined;
+  let clueNumber: undefined | number = undefined;
+  let clueAcross: undefined | boolean = undefined;
+  if (focusedRow !== undefined && focusedCol !== undefined) {
+    const clueInfo = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx];
+    if (clueInfo !== undefined) {
+      if (clueInfo.across) {
+        const clue = puzzle.clues[clueInfo.row][clueInfo.col] as AcrossClue;
+        clueText = clue.acrossClue;
+        clueNumber = clue.clueNumber;
+        clueAcross = true;
+      } else {
+        const clue = puzzle.clues[clueInfo.row][clueInfo.col] as DownClue;
+        clueText = clue.downClue;
+        clueNumber = clue.clueNumber;
+        clueAcross = false;
+      }
+    }
+  }
 
   return (
     <>
@@ -249,9 +268,7 @@ export const Crossword: FunctionComponent<Props> = ({
                 key={cellKey(rowidx, colidx)}
                 rowidx={rowidx}
                 colidx={colidx}
-                number={
-                  (puzzle.clues[rowidx]?.[colidx] as FillableClue)?.clueNumber
-                }
+                number={clueNumber}
                 value={scratch[cellKey(rowidx, colidx)]}
                 onClick={onClick}
                 state={getState(rowidx, colidx)}
@@ -260,7 +277,11 @@ export const Crossword: FunctionComponent<Props> = ({
           )
           .flat()}
       </div>
-      <Clue text={clueText} />
+      {clueText !== undefined &&
+        clueNumber !== undefined &&
+        clueAcross !== undefined && (
+          <Clue text={clueText} number={clueNumber} across={clueAcross} />
+        )}
     </>
   );
 };
