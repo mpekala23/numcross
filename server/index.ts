@@ -20,15 +20,14 @@ import {
   TypedRequestBody,
   TypedRequestQuery,
   TypedResponse,
+  UpdateAttemptReq,
+  UpdateAttemptResp,
   UserStatsReq,
   UserStatsResp,
 } from "../src/types/api";
 
 const env_path =
-  process.env.NODE_ENV === "production"
-    ? ".env.production"
-    : ".env.development";
-console.log(env_path);
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env.production";
 dotenv.config({ path: env_path });
 
 const IS_DEV = process.env.NODE_ENV !== "production";
@@ -37,7 +36,7 @@ const handle = app.getRequestHandler();
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_KEY || ""
+  process.env.SUPABASE_SECRET || ""
 );
 
 app
@@ -67,6 +66,7 @@ app
           .limit(1)
           .single();
         if (error) {
+          console.log(error);
           res.status(500).send({
             status: "error",
             errorMessage: "Error: Can't get puzzle",
@@ -124,6 +124,37 @@ app
           res.status(500).send({
             status: "error",
             errorMessage: "Error: Can't add puzzle",
+          });
+        } else {
+          res.send({
+            status: "ok",
+          });
+        }
+      }
+    );
+
+    server.post(
+      "/api/update_attempt",
+      async (
+        req: TypedRequestBody<UpdateAttemptReq>,
+        res: TypedResponse<UpdateAttemptResp>
+      ) => {
+        console.log("POST /api/update_attempt");
+        const { attempt, userId } = req.body;
+        const { error } = await supabase
+          .from("attempts")
+          .upsert({
+            uid: userId,
+            pid: attempt.puzzleId,
+            start_time: attempt.startTime,
+            has_cheated: attempt.hasCheated,
+            jsonb: attempt.scratch,
+          })
+          .select();
+        if (error) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't update attempt",
           });
         } else {
           res.send({

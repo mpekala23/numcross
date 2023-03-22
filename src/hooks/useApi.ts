@@ -2,6 +2,8 @@ import {
   CheckAttemptReq,
   CheckAttemptResp,
   TodaysNumcrossResp,
+  UpdateAttemptReq,
+  UpdateAttemptResp,
   UserStatsResp,
 } from "@/types/api";
 import { Attempt, Numcross, UserStats } from "@/types/types";
@@ -12,8 +14,8 @@ import { getJSON, postJSON } from "@/utils";
 import { useCallback } from "react";
 
 export default function useApi() {
-  const supabaseClient = useSupabaseClient();
   const user = useUser();
+  const supabaseClient = useSupabaseClient();
   const { storeAttempt, mineAttempt } = useStorage();
 
   const getTodaysNumcross: () => Promise<{
@@ -74,27 +76,27 @@ export default function useApi() {
 
   const updateAttempt: (attempt: Attempt) => Promise<null> = useCallback(
     async (attempt) => {
-      // First save the attempt
       if (!user) {
         // Store the attempt in local storage
         storeAttempt(attempt);
       } else {
-        // Store the attempt in the database
-        const { error } = await supabaseClient.from("attempts").upsert({
-          uid: user.id,
-          pid: attempt.puzzleId,
-          jsonb: attempt.scratch,
-          has_cheated: attempt.hasCheated,
-        });
+        const update_req: UpdateAttemptReq = {
+          attempt,
+          userId: user.id,
+        };
+
+        const { error } = await postJSON<UpdateAttemptResp>(
+          "/api/update_attempt",
+          update_req
+        );
+
         if (error) {
-          toast("There was an updating submitting your attempt.", {
-            icon: "🚫",
-          });
+          toast("There was an error saving your attempt.", { icon: "🚫" });
         }
       }
       return null;
     },
-    [user, storeAttempt, supabaseClient]
+    [user, storeAttempt]
   );
 
   const getStats: () => Promise<UserStats | null> = useCallback(async () => {

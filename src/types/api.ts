@@ -29,6 +29,13 @@ export interface AddPuzzleReq {
 }
 export interface AddPuzzleResp extends RespBase {}
 
+// POST update_attempt
+export interface UpdateAttemptReq {
+  attempt: Attempt;
+  userId: string;
+}
+export interface UpdateAttemptResp extends RespBase {}
+
 // POST check_attempt
 export interface CheckAttemptReq {
   attempt: Attempt;
