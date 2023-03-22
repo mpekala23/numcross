@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch \"server/**/*\" --ext \"ts,json\" --exec \"ts-node --project tsconfig.server.json server/index.ts\"",
+    "dev": "nodemon --watch \"server/**/*\" --ext \"ts,json\" --exec \"NODE_ENV=development ts-node --project tsconfig.server.json server/index.ts\"",
     "build": "rm -rf dist && tsc --build tsconfig.server.json && next build",
-    "serve": "node ./dist/server/index.js",
-    "start": "next start",
+    "serve": "NODE_ENV=production node ./dist/server/index.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -26,6 +25,7 @@
     "babel-eslint": "^10.1.0",
     "body-parser": "^1.20.1",
     "classnames": "^2.3.2",
+    "dotenv": "^16.0.3",
     "eslint": "^8.0.1",
     "eslint-config-next": "^13.1.6",
     "eslint-plugin-eslint-plugin": "^5.0.8",

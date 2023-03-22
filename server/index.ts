@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import express from "express";
 import next from "next";
 import bodyParser from "body-parser";
@@ -23,15 +24,20 @@ import {
   UserStatsResp,
 } from "../src/types/api";
 
-const IS_DEV = process.env.NODE_ENV !== "production" && true;
-console.log(IS_DEV, "IS_DEV");
+const env_path =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+console.log(env_path);
+dotenv.config({ path: env_path });
+
+const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
 const handle = app.getRequestHandler();
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321",
-  process.env.NEXT_PUBLIC_SUPABASE_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.NEXT_PUBLIC_SUPABASE_KEY || ""
 );
 
 app
@@ -298,8 +304,8 @@ app
       return handle(req, res);
     });
 
-    server.listen(3000, () => {
-      console.log("> Ready on http://localhost:3000");
+    server.listen(80, () => {
+      console.log("> Ready on http://localhost:80");
     });
   })
   .catch((ex) => {
