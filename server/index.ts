@@ -27,7 +27,9 @@ import {
 } from "../src/types/api";
 
 const env_path =
-  process.env.NODE_ENV === "production" ? ".env.production" : ".env.production";
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
 dotenv.config({ path: env_path });
 
 const IS_DEV = process.env.NODE_ENV !== "production";
@@ -255,6 +257,8 @@ app
             did_cheat: attempt.hasCheated,
           })
           .select();
+
+        console.log("Solve error", solveError);
 
         res.send({
           status: "ok",

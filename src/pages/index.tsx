@@ -26,10 +26,10 @@ export default function Home() {
         setPageError("Error loading today's numcross");
         return;
       }
-      const { numcross, attempt } = result;
+      const { numcross, attempt: attemptFetch } = result;
       setNumcross(numcross);
       setAttempt(
-        attempt || {
+        attemptFetch || {
           puzzleId: numcross.id,
           scratch: {},
           startTime: new Date().toISOString(),
@@ -38,13 +38,14 @@ export default function Home() {
       );
       // Explicitly update the scratch, note that usually data
       // flows in the reverse direction
-      if (attempt) {
-        setScratch(attempt.scratch);
+      if (attemptFetch) {
+        setScratch(attemptFetch.scratch);
+        console.log("setting scratch", attemptFetch.scratch);
       }
     };
 
     performGet();
-  }, [getTodaysNumcross, setNumcross, setAttempt, setPageError]);
+  }, [getTodaysNumcross]);
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {

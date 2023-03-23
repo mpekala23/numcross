@@ -178,17 +178,15 @@ export const Crossword: FunctionComponent<Props> = ({
 
   const onUpdate = useCallback(
     (rowidx: number, colidx: number, value?: number) => {
-      setScratch((s) => {
-        let s2 = cloneDeep(s);
-        if (value === undefined) {
-          delete s2[cellKey(rowidx, colidx)];
-        } else {
-          s2[cellKey(rowidx, colidx)] = value;
-        }
-        return s2;
-      });
+      const s2 = cloneDeep(scratch);
+      if (value === undefined) {
+        delete s2[cellKey(rowidx, colidx)];
+      } else {
+        s2[cellKey(rowidx, colidx)] = value;
+      }
+      setScratch(s2);
     },
-    [setScratch]
+    [setScratch, scratch]
   );
 
   useEffect(() => {
