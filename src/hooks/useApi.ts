@@ -7,11 +7,9 @@ import {
   UserStatsResp,
 } from "@/types/api";
 import { Attempt, Numcross, UserStats } from "@/types/types";
-import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
-import useStorage, { mineAttempt, storeAttempt } from "./useStorage";
+import { mineAttempt, storeAttempt } from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
-import { useCallback } from "react";
 
 export async function getTodaysNumcross(userId?: string): Promise<{
   numcross: Numcross;
