@@ -16,6 +16,9 @@
 /build
 /dist
 
+# deployment
+deployment/.terraform
+
 # misc
 .DS_Store
 *.pem

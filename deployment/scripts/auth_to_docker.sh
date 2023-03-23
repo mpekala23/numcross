@@ -1,0 +1,1 @@
+aws ecr get-login-password --profile numcross_user --region us-east-1 | docker login --username AWS --password-stdin "720116267795.dkr.ecr.us-east-1.amazonaws.com"
