@@ -27,12 +27,16 @@ import {
 } from "../src/types/api";
 
 const env_path =
-  process.env.NODE_ENV === "production" ? ".env.production" : ".env.production";
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
 dotenv.config({ path: env_path });
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
 const handle = app.getRequestHandler();
+
+const port = process.env.NODE_ENV === "production" ? 80 : 3000;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -335,8 +339,8 @@ app
       return handle(req, res);
     });
 
-    server.listen(80, () => {
-      console.log("> Ready on http://localhost:80");
+    server.listen(port, () => {
+      console.log(`> Ready on http://localhost:${port}`);
     });
   })
   .catch((ex) => {

@@ -69,7 +69,7 @@ export default function StatsOverlay({ closeModal }: Props) {
   const renderNotLoggedIn = useCallback(() => {
     return (
       <div className="flex flex-col h-16 justify-center items-center">
-        <p className="text-md font-body px-4">
+        <p className="text-md font-body px-4 p-2">
           You need to be logged in to see stats.
         </p>
         <Slink onClick={closeModal} href="/signin">
