@@ -18,7 +18,7 @@ export default function Layout({ children }: Props) {
   }, [confetti]);
 
   return (
-    <div className="bg-slate-50 flex flex-col w-screen min-h-screen">
+    <div className="bg-slate-50 flex flex-col w-screen h-screen">
       <Confetti
         numberOfPieces={confetti}
         recycle={false}
@@ -28,7 +28,8 @@ export default function Layout({ children }: Props) {
         initialVelocityY={20}
       />
       <Header />
-      <div className="flex flex-1 flex-col justify-center align-center p-8 max-w-[700px] w-screen self-center">
+
+      <div className="flex flex-1 overflow-hidden flex-col justify-center align-center p-8 max-w-[700px] w-screen self-center">
         {children}
       </div>
     </div>

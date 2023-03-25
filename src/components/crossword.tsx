@@ -43,7 +43,7 @@ export const Crossword: FunctionComponent<Props> = ({
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
     setFontSize(contRef.current.clientHeight / (3 * puzzle.shape[1]));
-  }, [setFontSize]);
+  }, [setFontSize, puzzle.shape]);
 
   useEffect(() => {
     updateFontSize();
@@ -371,27 +371,36 @@ export const Crossword: FunctionComponent<Props> = ({
 
   return (
     <>
-      <div className={`grid gap-4 grid-cols-${puzzle.shape[1]}`} ref={contRef}>
+      <div className={`flex flex-1 w-full h-full flex-col`} ref={contRef}>
         {Range(puzzle.shape[0])
-          .map((rowidx) =>
-            Range(puzzle.shape[1]).map((colidx) => {
-              const clue = puzzle.clues[rowidx]?.[colidx];
-              const thisClueNumber =
-                clue && clue.type === "fillable" ? clue.clueNumber : undefined;
-              return (
-                <Cell
-                  key={cellKey(rowidx, colidx)}
-                  rowidx={rowidx}
-                  colidx={colidx}
-                  number={thisClueNumber}
-                  value={scratch[cellKey(rowidx, colidx)]}
-                  onClick={onClick}
-                  state={getState(rowidx, colidx)}
-                  fontSize={fontSize}
-                />
-              );
-            })
-          )
+          .map((rowidx) => (
+            <div className={`flex flex-row w-full justify-center flex-1`}>
+              {Range(puzzle.shape[1]).map((colidx) => {
+                const clue = puzzle.clues[rowidx]?.[colidx];
+                const thisClueNumber =
+                  clue && clue.type === "fillable"
+                    ? clue.clueNumber
+                    : undefined;
+                return (
+                  <Cell
+                    key={cellKey(rowidx, colidx)}
+                    rowidx={rowidx}
+                    colidx={colidx}
+                    number={thisClueNumber}
+                    value={scratch[cellKey(rowidx, colidx)]}
+                    onClick={onClick}
+                    state={getState(rowidx, colidx)}
+                    fontSize={fontSize}
+                    className={`${rowidx === 0 ? "border-t-4" : ""} ${
+                      colidx === 0 ? "border-l-4" : ""
+                    } ${rowidx === puzzle.shape[0] - 1 ? "border-b-4" : ""} ${
+                      colidx === puzzle.shape[1] - 1 ? "border-r-4" : ""
+                    }`}
+                  />
+                );
+              })}
+            </div>
+          ))
           .flat()}
       </div>
       <Clue

@@ -22,10 +22,10 @@ export const Clue: FunctionComponent<Props> = ({
   const num = set ? `${number} ${across ? "Across" : "Down"}` : "";
 
   return (
-    <div className="rounded-md pt-4 p-5 bg-slate-200 my-10 relative">
-      <div className="text-left">{num}</div>
-      <div className="text-center" style={{ fontSize }}>
-        {"text a very long clue with this long string of text"}
+    <div className="w-full pt-4 p-5 bg-slate-200 my-10 relative">
+      <div className="text-left font-bold text-sm">{num}</div>
+      <div className="text-left" style={{ fontSize }}>
+        {line}
       </div>
     </div>
   );

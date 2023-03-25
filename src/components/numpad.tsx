@@ -46,17 +46,9 @@ export function Numpad() {
   return (
     <div className="w-full flex flex-col justify-evenly items-center">
       <div className="w-full flex">
-        {NumberCell(
-          1,
-          handleNumberClick,
-          "border-t-4 border-l-4 rounded-tl-md"
-        )}
+        {NumberCell(1, handleNumberClick, "border-t-4 border-l-4")}
         {NumberCell(2, handleNumberClick, "border-t-4")}
-        {NumberCell(
-          3,
-          handleNumberClick,
-          "border-t-4 border-r-4 rounded-tr-md"
-        )}
+        {NumberCell(3, handleNumberClick, "border-t-4 border-r-4")}
       </div>
       <div className="w-full flex">
         {NumberCell(4, handleNumberClick, "border-l-4")}
@@ -64,22 +56,22 @@ export function Numpad() {
         {NumberCell(6, handleNumberClick, "border-r-4")}
       </div>
       <div className="w-full flex">
-        {NumberCell(
-          7,
-          handleNumberClick,
-          "border-l-4 border-b-4 rounded-bl-md"
-        )}
-        {NumberCell(8, handleNumberClick, "border-b-4")}
-        {NumberCell(
-          9,
-          handleNumberClick,
-          "border-r-4 border-b-4 rounded-br-md"
-        )}
+        {NumberCell(7, handleNumberClick, "border-l-4")}
+        {NumberCell(8, handleNumberClick, "")}
+        {NumberCell(9, handleNumberClick, "border-r-4")}
       </div>
       <div className="w-full flex">
-        {NumberCell(" ", handleNumberClick, "border-0 hover:cursor-auto")}
-        {NumberCell("x", handleNumberClick, "border-4 border-t-0 rounded-b-md")}
-        {NumberCell(" ", handleNumberClick, "border-0 hover:cursor-auto")}
+        {NumberCell(
+          " ",
+          handleNumberClick,
+          "border-b-4 border-l-4 hover:cursor-default"
+        )}
+        {NumberCell("x", handleNumberClick, "border-b-4")}
+        {NumberCell(
+          " ",
+          handleNumberClick,
+          "border-r-4 border-b-4 hover:cursor-default"
+        )}
       </div>
     </div>
   );

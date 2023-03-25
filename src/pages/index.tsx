@@ -116,7 +116,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <div className="flex w-full flex-1 flex-col justify-center items-center">
         <Crossword
           puzzle={numcross.puzzle}
           scratch={scratch}
@@ -126,7 +126,7 @@ export default function Home() {
         <SolvedModal>
           <SolvedOverlay closeModal={closeSolved} />
         </SolvedModal>
-      </main>
+      </div>
     </>
   );
 }

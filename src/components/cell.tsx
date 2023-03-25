@@ -11,6 +11,7 @@ type CellProps = {
   state: CellState;
   number: number | null | undefined;
   fontSize: number;
+  className?: string;
 };
 
 export enum CellState {
@@ -42,13 +43,18 @@ export const Cell: FunctionComponent<CellProps> = ({
   number,
   onClick,
   fontSize,
+  className,
 }) => {
   const onSelect = useCallback(() => {
     onClick(rowidx, colidx);
   }, [rowidx, colidx, onClick]);
 
   return (
-    <div className={"rounded-md border-2 place-content-center aspect-square"}>
+    <div
+      className={`border-2 place-content-center aspect-square ${
+        className || ""
+      }`}
+    >
       {state !== CellState.INVALID && (
         <div
           className={classNames(

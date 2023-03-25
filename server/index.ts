@@ -342,13 +342,8 @@ app
       return handle(req, res);
     });
 
-<<<<<<< HEAD
-    server.listen(PORT, () => {
-      console.log("> Ready on http://localhost:" + PORT);
-=======
     server.listen(port, () => {
       console.log(`> Ready on http://localhost:${port}`);
->>>>>>> main
     });
   })
   .catch((ex) => {
