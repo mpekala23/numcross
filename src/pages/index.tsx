@@ -7,6 +7,7 @@ import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
+import { isEqual } from "lodash";
 import SolvedOverlay from "@/common/solved_overlay";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [hasSolved, setHasSolved] = useState<boolean>(false);
   const [SolvedModal, openSolved, closeSolved] = useModal();
+  const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
 
   useEffect(() => {
     // Helper function to do the get
@@ -50,7 +52,7 @@ export default function Home() {
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
     setAttempt((a) => {
-      if (!a) return a;
+      if (!a || a.scratch === scratch) return a;
       return { ...a, scratch };
     });
   }, [scratch]);
@@ -74,13 +76,22 @@ export default function Home() {
   // NOTE: Short circuits if the attempt is null or if
   // the puzzle has already been solved
   useEffect(() => {
-    if (attempt && !hasSolved) {
+    if (attempt && !isEqual(attempt, lastAttempt) && !hasSolved) {
       updateAttempt(attempt);
+      setLastAttempt(attempt);
       if (numcross?.puzzle && isAttemptFull(attempt, numcross?.puzzle)) {
         doCheckAttempt();
       }
     }
-  }, [attempt, hasSolved, updateAttempt, numcross?.puzzle, doCheckAttempt]);
+  }, [
+    attempt,
+    lastAttempt,
+    hasSolved,
+    updateAttempt,
+    setLastAttempt,
+    numcross?.puzzle,
+    doCheckAttempt,
+  ]);
 
   // Fun stuff on solve
   useEffect(() => {

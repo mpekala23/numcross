@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { FunctionComponent, useState, useCallback } from "react";
+import { FunctionComponent, useState, useCallback, useRef } from "react";
 import { Range, cellKey, safeParse } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
 import { cloneDeep } from "lodash";
@@ -23,6 +23,8 @@ type ClueMappingsEntry = ClueMappingsEntryCell[];
 type ClueMappingsRow = ClueMappingsEntry[];
 type ClueMappings = ClueMappingsRow[];
 
+const DEFAULT_FONT_SIZE = 36;
+
 export const Crossword: FunctionComponent<Props> = ({
   puzzle,
   scratch,
@@ -34,6 +36,22 @@ export const Crossword: FunctionComponent<Props> = ({
   const [clueMappings, setClueMappings] = useState<ClueMappings>([]);
   const { numpadVal, setNumpadVal } = useNumpad();
   const { settings } = useSettings();
+
+  const contRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+
+  const updateFontSize = useCallback(() => {
+    if (!contRef.current) return;
+    setFontSize(contRef.current.clientHeight / (3 * puzzle.shape[1]));
+  }, [setFontSize]);
+
+  useEffect(() => {
+    updateFontSize();
+    window.addEventListener("resize", updateFontSize);
+    return () => {
+      window.removeEventListener("resize", updateFontSize);
+    };
+  }, [contRef, updateFontSize]);
 
   // A function to manipulate the cursor according to the settings
   // after a cell has been filled in
@@ -114,6 +132,23 @@ export const Crossword: FunctionComponent<Props> = ({
     setFocusedRow,
     settings,
   ]);
+
+  useEffect(() => {
+    if (focusedCol !== undefined && focusedRow !== undefined) {
+      return;
+    }
+
+    // Focus on first element on load
+    for (let i = 0; i < puzzle.shape[0]; i++) {
+      for (let j = 0; j < puzzle.shape[0]; j++) {
+        if (puzzle.clues[i][j].type === "fillable") {
+          setFocusedRow(i);
+          setFocusedCol(j);
+          return;
+        }
+      }
+    }
+  }, [focusedRow, focusedCol, puzzle, setFocusedRow, setFocusedCol]);
 
   // A function to manipulate the cursor according to the settings
   // after a cell has been deleted
@@ -332,9 +367,11 @@ export const Crossword: FunctionComponent<Props> = ({
     }
   }
 
+  const clueFontSize = fontSize / 3;
+
   return (
     <>
-      <div className={`grid p-8 gap-4 grid-cols-${puzzle.shape[1]}`}>
+      <div className={`grid gap-4 grid-cols-${puzzle.shape[1]}`} ref={contRef}>
         {Range(puzzle.shape[0])
           .map((rowidx) =>
             Range(puzzle.shape[1]).map((colidx) => {
@@ -350,13 +387,19 @@ export const Crossword: FunctionComponent<Props> = ({
                   value={scratch[cellKey(rowidx, colidx)]}
                   onClick={onClick}
                   state={getState(rowidx, colidx)}
+                  fontSize={fontSize}
                 />
               );
             })
           )
           .flat()}
       </div>
-      <Clue text={clueText} number={clueNumber} across={clueAcross} />
+      <Clue
+        text={clueText}
+        number={clueNumber}
+        across={clueAcross}
+        fontSize={clueFontSize}
+      />
     </>
   );
 };

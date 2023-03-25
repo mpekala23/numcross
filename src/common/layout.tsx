@@ -28,7 +28,7 @@ export default function Layout({ children }: Props) {
         initialVelocityY={20}
       />
       <Header />
-      <div className="flex flex-1 flex-col justify-center align-center p-4">
+      <div className="flex flex-1 flex-col justify-center align-center p-8 max-w-[700px] w-screen self-center">
         {children}
       </div>
     </div>

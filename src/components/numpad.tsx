@@ -20,7 +20,7 @@ function NumberCell(
 
   return (
     <div
-      className={`flex-1 flex justify-center items-center h-16 ${className} border-2`}
+      className={`flex-1 flex justify-center items-center h-16 hover:cursor-pointer ${className} border-2  select-none`}
       onClick={actuallyHandleClick}
     >
       {num !== "x" && <p className="text-2xl font-title px-4">{num}</p>}
@@ -46,9 +46,17 @@ export function Numpad() {
   return (
     <div className="w-full flex flex-col justify-evenly items-center">
       <div className="w-full flex">
-        {NumberCell(1, handleNumberClick, "border-t-4 border-l-4")}
+        {NumberCell(
+          1,
+          handleNumberClick,
+          "border-t-4 border-l-4 rounded-tl-md"
+        )}
         {NumberCell(2, handleNumberClick, "border-t-4")}
-        {NumberCell(3, handleNumberClick, "border-t-4 border-r-4")}
+        {NumberCell(
+          3,
+          handleNumberClick,
+          "border-t-4 border-r-4 rounded-tr-md"
+        )}
       </div>
       <div className="w-full flex">
         {NumberCell(4, handleNumberClick, "border-l-4")}
@@ -56,14 +64,22 @@ export function Numpad() {
         {NumberCell(6, handleNumberClick, "border-r-4")}
       </div>
       <div className="w-full flex">
-        {NumberCell(7, handleNumberClick, "border-l-4 ")}
-        {NumberCell(8, handleNumberClick, "")}
-        {NumberCell(9, handleNumberClick, "border-r-4 ")}
+        {NumberCell(
+          7,
+          handleNumberClick,
+          "border-l-4 border-b-4 rounded-bl-md"
+        )}
+        {NumberCell(8, handleNumberClick, "border-b-4")}
+        {NumberCell(
+          9,
+          handleNumberClick,
+          "border-r-4 border-b-4 rounded-br-md"
+        )}
       </div>
       <div className="w-full flex">
-        {NumberCell(" ", handleNumberClick, "border-l-4 border-b-4")}
-        {NumberCell("x", handleNumberClick, "border-b-4")}
-        {NumberCell(" ", handleNumberClick, "border-r-4 border-b-4")}
+        {NumberCell(" ", handleNumberClick, "border-0 hover:cursor-auto")}
+        {NumberCell("x", handleNumberClick, "border-4 border-t-0 rounded-b-md")}
+        {NumberCell(" ", handleNumberClick, "border-0 hover:cursor-auto")}
       </div>
     </div>
   );

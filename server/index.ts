@@ -37,6 +37,8 @@ const app = next({ dev: IS_DEV });
 const handle = app.getRequestHandler();
 const PORT = process.env.PORT || 3000;
 
+const port = process.env.NODE_ENV === "production" ? 80 : 3000;
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   process.env.SUPABASE_SECRET || ""
@@ -340,8 +342,13 @@ app
       return handle(req, res);
     });
 
+<<<<<<< HEAD
     server.listen(PORT, () => {
       console.log("> Ready on http://localhost:" + PORT);
+=======
+    server.listen(port, () => {
+      console.log(`> Ready on http://localhost:${port}`);
+>>>>>>> main
     });
   })
   .catch((ex) => {

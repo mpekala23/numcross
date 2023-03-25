@@ -23,17 +23,20 @@ export default function Header() {
 
   return (
     <div className="flex justify-between items-center border-b-2 border-slate-200 p-2">
-      <p className="text-2xl font-bold font-title" onClick={goToIndex}>
+      <p
+        className="text-2xl font-bold font-title hover:cursor-pointer"
+        onClick={goToIndex}
+      >
         NUMCROSS
       </p>
       <div className="flex">
-        <div className="p-1" onClick={openHelpModal}>
+        <div className="p-1 hover:cursor-pointer" onClick={openHelpModal}>
           <QuestionMarkCircleIcon className="w-8 h-8 text-black" />
         </div>
-        <div className="p-1" onClick={openStatsModal}>
+        <div className="p-1 hover:cursor-pointer" onClick={openStatsModal}>
           <ChartPieIcon className="w-8 h-8 text-black" />
         </div>
-        <div className="p-1" onClick={openSettingsModal}>
+        <div className="p-1 hover:cursor-pointer" onClick={openSettingsModal}>
           <WrenchScrewdriverIcon className="w-8 h-8 text-black" />
         </div>
       </div>
