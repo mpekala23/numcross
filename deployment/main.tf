@@ -99,7 +99,7 @@ resource "aws_lb_listener" "numcross_listener" {
   depends_on = [
     aws_lb_target_group.numcross_target_group,
   ]
-  certificate_arn   = "arn:aws:acm:us-east-1:720116267795:certificate/079ae55a-f057-4489-b840-cac2ee57b9a2"
+  certificate_arn   = "arn:aws:acm:us-east-1:720116267795:certificate/8bca9204-4353-4c11-bd56-4003c4de7d68"
 
   default_action {
     target_group_arn = aws_lb_target_group.numcross_target_group.id

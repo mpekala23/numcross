@@ -114,7 +114,7 @@ export default function Home() {
           content="You're probably not smart enough for this."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo64_black.png" />
       </Head>
       <div className="flex w-full flex-1 flex-col justify-center items-center">
         <Crossword
