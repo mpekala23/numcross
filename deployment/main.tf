@@ -171,7 +171,7 @@ resource "aws_ecs_service" "numcross_ecs_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.numcross_target_group.id
-    container_name   = "numcross-container"
+    container_name   = "numcross-image"
     container_port   = 3001
   }
 
