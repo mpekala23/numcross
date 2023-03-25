@@ -17,7 +17,7 @@
 /dist
 
 # deployment
-deployment/.terraform
+/deployment/.terraform/
 deployment/terraform.tfstate
 deployment/terraform.tfstate.backup
 
