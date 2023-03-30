@@ -1,30 +1,12 @@
 import useApi from "@/hooks/useApi";
-import { UserStats } from "@/types/types";
+import { UserStats } from "@/types/stats";
 import { useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback, useEffect, useState } from "react";
 import Slink from "../components/slink";
-import { asPercentage } from "@/utils";
+import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
 
 interface Props {
   closeModal: () => void;
-}
-
-function streakToString(streak: number) {
-  if (streak < 0) return "-";
-  return `${streak}d`;
-}
-
-function solveSecondsToString(seconds?: number) {
-  if (!seconds) return "-";
-  if (seconds < 60) {
-    return `${seconds}s`;
-  } else if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)}m`;
-  } else if (seconds < 86400) {
-    return `${Math.floor(seconds / 3600)}h`;
-  } else {
-    return `${Math.floor(seconds / 86400)}d`;
-  }
 }
 
 function renderStat({ name, value }: { name: string; value: number | string }) {

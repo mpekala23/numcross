@@ -3,14 +3,18 @@ import {
   QuestionMarkCircleIcon,
   ChartPieIcon,
   WrenchScrewdriverIcon,
+  TrophyIcon,
 } from "@heroicons/react/24/outline";
 import useModal from "@/hooks/useModal";
+import LeaderboardOverlay from "./leaderboard_overlay";
 import StatsOverlay from "./stats_overlay";
 import SettingsOverlay from "./settings_overlay";
 import HelpOverlay from "./help_overlay";
 import { useRouter } from "next/router";
 
 export default function Header() {
+  const [LeaderboardModal, openLeaderboardModal, closeLeaderboardModal] =
+    useModal();
   const [HelpModal, openHelpModal, closeHelpModal] = useModal();
   const [StatsModal, openStatsModal, closeStatsModal] = useModal();
   const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
@@ -33,6 +37,12 @@ export default function Header() {
         </p>
       </div>
       <div className="flex">
+        <div
+          className="p-1 hover:cursor-pointer"
+          onClick={openLeaderboardModal}
+        >
+          <TrophyIcon className="w-8 h-8 text-black" />
+        </div>
         <div className="p-1 hover:cursor-pointer" onClick={openHelpModal}>
           <QuestionMarkCircleIcon className="w-8 h-8 text-black" />
         </div>
@@ -44,6 +54,9 @@ export default function Header() {
         </div>
       </div>
 
+      <LeaderboardModal>
+        <LeaderboardOverlay closeModal={closeLeaderboardModal} />
+      </LeaderboardModal>
       <HelpModal>
         <HelpOverlay closeModal={closeHelpModal} />
       </HelpModal>

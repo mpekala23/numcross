@@ -53,6 +53,43 @@ export const Crossword: FunctionComponent<Props> = ({
     };
   }, [contRef, updateFontSize]);
 
+  // Listen for keypresses
+  useEffect(() => {
+    const handleKeypress = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a") {
+        setFocusedCol((oldVal) => {
+          if (oldVal === undefined) return undefined;
+          if (oldVal === 0) return puzzle.shape[1] - 1;
+          return oldVal - 1;
+        });
+      } else if (e.key === "ArrowRight" || e.key === "d") {
+        setFocusedCol((oldVal) => {
+          if (oldVal === undefined) return undefined;
+          if (oldVal === puzzle.shape[1] - 1) return 0;
+          return oldVal + 1;
+        });
+      }
+
+      if (e.key === "ArrowUp" || e.key === "w") {
+        setFocusedRow((oldVal) => {
+          if (oldVal === undefined) return undefined;
+          if (oldVal === 0) return puzzle.shape[0] - 1;
+          return oldVal - 1;
+        });
+      } else if (e.key === "ArrowDown" || e.key === "s") {
+        setFocusedRow((oldVal) => {
+          if (oldVal === undefined) return undefined;
+          if (oldVal === puzzle.shape[0] - 1) return 0;
+          return oldVal + 1;
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeypress);
+    return () => {
+      window.removeEventListener("keydown", handleKeypress);
+    };
+  }, [setFocusedRow, setFocusedCol, puzzle]);
+
   // A function to manipulate the cursor according to the settings
   // after a cell has been filled in
   const incrementFocus = useCallback(() => {
@@ -374,7 +411,10 @@ export const Crossword: FunctionComponent<Props> = ({
       <div className={`flex flex-1 w-full h-full flex-col`} ref={contRef}>
         {Range(puzzle.shape[0])
           .map((rowidx) => (
-            <div className={`flex flex-row w-full justify-center flex-1`}>
+            <div
+              key={cellKey(rowidx, -1)}
+              className={`flex flex-row w-full justify-center flex-1`}
+            >
               {Range(puzzle.shape[1]).map((colidx) => {
                 const clue = puzzle.clues[rowidx]?.[colidx];
                 const thisClueNumber =

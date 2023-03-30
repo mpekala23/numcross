@@ -1,4 +1,5 @@
-import { Attempt, Numcross, Puzzle, Solution, UserStats } from "./types";
+import { Attempt, Numcross, Puzzle, Solution } from "./types";
+import { LeaderboardStats, UserStats } from "./stats";
 import { Send, Response } from "express-serve-static-core";
 
 interface RespBase {
@@ -51,6 +52,11 @@ export interface UserStatsReq {
   uid: string;
 }
 export interface UserStatsResp extends RespBase, UserStats {}
+
+// GET leaderboard
+export interface LeaderboardReq {}
+
+export interface LeaderboardResp extends RespBase, LeaderboardStats {}
 
 /* ------------------ */
 // START HELPER STUFF FOR EXPRESS BACKEND

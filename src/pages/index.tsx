@@ -9,6 +9,7 @@ import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
 import { isEqual } from "lodash";
 import SolvedOverlay from "@/common/solved_overlay";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export default function Home() {
   const { getTodaysNumcross, checkAttempt, updateAttempt } = useApi();
@@ -19,11 +20,13 @@ export default function Home() {
   const [hasSolved, setHasSolved] = useState<boolean>(false);
   const [SolvedModal, openSolved, closeSolved] = useModal();
   const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
+  const user = useUser();
 
   useEffect(() => {
     // Helper function to do the get
     const performGet: () => Promise<void> = async () => {
-      const result = await getTodaysNumcross();
+      localStorage.clear();
+      const result = await getTodaysNumcross(user?.id);
       if (!result) {
         setPageError("Error loading today's numcross");
         return;
@@ -42,12 +45,11 @@ export default function Home() {
       // flows in the reverse direction
       if (attemptFetch) {
         setScratch(attemptFetch.scratch);
-        console.log("setting scratch", attemptFetch.scratch);
       }
     };
 
     performGet();
-  }, [getTodaysNumcross]);
+  }, [getTodaysNumcross, user?.id]);
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
@@ -62,22 +64,22 @@ export default function Home() {
   // the puzzle has already been solved
   const doCheckAttempt = useCallback(async () => {
     if (!attempt || hasSolved) return;
-    const apiResult = await checkAttempt(attempt);
+    const apiResult = await checkAttempt(attempt, user?.id);
     if (apiResult?.correct) {
       setHasSolved(true);
     } else {
       toast("Puzzle incorrect", { icon: "😑" });
     }
     return;
-  }, [attempt, checkAttempt, hasSolved, setHasSolved]);
+  }, [attempt, checkAttempt, hasSolved, setHasSolved, user?.id]);
 
   // Update the attempt over API on change
   // Check the attempt if it's full
-  // NOTE: Short circuits if the attempt is null or if
+  // NOTE: Short circuits if the attempt is nul123l or if
   // the puzzle has already been solved
   useEffect(() => {
     if (attempt && !isEqual(attempt, lastAttempt) && !hasSolved) {
-      updateAttempt(attempt);
+      updateAttempt(attempt, user?.id);
       setLastAttempt(attempt);
       if (numcross?.puzzle && isAttemptFull(attempt, numcross?.puzzle)) {
         doCheckAttempt();
@@ -91,6 +93,7 @@ export default function Home() {
     setLastAttempt,
     numcross?.puzzle,
     doCheckAttempt,
+    user?.id,
   ]);
 
   // Fun stuff on solve

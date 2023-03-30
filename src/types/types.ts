@@ -86,14 +86,6 @@ export interface Solve {
   didCheat: boolean;
 }
 
-export interface UserStats {
-  numPlayed: number;
-  numSolved: number;
-  currentStreak: number;
-  maxStreak: number;
-  averageSolveTime?: number;
-}
-
 export type FillMode = "next" | "nextEmpty" | "stay";
 export type DeleteMode = "previous" | "stay";
 
@@ -113,5 +105,6 @@ export type NumpadVal =
   | "7"
   | "8"
   | "9"
+  | "x"
   | ""
   | "nothing";

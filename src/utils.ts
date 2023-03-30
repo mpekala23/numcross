@@ -87,3 +87,21 @@ export const DEFAULT_SETTINGS: Settings = {
   fillMode: "nextEmpty",
   deleteMode: "previous",
 };
+
+export function streakToString(streak: number) {
+  if (streak < 0) return "-";
+  return `${streak}d`;
+}
+
+export function solveSecondsToString(seconds?: number) {
+  if (!seconds) return "-";
+  if (seconds < 60) {
+    return `${seconds}s`;
+  } else if (seconds < 3600) {
+    return `${Math.floor(seconds / 60)}m`;
+  } else if (seconds < 86400) {
+    return `${Math.floor(seconds / 3600)}h`;
+  } else {
+    return `${Math.floor(seconds / 86400)}d`;
+  }
+}

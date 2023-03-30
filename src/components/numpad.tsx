@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { BackspaceIcon } from "@heroicons/react/24/outline";
 import { useNumpad } from "@/hooks/useNumpad";
 import { NumpadVal } from "@/types/types";
@@ -42,6 +42,39 @@ export function Numpad() {
     },
     [setNumpadVal]
   );
+
+  // Listen for keypresses
+  useEffect(() => {
+    const handleKeypress = (e: KeyboardEvent) => {
+      if (e.key === "Backspace") {
+        handleNumberClick("x");
+      } else if (e.key === "0") {
+        handleNumberClick("0");
+      } else if (e.key === "1") {
+        handleNumberClick("1");
+      } else if (e.key === "2") {
+        handleNumberClick("2");
+      } else if (e.key === "3") {
+        handleNumberClick("3");
+      } else if (e.key === "4") {
+        handleNumberClick("4");
+      } else if (e.key === "5") {
+        handleNumberClick("5");
+      } else if (e.key === "6") {
+        handleNumberClick("6");
+      } else if (e.key === "7") {
+        handleNumberClick("7");
+      } else if (e.key === "8") {
+        handleNumberClick("8");
+      } else if (e.key === "9") {
+        handleNumberClick("9");
+      }
+    };
+    window.addEventListener("keydown", handleKeypress);
+    return () => {
+      window.removeEventListener("keydown", handleKeypress);
+    };
+  }, [handleNumberClick]);
 
   return (
     <div className="w-full flex flex-col justify-evenly items-center">

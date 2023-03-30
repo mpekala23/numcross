@@ -6,7 +6,8 @@ import {
   UpdateAttemptResp,
   UserStatsResp,
 } from "@/types/api";
-import { Attempt, Numcross, UserStats } from "@/types/types";
+import { Attempt, Numcross } from "@/types/types";
+import { LeaderboardStats, UserStats } from "@/types/stats";
 import { toast } from "react-hot-toast";
 import { mineAttempt, storeAttempt } from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
@@ -116,11 +117,24 @@ export async function getStats(userId?: string): Promise<UserStats | null> {
   };
 }
 
+export async function getLeaderboard(): Promise<LeaderboardStats | null> {
+  const { data, error } = await getJSON<LeaderboardStats>(
+    "/api/leaderboard",
+    {}
+  );
+  if (error || !data) {
+    toast("There was an error getting the leaderboard.", { icon: "🚫" });
+    return null;
+  }
+  return data;
+}
+
 export default function useApi() {
   return {
     getTodaysNumcross,
     checkAttempt,
     updateAttempt,
     getStats,
+    getLeaderboard,
   };
 }

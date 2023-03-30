@@ -15,6 +15,8 @@ import {
   AddPuzzleResp,
   CheckAttemptReq,
   CheckAttemptResp,
+  LeaderboardReq,
+  LeaderboardResp,
   TodaysNumcrossReq,
   TodaysNumcrossResp,
   TypedRequestBody,
@@ -50,6 +52,22 @@ app
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: true }));
 
+    const getMostRecentPuzzle = async (): Promise<any | null> => {
+      const todaysDatestring = getESTDatestring();
+      const { data, error } = await supabase
+        .from("puzzles")
+        .select("*")
+        .lte("live_date", todaysDatestring)
+        .order("live_date", { ascending: false })
+        .limit(1)
+        .single();
+      if (error) {
+        return null;
+      } else {
+        return data;
+      }
+    };
+
     server.get(
       "/api/todays_numcross",
       async (
@@ -60,21 +78,8 @@ app
 
         // Will get the current date in format yyyy-mm-dd and fetch
         // the most recent puzzle that was/is live on or before this date
-        const todaysDatestring = getESTDatestring();
-        const { data, error } = await supabase
-          .from("puzzles")
-          .select("*")
-          .lte("live_date", todaysDatestring)
-          .order("live_date", { ascending: false })
-          .limit(1)
-          .single();
-        if (error) {
-          console.log(error);
-          res.status(500).send({
-            status: "error",
-            errorMessage: "Error: Can't get puzzle",
-          });
-        } else {
+        const data = await getMostRecentPuzzle();
+        if (data) {
           // Try to load the users attempt from DB
           const { uid } = req.query;
           let attempt: Attempt | undefined = undefined;
@@ -332,6 +337,53 @@ app
           currentStreak,
           maxStreak,
           averageSolveTime,
+        });
+      }
+    );
+
+    server.get(
+      "/api/leaderboard",
+      async (
+        req: TypedRequestQuery<LeaderboardReq>,
+        res: TypedResponse<LeaderboardResp>
+      ) => {
+        console.log("GET /api/leaderboard");
+
+        const data = await getMostRecentPuzzle();
+        if (!data) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't get puzzle",
+          });
+          return;
+        }
+        // Get all their solves
+        const { data: solvesData, error: solvesError } = await supabase
+          .from("solves")
+          .select("*")
+          .eq("pid", data.id)
+          .eq("has_cheated", false);
+        if (solvesError) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: "Error: Can't get user stats",
+          });
+          return;
+        }
+
+        solvesData.map((solve) => {
+          return {
+            ...solve,
+            time:
+              (solve.end_time.getTime() - solve.start_time.getTime()) / 1000,
+          };
+        });
+
+        console.log(solvesData);
+        res.send({
+          status: "ok",
+          today: [],
+          allTime: [],
         });
       }
     );
