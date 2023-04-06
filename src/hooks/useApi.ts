@@ -5,9 +5,11 @@ import {
   UpdateAttemptReq,
   UpdateAttemptResp,
   UserStatsResp,
+  AddPuzzleReq,
+  AddPuzzleResp,
 } from "@/types/api";
 import { Attempt, Numcross, UserStats } from "@/types/types";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
 import useStorage from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
@@ -15,8 +17,23 @@ import { useCallback } from "react";
 
 export default function useApi() {
   const user = useUser();
-  const supabaseClient = useSupabaseClient();
   const { storeAttempt, mineAttempt } = useStorage();
+
+  const addPuzzle: (data: AddPuzzleReq) => Promise<null> = useCallback(
+    async (data) => {
+      const error = (await postJSON<AddPuzzleResp>("/api/add_puzzle", data))
+        .error;
+
+      if (error) {
+        toast("There was an error uploading your puzzle.", { icon: "🚫" });
+      } else {
+        toast("Success! Puzzle uploaded.");
+      }
+
+      return null;
+    },
+    []
+  );
 
   const getTodaysNumcross: () => Promise<{
     numcross: Numcross;
@@ -30,7 +47,6 @@ export default function useApi() {
       }
     );
     if (error || !data?.numcross) {
-      console.error(error);
       toast("There was an error getting today's puzzle.", { icon: "🚫" });
       return null;
     }
@@ -129,5 +145,6 @@ export default function useApi() {
     checkAttempt,
     updateAttempt,
     getStats,
+    addPuzzle,
   };
 }

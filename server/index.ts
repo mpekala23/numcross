@@ -113,7 +113,6 @@ app
         req: TypedRequestBody<AddPuzzleReq>,
         res: TypedResponse<AddPuzzleResp>
       ) => {
-        console.log("POST /api/add_puzzle");
         const { error } = await supabase
           .from("puzzles")
           .insert({

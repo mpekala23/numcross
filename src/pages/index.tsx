@@ -120,6 +120,7 @@ export default function Home() {
           puzzle={numcross.puzzle}
           scratch={scratch}
           setScratch={setScratch}
+          editable={false}
         />
         <Numpad />
         <SolvedModal>

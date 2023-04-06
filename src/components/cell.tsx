@@ -11,6 +11,7 @@ type CellProps = {
   state: CellState;
   number: number | null | undefined;
   fontSize: number;
+  editable: boolean;
 };
 
 export enum CellState {
@@ -21,17 +22,10 @@ export enum CellState {
 }
 
 const colors: { [key in CellState]: string } = {
-  [CellState.INVALID]: "black",
+  [CellState.INVALID]: "bg-black",
   [CellState.INACTIVE]: "bg-slate-100",
   [CellState.ACTIVE_WORD]: "bg-sky-200",
   [CellState.ACTIVE_LETTER]: "bg-sky-400",
-};
-
-const hoverColors: { [key in CellState]: string } = {
-  [CellState.INVALID]: "black",
-  [CellState.INACTIVE]: "bg-slate-200",
-  [CellState.ACTIVE_WORD]: "bg-slate-300",
-  [CellState.ACTIVE_LETTER]: "bg-slate-400",
 };
 
 export const Cell: FunctionComponent<CellProps> = ({
@@ -42,21 +36,24 @@ export const Cell: FunctionComponent<CellProps> = ({
   number,
   onClick,
   fontSize,
+  editable,
 }) => {
   const onSelect = useCallback(() => {
     onClick(rowidx, colidx);
   }, [rowidx, colidx, onClick]);
 
   return (
-    <div className={"rounded-md border-2 place-content-center aspect-square"}>
-      {state !== CellState.INVALID && (
+    <div
+      className={classNames(
+        "rounded-md border-2 place-content-center aspect-square",
+        colors[state]
+      )}
+    >
+      {(state !== CellState.INVALID || editable) && (
         <div
-          className={classNames(
-            "relative w-full h-full flex items-center justify-center",
-            colors[state],
-            `hover:${hoverColors[state]}`,
-            "hover:cursor-pointer"
-          )}
+          className={
+            "relative w-full h-full flex items-center justify-center hover:cursor-pointer"
+          }
           onClick={onSelect}
         >
           <Corner>{number}</Corner>

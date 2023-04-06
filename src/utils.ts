@@ -1,11 +1,29 @@
 import { Attempt, Puzzle, Settings } from "./types/types";
+import { cloneDeep } from "lodash";
 
 export const Range = (n: number) => {
   return Array.from(Array(n).keys());
 };
 
+// Create an array with the same value in each entry
+export const Arr = (n: number, v: any) => {
+  return Array.from(Array(n)).map((_) => cloneDeep(v));
+};
+
+export const Arr2D = (nx: number, ny: number, v: any) => {
+  return Arr(nx, Arr(ny, v));
+};
+
 export const cellKey = (rowidx: number, colidx: number) => {
   return `${rowidx},${colidx}`;
+};
+
+export const parseCellKey = (key: string) => {
+  const l = key.split(",");
+  if (l.length != 2) {
+    return [-1, -1];
+  }
+  return [parseFloat(l[0]), parseFloat(l[1])];
 };
 
 export async function getJSON<Type>(
