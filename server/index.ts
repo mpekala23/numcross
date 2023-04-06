@@ -35,8 +35,7 @@ dotenv.config({ path: env_path });
 const IS_DEV = process.env.NODE_ENV !== "production";
 const app = next({ dev: IS_DEV });
 const handle = app.getRequestHandler();
-
-const port = process.env.NODE_ENV === "production" ? 80 : 3000;
+const PORT = process.env.PORT || 3000;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -259,6 +258,8 @@ app
           })
           .select();
 
+        console.log("Solve error", solveError);
+
         res.send({
           status: "ok",
           correct,
@@ -338,8 +339,8 @@ app
       return handle(req, res);
     });
 
-    server.listen(port, () => {
-      console.log(`> Ready on http://localhost:${port}`);
+    server.listen(PORT, () => {
+      console.log(`> Ready on http://localhost:${PORT}`);
     });
   })
   .catch((ex) => {

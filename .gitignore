@@ -16,6 +16,11 @@
 /build
 /dist
 
+# deployment
+/deployment/.terraform/
+deployment/terraform.tfstate
+deployment/terraform.tfstate.backup
+
 # misc
 .DS_Store
 *.pem

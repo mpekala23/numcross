@@ -12,6 +12,7 @@ type CellProps = {
   number: number | null | undefined;
   fontSize: number;
   editable: boolean;
+  className: string;
 };
 
 export enum CellState {
@@ -37,6 +38,7 @@ export const Cell: FunctionComponent<CellProps> = ({
   onClick,
   fontSize,
   editable,
+  className,
 }) => {
   const onSelect = useCallback(() => {
     onClick(rowidx, colidx);
@@ -45,15 +47,16 @@ export const Cell: FunctionComponent<CellProps> = ({
   return (
     <div
       className={classNames(
-        "rounded-md border-2 place-content-center aspect-square",
+        "border-2 place-content-center aspect-square",
         colors[state]
       )}
     >
       {(state !== CellState.INVALID || editable) && (
         <div
-          className={
-            "relative w-full h-full flex items-center justify-center hover:cursor-pointer"
-          }
+          className={classNames(
+            "relative w-full h-full flex items-center justify-center hover:cursor-pointer",
+            className
+          )}
           onClick={onSelect}
         >
           <Corner>{number}</Corner>

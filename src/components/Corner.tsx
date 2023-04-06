@@ -1,3 +1,4 @@
+import React from "react";
 import { FunctionComponent, PropsWithChildren } from "react";
 
 export const Corner: FunctionComponent<PropsWithChildren> = ({ children }) => {

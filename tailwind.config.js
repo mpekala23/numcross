@@ -19,6 +19,9 @@ module.exports = {
     {
       pattern: /grid-cols-*/,
     },
+    {
+      pattern: /grid-rows-*/,
+    },
   ],
   plugins: [],
 };

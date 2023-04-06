@@ -121,7 +121,7 @@ export const Crossword: FunctionComponent<Props> = ({
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
     setFontSize(contRef.current.clientHeight / (3 * puzzle.shape[1]));
-  }, [setFontSize]);
+  }, [setFontSize, puzzle.shape]);
 
   useEffect(() => {
     updateFontSize();
@@ -524,6 +524,11 @@ export const Crossword: FunctionComponent<Props> = ({
                   state={getState(rowidx, colidx)}
                   fontSize={fontSize}
                   editable
+                  className={`${rowidx === 0 ? "border-t-4" : ""} ${
+                    colidx === 0 ? "border-l-4" : ""
+                  } ${rowidx === puzzle.shape[0] - 1 ? "border-b-4" : ""} ${
+                    colidx === puzzle.shape[1] - 1 ? "border-r-4" : ""
+                  }`}
                 />
               );
             })
