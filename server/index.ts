@@ -27,6 +27,7 @@ import {
   UserStatsReq,
   UserStatsResp,
 } from "../src/types/api";
+import { LeaderboardEntry } from "../src/types/stats";
 
 const env_path =
   process.env.NODE_ENV === "production"
@@ -357,12 +358,12 @@ app
           });
           return;
         }
-        // Get all their solves
+
         const { data: solvesData, error: solvesError } = await supabase
           .from("solves")
           .select("*")
           .eq("pid", data.id)
-          .eq("has_cheated", false);
+          .eq("did_cheat", false);
         if (solvesError) {
           res.status(500).send({
             status: "error",
@@ -371,19 +372,65 @@ app
           return;
         }
 
-        solvesData.map((solve) => {
-          return {
+        const todaysSolves: any[] = [];
+
+        solvesData.forEach((solve) => {
+          const extendedSolve = {
             ...solve,
             time:
-              (solve.end_time.getTime() - solve.start_time.getTime()) / 1000,
+              (new Date(solve.end_time).getTime() -
+                new Date(solve.start_time).getTime()) /
+              1000,
           };
+
+          if (solve.pid === data.id) {
+            todaysSolves.push(extendedSolve);
+          }
         });
 
-        console.log(solvesData);
+        // Sort by time ascending
+        todaysSolves.sort((a, b) => a.time - b.time);
+
+        // Get the top 10
+        const todays_top_10 = todaysSolves.slice(0, 10);
+        const top_ten_uids: string[] = [];
+
+        todays_top_10.forEach((solve) => {
+          if (!top_ten_uids.includes(solve.uid)) {
+            top_ten_uids.push(solve.uid);
+          }
+        });
+
+        const map_uid_to_username: { [key: string]: string } = {};
+        for (let i = 0; i < top_ten_uids.length; i++) {
+          const uid = top_ten_uids[i];
+          const { data: user, error: userError } =
+            await supabase.auth.admin.getUserById(uid);
+          if (userError) {
+            res.status(500).send({
+              status: "error",
+              errorMessage: "Error: Can't get user stats",
+            });
+            return;
+          } else {
+            map_uid_to_username[uid] = user.user.email || "ERROR";
+          }
+        }
+
+        const today: LeaderboardEntry[] = todays_top_10.map((solve) => {
+          return {
+            username: map_uid_to_username[solve.uid],
+            time: solve.time,
+            streak: -1,
+            numSolved: -1,
+          };
+        });
+        const allTime: LeaderboardEntry[] = [];
+
         res.send({
           status: "ok",
-          today: [],
-          allTime: [],
+          today,
+          allTime,
         });
       }
     );

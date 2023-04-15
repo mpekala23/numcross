@@ -34,6 +34,7 @@ export default function LeaderboardOverlay({ closeModal }: Props) {
           setLoading(false);
           return;
         }
+        console.log(stats);
         setStats(stats);
         setLoading(false);
       } catch (error) {
@@ -70,7 +71,32 @@ export default function LeaderboardOverlay({ closeModal }: Props) {
     if (error.length > 0 || (!loading && !stats)) return renderError(error);
     if (!stats) return renderError("No stats found. Are you logged in?");
 
-    return <div></div>;
+    return (
+      <div>
+        <table className="table-auto w-full">
+          <thead>
+            <tr>
+              <th className="text-left">Rank</th>
+              <th className="text-left">Name</th>
+              <th className="text-left">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stats.today.map((user, index) => {
+              return (
+                <tr key={index}>
+                  <td className="border px-4 py-2">{index}</td>
+                  <td className="border px-4 py-2">{user.username}</td>
+                  <td className="border px-4 py-2">
+                    {solveSecondsToString(user.time)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
   }, [loading, error, stats, renderError, renderLoading]);
 
   return (

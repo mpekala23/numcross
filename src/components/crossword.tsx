@@ -39,11 +39,13 @@ export const Crossword: FunctionComponent<Props> = ({
 
   const contRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [rowHeight, setRowHeight] = useState(64);
 
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
     setFontSize(contRef.current.clientHeight / (3 * puzzle.shape[1]));
-  }, [setFontSize, puzzle.shape]);
+    setRowHeight(contRef.current.children[0].clientHeight);
+  }, [setFontSize, setRowHeight, puzzle.shape]);
 
   useEffect(() => {
     updateFontSize();
@@ -431,6 +433,7 @@ export const Crossword: FunctionComponent<Props> = ({
                     onClick={onClick}
                     state={getState(rowidx, colidx)}
                     fontSize={fontSize}
+                    rowHeight={rowHeight}
                     className={`${rowidx === 0 ? "border-t-4" : ""} ${
                       colidx === 0 ? "border-l-4" : ""
                     } ${rowidx === puzzle.shape[0] - 1 ? "border-b-4" : ""} ${

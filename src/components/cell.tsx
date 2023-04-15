@@ -11,6 +11,7 @@ type CellProps = {
   state: CellState;
   number: number | null | undefined;
   fontSize: number;
+  rowHeight: number;
   className?: string;
 };
 
@@ -43,6 +44,7 @@ export const Cell: FunctionComponent<CellProps> = ({
   number,
   onClick,
   fontSize,
+  rowHeight,
   className,
 }) => {
   const onSelect = useCallback(() => {
@@ -51,9 +53,13 @@ export const Cell: FunctionComponent<CellProps> = ({
 
   return (
     <div
-      className={`border-2 place-content-center aspect-square ${
+      className={`border-2 place-content-center aspect-square safari-sucks ${
         className || ""
       }`}
+      style={{
+        width: `${rowHeight}px`,
+        height: `${rowHeight}px`,
+      }}
     >
       {state !== CellState.INVALID && (
         <div

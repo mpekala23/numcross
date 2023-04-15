@@ -20,13 +20,13 @@ function NumberCell(
 
   return (
     <div
-      className={`flex-1 flex justify-center items-center h-16 hover:cursor-pointer ${className} border-2  select-none`}
+      className={`flex-1 flex justify-center items-center h-14 hover:cursor-pointer ${className} border-2  select-none`}
       onClick={actuallyHandleClick}
     >
       {num !== "x" && <p className="text-2xl font-title px-4">{num}</p>}
       {num === "x" && (
         <div>
-          <BackspaceIcon className="w-8 h-8 text-black" />
+          <BackspaceIcon className="w-10 h-10 text-black" />
         </div>
       )}
     </div>
