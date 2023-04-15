@@ -14,6 +14,7 @@ import {
   BlankClue,
 } from "@/types/types";
 import { AddPuzzleReq } from "@/types/api";
+import { useUser } from "@supabase/auth-helpers-react";
 
 const DEFAULT_PUZZLE: Puzzle = {
   shape: [2, 2],
@@ -35,6 +36,7 @@ export default function Upload() {
   const [scratch, setScratch] = useState<Scratch>({});
   const [puzzle, setPuzzle] = useState<Puzzle>(cloneDeep(DEFAULT_PUZZLE));
   const [disabled, setDisabled] = useState(false);
+  const user = useUser();
 
   const doUpload = useCallback(async () => {
     const answers: ("blank" | number)[][] = Arr2D(
@@ -62,8 +64,6 @@ export default function Upload() {
       puzzle,
       difficulty,
     };
-
-    console.log(data);
 
     setDisabled(true);
     await addPuzzle(data);
@@ -139,6 +139,13 @@ export default function Upload() {
     [setLiveDate]
   );
 
+  if (
+    user?.email !== "mpek66@gmail.com" &&
+    user?.email !== "rajatmittal@college.harvard.edu"
+  ) {
+    return null;
+  }
+
   return (
     <>
       <Head>
@@ -150,7 +157,7 @@ export default function Upload() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <div className="flex w-full flex-1 flex-col justify-center items-center">
         <Crossword
           puzzle={puzzle}
           scratch={scratch}
@@ -159,7 +166,7 @@ export default function Upload() {
           updateShape={updateShape}
           editable
         />
-        <Numpad />
+        <Numpad editable />
         <div className="flex justify-center items-center">
           <input
             type="date"
@@ -174,7 +181,7 @@ export default function Upload() {
             Upload
           </button>
         </div>
-      </main>
+      </div>
     </>
   );
 }

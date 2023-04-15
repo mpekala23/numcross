@@ -121,7 +121,7 @@ export const Crossword: FunctionComponent<Props> = ({
 
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
-    setFontSize(contRef.current.clientHeight / (3 * puzzle.shape[1]));
+    setFontSize(contRef.current.clientHeight / (3.2 * puzzle.shape[1]));
     setRowHeight(contRef.current.children[0].clientHeight);
   }, [setFontSize, setRowHeight, puzzle.shape]);
 
@@ -136,6 +136,7 @@ export const Crossword: FunctionComponent<Props> = ({
   // Listen for keypresses
   useEffect(() => {
     const handleKeypress = (e: KeyboardEvent) => {
+      if (editable) return;
       if (e.key === "ArrowLeft" || e.key === "a") {
         setFocusedCol((oldVal) => {
           if (oldVal === undefined) return undefined;
@@ -464,7 +465,6 @@ export const Crossword: FunctionComponent<Props> = ({
           } else {
             (copy as DownClue).downClue = text;
           }
-          console.log(copy);
           updatePuzzle(focusedRow, focusedCol, copy);
         }
       }
@@ -541,8 +541,9 @@ export const Crossword: FunctionComponent<Props> = ({
     <>
       <div
         className={classNames(
-          `grid gap-4 relative grid-cols-${puzzle.shape[1]}`,
-          editable ? "mb-28" : ""
+          `relative flex flex-col ${
+            editable ? "h-60" : "flex-1"
+          } overflow-hidden`
         )}
         ref={contRef}
       >
@@ -566,7 +567,7 @@ export const Crossword: FunctionComponent<Props> = ({
                     number={thisClueNumber}
                     value={scratch[cellKey(rowidx, colidx)]}
                     onClick={onClick}
-                    editable
+                    editable={editable}
                     state={getState(rowidx, colidx)}
                     fontSize={fontSize}
                     rowHeight={rowHeight}
@@ -581,56 +582,52 @@ export const Crossword: FunctionComponent<Props> = ({
             </div>
           ))
           .flat()}
-        {editable && (
-          <>
-            <div className="absolute right-[-5rem] h-full flex flex-col justify-center">
-              <button
-                className="my-3 w-16 h-40 text-center text-3xl bg-slate-300"
-                onClick={() => {
-                  updateShape?.([puzzle.shape[0], puzzle.shape[1] + 1]);
-                }}
-              >
-                +
-              </button>
-              <button
-                className="my-3 w-16 h-40 text-center text-3xl bg-slate-300"
-                onClick={() => {
-                  updateShape?.([puzzle.shape[0], puzzle.shape[1] - 1]);
-                }}
-                disabled={puzzle.shape[1] <= 1}
-              >
-                -
-              </button>
-            </div>
-            <div className="absolute bottom-[-5rem] w-full flex justify-center">
-              <button
-                className="mx-3 w-40 h-16 text-center text-3xl bg-slate-300"
-                onClick={() => {
-                  updateShape?.([puzzle.shape[0] + 1, puzzle.shape[1]]);
-                }}
-              >
-                +
-              </button>
-              <button
-                className="mx-3 w-40 h-16 text-center text-3xl bg-slate-300"
-                onClick={() => {
-                  updateShape?.([puzzle.shape[0] - 1, puzzle.shape[1]]);
-                }}
-                disabled={puzzle.shape[0] <= 1}
-              >
-                -
-              </button>
-            </div>
-          </>
-        )}
       </div>
+      {editable && (
+        <div className="row">
+          <button
+            className="my-3 w-16 text-center text-3xl bg-slate-300"
+            onClick={() => {
+              updateShape?.([puzzle.shape[0], puzzle.shape[1] + 1]);
+            }}
+          >
+            Col+
+          </button>
+          <button
+            className="my-3 w-16 text-center text-3xl bg-slate-300"
+            onClick={() => {
+              updateShape?.([puzzle.shape[0], puzzle.shape[1] - 1]);
+            }}
+            disabled={puzzle.shape[1] <= 1}
+          >
+            Col-
+          </button>
+          <button
+            className="mx-3 w-16 text-center text-3xl bg-slate-300"
+            onClick={() => {
+              updateShape?.([puzzle.shape[0] + 1, puzzle.shape[1]]);
+            }}
+          >
+            Row+
+          </button>
+          <button
+            className="mx-3 w-16 text-center text-3xl bg-slate-300"
+            onClick={() => {
+              updateShape?.([puzzle.shape[0] - 1, puzzle.shape[1]]);
+            }}
+            disabled={puzzle.shape[0] <= 1}
+          >
+            Row-
+          </button>
+        </div>
+      )}
       <ClueText
         text={clueText}
         number={clueNumber}
         across={clueInfo?.across}
         isAcross={isAcross}
         isDown={isDown}
-        fontSize={clueFontSize}
+        fontSize={clueFontSize * (editable ? 2 : 1)}
         editable={editable}
         updateText={updateClueText}
         addClue={addClue}

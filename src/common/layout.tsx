@@ -29,7 +29,7 @@ export default function Layout({ children }: Props) {
       />
       <Header />
 
-      <div className="flex flex-1 overflow-hidden flex-col justify-center align-center p-8 max-w-[700px] w-screen self-center">
+      <div className="flex flex-1 overflow-hidden flex-col justify-center align-center p-8 max-w-[550px] w-screen self-center">
         {children}
       </div>
     </div>

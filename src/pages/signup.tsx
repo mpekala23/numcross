@@ -22,17 +22,31 @@ export default function SignupPage() {
       <Auth
         view="sign_up"
         redirectTo="http://localhost:3000/test"
-        appearance={{ theme: ThemeSupa }}
+        appearance={{
+          theme: ThemeSupa,
+          variables: {
+            default: {
+              colors: {
+                brand: "#37BCF7",
+                brandAccent: "#BAE7FC",
+              },
+            },
+          },
+        }}
         supabaseClient={supabaseClient}
-        providers={
-          [
-            /*"google", "github"*/
-          ]
-        }
+        providers={["google"]}
         socialLayout="horizontal"
         showLinks={false}
       />
-      <Slink href="signin">Already have an account? Sign in</Slink>
+      <div className="mt-4">
+        <Slink href="signin">Already have an account? Sign in</Slink>
+      </div>
+      <div className="mt-4">
+        <div>By signing up you agree to the following:</div>
+        <Slink href="privacy_policy">Privacy Policy</Slink>
+        <br />
+        <Slink href="terms_of_service">Terms of Service</Slink>
+      </div>
     </div>
   );
 }

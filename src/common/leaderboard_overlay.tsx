@@ -34,7 +34,6 @@ export default function LeaderboardOverlay({ closeModal }: Props) {
           setLoading(false);
           return;
         }
-        console.log(stats);
         setStats(stats);
         setLoading(false);
       } catch (error) {

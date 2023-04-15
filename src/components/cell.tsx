@@ -50,10 +50,10 @@ export const Cell: FunctionComponent<CellProps> = ({
     <div
       style={{
         width: `${rowHeight}px`,
-        height: `${rowHeight}px`,
+        height: `100%`,
       }}
       className={classNames(
-        "border-2 place-content-center aspect-square safari-sucks",
+        "border-2 place-content-center safari-sucks",
         colors[state]
       )}
     >
@@ -66,7 +66,7 @@ export const Cell: FunctionComponent<CellProps> = ({
           onClick={onSelect}
         >
           <Corner>{number}</Corner>
-          <span className={"aspect-square select-none"} style={{ fontSize }}>
+          <span className={"select-none"} style={{ fontSize }}>
             {value ?? ""}
           </span>
         </div>

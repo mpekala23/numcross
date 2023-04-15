@@ -3,6 +3,10 @@ import { BackspaceIcon } from "@heroicons/react/24/outline";
 import { useNumpad } from "@/hooks/useNumpad";
 import { NumpadVal } from "@/types/types";
 
+interface Props {
+  editable: boolean;
+}
+
 function NumberCell(
   num: number | string,
   handleClick: (str: NumpadVal) => void,
@@ -33,7 +37,7 @@ function NumberCell(
   );
 }
 
-export function Numpad() {
+export function Numpad({ editable }: Props) {
   const { setNumpadVal } = useNumpad();
 
   const handleNumberClick = useCallback(
@@ -46,8 +50,8 @@ export function Numpad() {
   // Listen for keypresses
   useEffect(() => {
     const handleKeypress = (e: KeyboardEvent) => {
-      if (e.key === "Backspace") {
-        handleNumberClick("x");
+      if (e.key === "Backspace" && !editable) {
+        handleNumberClick("");
       } else if (e.key === "0") {
         handleNumberClick("0");
       } else if (e.key === "1") {
@@ -74,7 +78,7 @@ export function Numpad() {
     return () => {
       window.removeEventListener("keydown", handleKeypress);
     };
-  }, [handleNumberClick]);
+  }, [handleNumberClick, editable]);
 
   return (
     <div className="w-full flex flex-col justify-evenly items-center">

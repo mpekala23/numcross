@@ -126,7 +126,7 @@ export default function Home() {
           setScratch={setScratch}
           editable={false}
         />
-        <Numpad />
+        <Numpad editable={false} />
         <SolvedModal>
           <SolvedOverlay closeModal={closeSolved} />
         </SolvedModal>

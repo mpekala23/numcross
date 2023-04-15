@@ -33,15 +33,15 @@ export const ClueText: FunctionComponent<Props> = ({
   const num = set ? `${number} ${across ? "Across" : "Down"}` : "";
 
   return (
-    <div className={"rounded-md bg-slate-200 my-10 mb-7 py-2 px-4 relative"}>
-      <div className="text-left">{num}</div>
+    <div className={"w-full bg-slate-200 my-10 mb-7 py-2 px-4 relative"}>
+      <div className="text-left font-bold">{num}</div>
       <EditableText
         inputProps={{
-          className: "text-center bg-slate-200 w-full p-5 pt-4",
+          className: "text-center bg-slate-200 w-full p-2 pt-4",
           style: { fontSize },
         }}
         divProps={{
-          className: "text-center p-5 pt-4",
+          className: "text-center p-2 pt-4",
           style: { fontSize, minHeight: 2 * fontSize },
         }}
         text={line}
