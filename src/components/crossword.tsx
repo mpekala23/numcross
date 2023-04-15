@@ -136,7 +136,6 @@ export const Crossword: FunctionComponent<Props> = ({
   // Listen for keypresses
   useEffect(() => {
     const handleKeypress = (e: KeyboardEvent) => {
-      if (editable) return;
       if (e.key === "ArrowLeft" || e.key === "a") {
         setFocusedCol((oldVal) => {
           if (oldVal === undefined) return undefined;
@@ -169,7 +168,7 @@ export const Crossword: FunctionComponent<Props> = ({
     return () => {
       window.removeEventListener("keydown", handleKeypress);
     };
-  }, [setFocusedRow, setFocusedCol, puzzle]);
+  }, [setFocusedRow, setFocusedCol, puzzle, editable]);
 
   // A function to manipulate the cursor according to the settings
   // after a cell has been filled in
@@ -543,7 +542,7 @@ export const Crossword: FunctionComponent<Props> = ({
         className={classNames(
           `relative flex flex-col ${
             editable ? "h-60" : "flex-1"
-          } overflow-hidden`
+          } overflow-hidden max-w-[550px] max-h-[550px]`
         )}
         ref={contRef}
       >
