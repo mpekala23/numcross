@@ -5,12 +5,26 @@ import {
   UpdateAttemptReq,
   UpdateAttemptResp,
   UserStatsResp,
+  AddPuzzleReq,
+  AddPuzzleResp,
 } from "@/types/api";
 import { Attempt, Numcross } from "@/types/types";
 import { LeaderboardStats, UserStats } from "@/types/stats";
 import { toast } from "react-hot-toast";
 import { mineAttempt, storeAttempt } from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
+
+export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
+  const error = (await postJSON<AddPuzzleResp>("/api/add_puzzle", data)).error;
+
+  if (error) {
+    toast("There was an error uploading your puzzle.", { icon: "🚫" });
+  } else {
+    toast("Success! Puzzle uploaded.");
+  }
+
+  return null;
+}
 
 export async function getTodaysNumcross(userId?: string): Promise<{
   numcross: Numcross;
@@ -136,5 +150,6 @@ export default function useApi() {
     updateAttempt,
     getStats,
     getLeaderboard,
+    addPuzzle,
   };
 }

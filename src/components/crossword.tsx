@@ -2,16 +2,56 @@ import React, { useEffect } from "react";
 import { FunctionComponent, useState, useCallback, useRef } from "react";
 import { Range, cellKey, safeParse } from "@/utils";
 import { Cell, CellState } from "@/components/cell";
-import { cloneDeep } from "lodash";
-import { Clue } from "@/components/clue";
-import { Puzzle, Scratch, AcrossClue, DownClue } from "@/types/types";
+import { cloneDeep, isEqual } from "lodash";
+import { ClueText } from "@/components/cluetext";
+import classNames from "classnames";
+import {
+  Puzzle,
+  Scratch,
+  AcrossClue,
+  DownClue,
+  Clue,
+  BlankClue,
+  AcrossAndDownClue,
+} from "@/types/types";
 import { useNumpad } from "@/hooks/useNumpad";
 import useSettings from "@/hooks/useSettings";
+
+const DEFAULT_CLUE: Clue = {
+  type: "fillable",
+  clueNumber: null,
+};
+
+const BLANK_CLUE: BlankClue = {
+  type: "blank",
+};
+
+const ACROSS_CLUE: AcrossClue = {
+  type: "fillable",
+  clueNumber: 1,
+  acrossClue: "Clue text",
+};
+
+const DOWN_CLUE: DownClue = {
+  type: "fillable",
+  clueNumber: 1,
+  downClue: "Clue text",
+};
+
+const ACROSSDOWN_CLUE: AcrossAndDownClue = {
+  type: "fillable",
+  clueNumber: 1,
+  downClue: "Clue text",
+  acrossClue: "Clue text",
+};
 
 interface Props {
   puzzle: Puzzle;
   scratch: Scratch;
+  editable: boolean;
   setScratch: React.Dispatch<React.SetStateAction<Scratch>>;
+  updatePuzzle?: (rowidx: number, colidx: number, clue?: Clue) => void;
+  updateShape?: (shape: [number, number]) => void;
 }
 
 type ClueMappingsEntryCell = {
@@ -29,6 +69,9 @@ export const Crossword: FunctionComponent<Props> = ({
   puzzle,
   scratch,
   setScratch,
+  editable,
+  updatePuzzle,
+  updateShape,
 }) => {
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
@@ -40,6 +83,41 @@ export const Crossword: FunctionComponent<Props> = ({
   const contRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
   const [rowHeight, setRowHeight] = useState(64);
+
+  // Get the current clue info
+  let clueText: undefined | string = undefined;
+  let clueNumber: undefined | number = undefined;
+  let clueInfo: undefined | ClueMappingsEntryCell = undefined;
+  // Is the current square itself an across/down clue?
+  let isAcross = false;
+  let isDown = false;
+  if (focusedRow !== undefined && focusedCol !== undefined) {
+    const mappings = clueMappings[focusedRow]?.[focusedCol];
+    if (mappings !== undefined) {
+      clueInfo = mappings[clueIdx];
+      if (clueInfo !== undefined) {
+        if (clueInfo.across) {
+          const clue = puzzle.clues[clueInfo.row][clueInfo.col] as AcrossClue;
+          if (clue !== undefined) {
+            clueText = clue.acrossClue;
+            clueNumber = clue.clueNumber;
+          }
+        } else {
+          const clue = puzzle.clues[clueInfo.row][clueInfo.col] as DownClue;
+          if (clue !== undefined) {
+            clueText = clue.downClue;
+            clueNumber = clue.clueNumber;
+          }
+        }
+      }
+    }
+    isAcross =
+      (puzzle.clues[focusedRow]?.[focusedCol] as AcrossClue | undefined)
+        ?.acrossClue !== undefined;
+    isDown =
+      (puzzle.clues[focusedRow]?.[focusedCol] as DownClue | undefined)
+        ?.downClue !== undefined;
+  }
 
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
@@ -101,11 +179,9 @@ export const Crossword: FunctionComponent<Props> = ({
     const startRow = focusedRow;
     const startCol = focusedCol;
 
-    const isAcross = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx]?.across;
+    if (clueInfo?.across === undefined) return;
 
-    if (isAcross === undefined) return;
-
-    if (isAcross) {
+    if (clueInfo.across) {
       let newRow = focusedRow;
       let newCol = focusedCol + 1;
       while (!(newRow === startRow && newCol === startCol)) {
@@ -165,6 +241,7 @@ export const Crossword: FunctionComponent<Props> = ({
     focusedRow,
     clueIdx,
     clueMappings,
+    clueInfo,
     puzzle,
     scratch,
     setFocusedCol,
@@ -179,7 +256,7 @@ export const Crossword: FunctionComponent<Props> = ({
 
     // Focus on first element on load
     for (let i = 0; i < puzzle.shape[0]; i++) {
-      for (let j = 0; j < puzzle.shape[0]; j++) {
+      for (let j = 0; j < puzzle.shape[1]; j++) {
         if (puzzle.clues[i][j].type === "fillable") {
           setFocusedRow(i);
           setFocusedCol(j);
@@ -198,11 +275,9 @@ export const Crossword: FunctionComponent<Props> = ({
     const startRow = focusedRow;
     const startCol = focusedCol;
 
-    const isAcross = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx]?.across;
+    if (clueInfo?.across === undefined) return;
 
-    if (isAcross === undefined) return;
-
-    if (isAcross) {
+    if (clueInfo.across) {
       let newRow = focusedRow;
       let newCol = focusedCol - 1;
       while (!(newRow === startRow && newCol === startCol)) {
@@ -244,6 +319,7 @@ export const Crossword: FunctionComponent<Props> = ({
     focusedRow,
     clueIdx,
     clueMappings,
+    clueInfo,
     puzzle,
     setFocusedCol,
     setFocusedRow,
@@ -252,15 +328,24 @@ export const Crossword: FunctionComponent<Props> = ({
 
   const onUpdate = useCallback(
     (rowidx: number, colidx: number, value?: number) => {
-      const s2 = cloneDeep(scratch);
-      if (value === undefined) {
-        delete s2[cellKey(rowidx, colidx)];
-      } else {
-        s2[cellKey(rowidx, colidx)] = value;
-      }
-      setScratch(s2);
+      setScratch((s) => {
+        if (s[cellKey(rowidx, colidx)] === value) {
+          return s;
+        }
+
+        let s2 = cloneDeep(s);
+        if (value === undefined) {
+          delete s2[cellKey(rowidx, colidx)];
+          if (editable && updatePuzzle) {
+            updatePuzzle(rowidx, colidx, BLANK_CLUE);
+          }
+        } else {
+          s2[cellKey(rowidx, colidx)] = value;
+        }
+        return s2;
+      });
     },
-    [setScratch, scratch]
+    [setScratch, updatePuzzle]
   );
 
   useEffect(() => {
@@ -274,7 +359,7 @@ export const Crossword: FunctionComponent<Props> = ({
           if (puzzle.clues[i]?.[j2]?.type === "blank") {
             break;
           }
-          if ((puzzle.clues[i]?.[j2] as AcrossClue).acrossClue !== undefined) {
+          if ((puzzle.clues[i]?.[j2] as AcrossClue)?.acrossClue !== undefined) {
             mapEntry.push({ row: i, col: j2, across: true });
           }
         }
@@ -282,7 +367,7 @@ export const Crossword: FunctionComponent<Props> = ({
           if (puzzle.clues[i2]?.[j]?.type === "blank") {
             break;
           }
-          if ((puzzle.clues[i2]?.[j] as DownClue).downClue !== undefined) {
+          if ((puzzle.clues[i2]?.[j] as DownClue)?.downClue !== undefined) {
             mapEntry.push({ row: i2, col: j, across: false });
           }
         }
@@ -323,6 +408,13 @@ export const Crossword: FunctionComponent<Props> = ({
       const clues = clueMappings[rowidx]?.[colidx] ?? [];
 
       if (clues.length === 0) {
+        if (editable) {
+          if (updatePuzzle) {
+            updatePuzzle(rowidx, colidx, DEFAULT_CLUE);
+          }
+          setFocusedRow(rowidx);
+          setFocusedCol(colidx);
+        }
         return;
       }
 
@@ -332,10 +424,10 @@ export const Crossword: FunctionComponent<Props> = ({
         setClueIdx((idx) => {
           let desiredIdx = -1;
           if (focusedRow !== undefined && focusedCol !== undefined) {
-            const isAcross =
+            const hasAcrossIdx =
               clueMappings[focusedRow]?.[focusedCol]?.[idx]?.across;
-            if (isAcross !== undefined) {
-              desiredIdx = clues.findIndex((v) => v.across === isAcross);
+            if (hasAcrossIdx !== undefined) {
+              desiredIdx = clues.findIndex((v) => v.across === hasAcrossIdx);
             }
           } else {
             desiredIdx = clues.findIndex((v) => v.across);
@@ -356,8 +448,69 @@ export const Crossword: FunctionComponent<Props> = ({
     ]
   );
 
+  const updateClueText = useCallback(
+    (text: string) => {
+      if (
+        editable &&
+        updatePuzzle &&
+        focusedRow !== undefined &&
+        focusedCol !== undefined &&
+        clueInfo !== undefined
+      ) {
+        const copy = cloneDeep(puzzle.clues[focusedRow]?.[focusedCol]);
+        if (copy !== undefined) {
+          if (clueInfo.across) {
+            (copy as AcrossClue).acrossClue = text;
+          } else {
+            (copy as DownClue).downClue = text;
+          }
+          console.log(copy);
+          updatePuzzle(focusedRow, focusedCol, copy);
+        }
+      }
+    },
+    [editable, clueInfo, updatePuzzle, puzzle, focusedRow, focusedCol]
+  );
+
+  const removeSquare = useCallback(() => {
+    if (
+      editable &&
+      updatePuzzle &&
+      focusedRow !== undefined &&
+      focusedCol !== undefined
+    ) {
+      updatePuzzle(focusedRow, focusedCol, BLANK_CLUE);
+      onUpdate(focusedRow, focusedCol, undefined);
+      setFocusedRow(undefined);
+      setFocusedCol(undefined);
+    }
+  }, [focusedRow, focusedCol, updatePuzzle, onUpdate, editable]);
+
+  const addClue = useCallback(
+    (across: boolean) => {
+      if (
+        editable &&
+        updatePuzzle &&
+        focusedRow !== undefined &&
+        focusedCol !== undefined
+      ) {
+        if (isAcross || isDown) {
+          updatePuzzle(focusedRow, focusedCol, ACROSSDOWN_CLUE);
+        } else {
+          updatePuzzle(
+            focusedRow,
+            focusedCol,
+            across ? ACROSS_CLUE : DOWN_CLUE
+          );
+        }
+      }
+    },
+    [isAcross, isDown, focusedRow, focusedCol, updatePuzzle, editable]
+  );
+
   const getState = (rowidx: number, colidx: number) => {
-    if (puzzle.clues[rowidx]?.[colidx]?.type === "blank") {
+    const type = puzzle.clues[rowidx]?.[colidx]?.type;
+    if (!type || type === "blank") {
       return CellState.INVALID;
     }
 
@@ -369,48 +522,30 @@ export const Crossword: FunctionComponent<Props> = ({
       return CellState.ACTIVE_LETTER;
     }
 
-    const isAcross = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx]?.across;
-
-    if (isAcross === undefined) {
-      // Should never trigger
+    if (clueInfo?.across === undefined) {
       return CellState.INACTIVE;
     }
 
     if (
-      (focusedRow === rowidx && isAcross) ||
-      (focusedCol === colidx && !isAcross)
+      (clueMappings[rowidx]?.[colidx] ?? []).filter((e) => isEqual(e, clueInfo))
+        .length !== 0
     ) {
       return CellState.ACTIVE_WORD;
     }
     return CellState.INACTIVE;
   };
 
-  // Get the current clue text
-  let clueText: undefined | string = undefined;
-  let clueNumber: undefined | number = undefined;
-  let clueAcross: undefined | boolean = undefined;
-  if (focusedRow !== undefined && focusedCol !== undefined) {
-    const clueInfo = clueMappings[focusedRow]?.[focusedCol]?.[clueIdx];
-    if (clueInfo !== undefined) {
-      if (clueInfo.across) {
-        const clue = puzzle.clues[clueInfo.row][clueInfo.col] as AcrossClue;
-        clueText = clue.acrossClue;
-        clueNumber = clue.clueNumber;
-        clueAcross = true;
-      } else {
-        const clue = puzzle.clues[clueInfo.row][clueInfo.col] as DownClue;
-        clueText = clue.downClue;
-        clueNumber = clue.clueNumber;
-        clueAcross = false;
-      }
-    }
-  }
-
   const clueFontSize = fontSize / 3;
 
   return (
     <>
-      <div className={`flex flex-1 w-full h-full flex-col`} ref={contRef}>
+      <div
+        className={classNames(
+          `grid gap-4 relative grid-cols-${puzzle.shape[1]}`,
+          editable ? "mb-28" : ""
+        )}
+        ref={contRef}
+      >
         {Range(puzzle.shape[0])
           .map((rowidx) => (
             <div
@@ -431,6 +566,7 @@ export const Crossword: FunctionComponent<Props> = ({
                     number={thisClueNumber}
                     value={scratch[cellKey(rowidx, colidx)]}
                     onClick={onClick}
+                    editable
                     state={getState(rowidx, colidx)}
                     fontSize={fontSize}
                     rowHeight={rowHeight}
@@ -445,12 +581,60 @@ export const Crossword: FunctionComponent<Props> = ({
             </div>
           ))
           .flat()}
+        {editable && (
+          <>
+            <div className="absolute right-[-5rem] h-full flex flex-col justify-center">
+              <button
+                className="my-3 w-16 h-40 text-center text-3xl bg-slate-300"
+                onClick={() => {
+                  updateShape?.([puzzle.shape[0], puzzle.shape[1] + 1]);
+                }}
+              >
+                +
+              </button>
+              <button
+                className="my-3 w-16 h-40 text-center text-3xl bg-slate-300"
+                onClick={() => {
+                  updateShape?.([puzzle.shape[0], puzzle.shape[1] - 1]);
+                }}
+                disabled={puzzle.shape[1] <= 1}
+              >
+                -
+              </button>
+            </div>
+            <div className="absolute bottom-[-5rem] w-full flex justify-center">
+              <button
+                className="mx-3 w-40 h-16 text-center text-3xl bg-slate-300"
+                onClick={() => {
+                  updateShape?.([puzzle.shape[0] + 1, puzzle.shape[1]]);
+                }}
+              >
+                +
+              </button>
+              <button
+                className="mx-3 w-40 h-16 text-center text-3xl bg-slate-300"
+                onClick={() => {
+                  updateShape?.([puzzle.shape[0] - 1, puzzle.shape[1]]);
+                }}
+                disabled={puzzle.shape[0] <= 1}
+              >
+                -
+              </button>
+            </div>
+          </>
+        )}
       </div>
-      <Clue
+      <ClueText
         text={clueText}
         number={clueNumber}
-        across={clueAcross}
+        across={clueInfo?.across}
+        isAcross={isAcross}
+        isDown={isDown}
         fontSize={clueFontSize}
+        editable={editable}
+        updateText={updateClueText}
+        addClue={addClue}
+        removeSquare={removeSquare}
       />
     </>
   );

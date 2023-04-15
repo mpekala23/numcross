@@ -13,6 +13,7 @@ type CellProps = {
   fontSize: number;
   rowHeight: number;
   className?: string;
+  editable: boolean;
 };
 
 export enum CellState {
@@ -23,17 +24,10 @@ export enum CellState {
 }
 
 const colors: { [key in CellState]: string } = {
-  [CellState.INVALID]: "black",
+  [CellState.INVALID]: "bg-black",
   [CellState.INACTIVE]: "bg-slate-100",
   [CellState.ACTIVE_WORD]: "bg-sky-200",
   [CellState.ACTIVE_LETTER]: "bg-sky-400",
-};
-
-const hoverColors: { [key in CellState]: string } = {
-  [CellState.INVALID]: "black",
-  [CellState.INACTIVE]: "bg-slate-200",
-  [CellState.ACTIVE_WORD]: "bg-slate-300",
-  [CellState.ACTIVE_LETTER]: "bg-slate-400",
 };
 
 export const Cell: FunctionComponent<CellProps> = ({
@@ -45,6 +39,7 @@ export const Cell: FunctionComponent<CellProps> = ({
   onClick,
   fontSize,
   rowHeight,
+  editable,
   className,
 }) => {
   const onSelect = useCallback(() => {
@@ -53,21 +48,20 @@ export const Cell: FunctionComponent<CellProps> = ({
 
   return (
     <div
-      className={`border-2 place-content-center aspect-square safari-sucks ${
-        className || ""
-      }`}
       style={{
         width: `${rowHeight}px`,
         height: `${rowHeight}px`,
       }}
+      className={classNames(
+        "border-2 place-content-center aspect-square safari-sucks",
+        colors[state]
+      )}
     >
-      {state !== CellState.INVALID && (
+      {(state !== CellState.INVALID || editable) && (
         <div
           className={classNames(
-            "relative w-full h-full flex items-center justify-center",
-            colors[state],
-            `hover:${hoverColors[state]}`,
-            "hover:cursor-pointer"
+            "relative w-full h-full flex items-center justify-center hover:cursor-pointer",
+            className
           )}
           onClick={onSelect}
         >
