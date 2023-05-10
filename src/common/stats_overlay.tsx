@@ -31,7 +31,7 @@ export default function StatsOverlay({ closeModal }: Props) {
   useEffect(() => {
     const doWork = async () => {
       try {
-        const stats = await getStats();
+        const stats = await getStats(user?.id);
         if (!stats) {
           setError("No stats found.");
           setLoading(false);
@@ -45,7 +45,7 @@ export default function StatsOverlay({ closeModal }: Props) {
       }
     };
     doWork();
-  }, [getStats]);
+  }, [getStats, user]);
 
   // For rendering a message prompting non-logged in users to log in
   // or create an account
@@ -98,7 +98,7 @@ export default function StatsOverlay({ closeModal }: Props) {
           {renderStat({ name: "Played", value: stats.numPlayed })}
           {renderStat({
             name: "Win %",
-            value: asPercentage(stats.numPlayed, stats.numSolved),
+            value: asPercentage(stats.numSolved, stats.numPlayed),
           })}
           {renderStat({
             name: "Avg. Solve Time",

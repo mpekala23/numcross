@@ -136,13 +136,13 @@ export const Crossword: FunctionComponent<Props> = ({
   // Listen for keypresses
   useEffect(() => {
     const handleKeypress = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" || e.key === "a") {
+      if (e.key === "ArrowLeft") {
         setFocusedCol((oldVal) => {
           if (oldVal === undefined) return undefined;
           if (oldVal === 0) return puzzle.shape[1] - 1;
           return oldVal - 1;
         });
-      } else if (e.key === "ArrowRight" || e.key === "d") {
+      } else if (e.key === "ArrowRight") {
         setFocusedCol((oldVal) => {
           if (oldVal === undefined) return undefined;
           if (oldVal === puzzle.shape[1] - 1) return 0;
@@ -150,13 +150,13 @@ export const Crossword: FunctionComponent<Props> = ({
         });
       }
 
-      if (e.key === "ArrowUp" || e.key === "w") {
+      if (e.key === "ArrowUp") {
         setFocusedRow((oldVal) => {
           if (oldVal === undefined) return undefined;
           if (oldVal === 0) return puzzle.shape[0] - 1;
           return oldVal - 1;
         });
-      } else if (e.key === "ArrowDown" || e.key === "s") {
+      } else if (e.key === "ArrowDown") {
         setFocusedRow((oldVal) => {
           if (oldVal === undefined) return undefined;
           if (oldVal === puzzle.shape[0] - 1) return 0;

@@ -30,6 +30,7 @@ export const EditableText: FunctionComponent<Props> = ({
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.preventDefault();
       if (enabled) {
         updateText(e.target.value);
       }

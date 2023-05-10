@@ -30,7 +30,7 @@ import {
 import { LeaderboardEntry } from "../src/types/stats";
 
 const env_path =
-  process.env.NODE_ENV === "production" || true // force production
+  process.env.NODE_ENV === "production"
     ? ".env.production"
     : ".env.development";
 dotenv.config({ path: env_path });
@@ -263,8 +263,6 @@ app
             did_cheat: attempt.hasCheated,
           })
           .select();
-
-        console.log("Solve error", solveError);
 
         res.send({
           status: "ok",

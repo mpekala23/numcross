@@ -50,6 +50,9 @@ export function Numpad({ editable }: Props) {
   // Listen for keypresses
   useEffect(() => {
     const handleKeypress = (e: KeyboardEvent) => {
+      if (editable) {
+        return;
+      }
       if (e.key === "Backspace" && !editable) {
         handleNumberClick("");
       } else if (e.key === "0") {
