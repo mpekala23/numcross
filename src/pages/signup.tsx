@@ -12,7 +12,7 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (user) {
-      router.replace("home");
+      router.replace("/");
     }
   }, [user, router]);
 
@@ -21,7 +21,7 @@ export default function SignupPage() {
       <p className="text-xl">Sign up</p>
       <Auth
         view="sign_up"
-        redirectTo="http://localhost:3000/test"
+        redirectTo=""
         appearance={{
           theme: ThemeSupa,
           variables: {
@@ -38,14 +38,18 @@ export default function SignupPage() {
         socialLayout="horizontal"
         showLinks={false}
       />
-      <div className="mt-4">
+      <div className="mt-4 justify-center flex">
         <Slink href="signin">Already have an account? Sign in</Slink>
       </div>
       <div className="mt-4">
-        <div>By signing up you agree to the following:</div>
-        <Slink href="privacy_policy">Privacy Policy</Slink>
-        <br />
-        <Slink href="terms_of_service">Terms of Service</Slink>
+        <div className="text-center">
+          By signing up you agree to the following:
+        </div>
+        <div className="flex mt-4 justify-around">
+          <Slink href="privacy_policy">Privacy Policy</Slink>
+          <br />
+          <Slink href="terms_of_service">Terms of Service</Slink>
+        </div>
       </div>
     </div>
   );

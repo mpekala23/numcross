@@ -1,6 +1,6 @@
 import useApi from "@/hooks/useApi";
 import { UserStats } from "@/types/stats";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback, useEffect, useState } from "react";
 import Slink from "../components/slink";
 import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
@@ -21,6 +21,7 @@ function renderStat({ name, value }: { name: string; value: number | string }) {
 }
 
 export default function StatsOverlay({ closeModal }: Props) {
+  const supabase = useSupabaseClient();
   const { getStats } = useApi();
   const user = useUser();
   const [stats, setStats] = useState<UserStats | null>();
@@ -32,7 +33,7 @@ export default function StatsOverlay({ closeModal }: Props) {
       try {
         const stats = await getStats();
         if (!stats) {
-          setError("No stats found. Are you logged in?");
+          setError("No stats found.");
           setLoading(false);
           return;
         }
@@ -130,6 +131,16 @@ export default function StatsOverlay({ closeModal }: Props) {
     <div className="flex flex-col justify-center align-center">
       <p className="text-2xl font-bold font-title pb-4">Stats</p>
       {renderContent()}
+      {user && (
+        <Slink
+          onClick={() => {
+            supabase.auth.signOut();
+          }}
+          href=""
+        >
+          Sign out
+        </Slink>
+      )}
     </div>
   );
 }

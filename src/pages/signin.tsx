@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.replace("home");
+      router.replace("/");
     }
   }, [user, router]);
 
@@ -21,18 +21,26 @@ export default function LoginPage() {
       <p className="text-xl">Sign in</p>
       <Auth
         view="sign_in"
-        redirectTo="http://localhost:3000/test"
-        appearance={{ theme: ThemeSupa }}
+        redirectTo="https://numcross.com"
+        appearance={{
+          theme: ThemeSupa,
+          variables: {
+            default: {
+              colors: {
+                brand: "#37BCF7",
+                brandAccent: "#BAE7FC",
+              },
+            },
+          },
+        }}
         supabaseClient={supabaseClient}
-        providers={
-          [
-            /*"google", "github"*/
-          ]
-        }
+        providers={["google"]}
         socialLayout="horizontal"
         showLinks={false}
       />
-      <Slink href="signup">Need to make an account? Sign up</Slink>
+      <div className="flex justify-center mt-4">
+        <Slink href="signup">Need to make an account? Sign up</Slink>
+      </div>
     </div>
   );
 }
