@@ -122,7 +122,11 @@ export const Crossword: FunctionComponent<Props> = ({
   const updateFontSize = useCallback(() => {
     if (!contRef.current) return;
     setFontSize(contRef.current.clientHeight / (3.2 * puzzle.shape[1]));
-    setRowHeight(contRef.current.children[0].clientHeight);
+    const vert = contRef.current.clientHeight / puzzle.shape[1];
+    const horiz = contRef.current.parentElement?.clientWidth
+      ? contRef.current.parentElement?.clientWidth / puzzle.shape[0]
+      : 60000;
+    setRowHeight(Math.min(vert, horiz));
   }, [setFontSize, setRowHeight, puzzle.shape]);
 
   useEffect(() => {
