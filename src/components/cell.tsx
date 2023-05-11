@@ -50,12 +50,9 @@ export const Cell: FunctionComponent<CellProps> = ({
     <div
       style={{
         width: `${rowHeight}px`,
-        height: `100%`,
+        height: `${rowHeight}px`,
       }}
-      className={classNames(
-        "border-2 place-content-center safari-sucks",
-        colors[state]
-      )}
+      className={classNames("border-2", colors[state])}
     >
       {(state !== CellState.INVALID || editable) && (
         <div

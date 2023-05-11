@@ -6,7 +6,11 @@ It's been awhile since I worked on the terraform stuff but now we're interested 
 
 ## Building the Image
 
-To build the image, run `docker build -t numcross-deploy .`
+To build the image, run
+
+```
+docker build -t numcross-deploy .
+```
 
 It's good practice to make sure that the image is working as expected by running
 

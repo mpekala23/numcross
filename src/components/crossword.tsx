@@ -550,8 +550,8 @@ export const Crossword: FunctionComponent<Props> = ({
           .map((rowidx) => (
             <div
               key={cellKey(rowidx, -1)}
-              className={`flex flex-row w-full justify-center flex-1`}
-              style={{ height: rowHeight }}
+              className={`flex flex-row w-full justify-center`}
+              style={{ height: `${rowHeight}px` }}
             >
               {Range(puzzle.shape[1]).map((colidx) => {
                 const clue = puzzle.clues[rowidx]?.[colidx];
