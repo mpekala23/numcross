@@ -4,6 +4,7 @@ import {
   ChartPieIcon,
   WrenchScrewdriverIcon,
   TrophyIcon,
+  ShareIcon,
 } from "@heroicons/react/24/outline";
 import useModal from "@/hooks/useModal";
 import LeaderboardOverlay from "./leaderboard_overlay";
@@ -11,6 +12,7 @@ import StatsOverlay from "./stats_overlay";
 import SettingsOverlay from "./settings_overlay";
 import HelpOverlay from "./help_overlay";
 import { useRouter } from "next/router";
+import { RWebShare } from "react-web-share";
 
 export default function Header() {
   const [LeaderboardModal, openLeaderboardModal, closeLeaderboardModal] =
@@ -38,6 +40,20 @@ export default function Header() {
           </p>
         </div>
         <div className="flex">
+          <RWebShare
+            data={{
+              text: "I'm playing NumCross. The fact that you aren't is deeply concerning.",
+              url: "https://numcross.com",
+              title: "NumCross",
+            }}
+          >
+            <div
+              className="p-1 hover:cursor-pointer"
+              onClick={openLeaderboardModal}
+            >
+              <ShareIcon className="w-8 h-8 text-black" />
+            </div>
+          </RWebShare>
           <div
             className="p-1 hover:cursor-pointer"
             onClick={openLeaderboardModal}
