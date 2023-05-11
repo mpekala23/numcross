@@ -20,6 +20,7 @@
 /deployment/.terraform/
 deployment/terraform.tfstate
 deployment/terraform.tfstate.backup
+deployment/README.md
 
 # misc
 .DS_Store
