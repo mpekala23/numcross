@@ -35,19 +35,36 @@ export const ClueText: FunctionComponent<Props> = ({
   return (
     <div className={"w-full bg-slate-200 my-10 mb-7 py-2 px-4 relative"}>
       <div className="text-left font-bold">{num}</div>
-      <EditableText
-        inputProps={{
-          className: "text-center bg-slate-200 w-full p-2 pt-4",
-          style: { fontSize },
-        }}
-        divProps={{
-          className: "text-center p-2 pt-4",
-          style: { fontSize, minHeight: 2 * fontSize },
-        }}
-        text={line}
-        updateText={updateText}
-        enabled={editable && set}
-      />
+      <div className="md:invisible md:h-0">
+        <EditableText
+          inputProps={{
+            className: "text-center bg-slate-200 w-full p-2",
+            style: { fontSize },
+          }}
+          divProps={{
+            className: "text-center p-2",
+            style: { fontSize: 2 * fontSize, minHeight: 4 * fontSize },
+          }}
+          text={line}
+          updateText={updateText}
+          enabled={editable && set}
+        />
+      </div>
+      <div className="invisible h-0 md:h-auto md:visible">
+        <EditableText
+          inputProps={{
+            className: "text-center bg-slate-200 w-full p-2",
+            style: { fontSize },
+          }}
+          divProps={{
+            className: "text-center p-2",
+            style: { fontSize, minHeight: 2 * fontSize },
+          }}
+          text={line}
+          updateText={updateText}
+          enabled={editable && set}
+        />
+      </div>
       {editable && (
         <div className="text-center">
           {!isAcross && (
