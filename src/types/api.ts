@@ -12,11 +12,17 @@ interface ErrorResp extends RespBase {
 }
 
 // GET todays_numcross
-export interface TodaysNumcrossReq {
-  uid?: string;
-}
+export interface TodaysNumcrossReq {}
 export interface TodaysNumcrossResp extends RespBase {
-  numcross: Numcross;
+  numcross?: Numcross;
+}
+
+// GET todays_progress
+export interface TodaysProgressReq {
+  uid: string;
+  pid: string;
+}
+export interface TodaysProgressResp extends RespBase {
   solve?: Solve;
   attempt?: Attempt;
 }

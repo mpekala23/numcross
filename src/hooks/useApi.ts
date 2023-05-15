@@ -8,11 +8,12 @@ import {
   AddPuzzleReq,
   AddPuzzleResp,
   LogSolveResp,
+  TodaysProgressResp,
 } from "@/types/api";
 import { Attempt, Numcross, Solve } from "@/types/types";
 import { LeaderboardStats, UserStats } from "@/types/stats";
 import { toast } from "react-hot-toast";
-import { mineAttempt, storeAttempt } from "./useStorage";
+import { mineAttempt, mineSolve, storeAttempt } from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
 
 export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
@@ -27,32 +28,42 @@ export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
   return null;
 }
 
-export async function getTodaysNumcross(userId?: string): Promise<{
+export async function getTodaysNumcross(): Promise<{
   numcross: Numcross;
-  solve?: Solve;
-  attempt?: Attempt;
 } | null> {
   // Load the numcross
   const { data, error } = await getJSON<TodaysNumcrossResp>(
-    "/api/todays_numcross",
-    {
-      uid: userId,
-    }
+    "/api/todays_numcross"
   );
   if (error || !data?.numcross) {
-    console.error(error);
     toast("There was an error getting today's puzzle.", { icon: "🚫" });
     return null;
   }
 
-  if (!userId) {
-    // If the user is not logged in, try to load their attempt
-    // from local storage
-    const attempt = mineAttempt(data.numcross.id);
-    return { numcross: data.numcross, attempt: attempt || undefined };
-  }
+  return { numcross: data.numcross };
+}
 
-  return { numcross: data.numcross, solve: data.solve, attempt: data.attempt };
+export async function getTodaysProgress(
+  userId: string,
+  pid: number
+): Promise<{
+  attempt: Attempt;
+  solve: Solve | null;
+}> {
+  const BLANK_ATTEMPT: Attempt = {
+    puzzleId: pid,
+    startTime: new Date().toISOString(),
+    scratch: {},
+    hasCheated: false,
+  };
+  const { data } = await getJSON<TodaysProgressResp>("/api/todays_progress", {
+    uid: userId,
+    pid,
+  });
+  return {
+    attempt: data?.attempt || BLANK_ATTEMPT,
+    solve: data?.solve || null,
+  };
 }
 
 export async function checkAttempt(
@@ -165,6 +176,7 @@ export async function getLeaderboard(): Promise<LeaderboardStats | null> {
 export default function useApi() {
   return {
     getTodaysNumcross,
+    getTodaysProgress,
     checkAttempt,
     logSolve,
     updateAttempt,

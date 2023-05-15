@@ -21,6 +21,8 @@ import {
   LogSolveResp,
   TodaysNumcrossReq,
   TodaysNumcrossResp,
+  TodaysProgressReq,
+  TodaysProgressResp,
   TypedRequestBody,
   TypedRequestQuery,
   TypedResponse,
@@ -82,46 +84,57 @@ app
         // Will get the current date in format yyyy-mm-dd and fetch
         // the most recent puzzle that was/is live on or before this date
         const data = await getMostRecentPuzzle();
-        if (data) {
-          // Try to load the users attempt and previous solve from DB
-          const { uid } = req.query;
-          let attempt: Attempt | undefined = undefined;
-          let solve: Solve | undefined = undefined;
-          if (uid) {
-            const { data: attemptData, error: attemptError } = await supabase
-              .from("attempts")
-              .select("*")
-              .eq("uid", uid)
-              .eq("pid", data.id)
-              .single();
-            if (attemptData && !attemptError) {
-              attempt = {
-                startTime: attemptData.start_time,
-                puzzleId: attemptData.pid,
-                hasCheated: attemptData.has_cheated,
-                scratch: attemptData.jsonb,
-              };
-            }
-            const { data: solveData, error: SolveError } = await supabase
-              .from("solves")
-              .select("*")
-              .eq("uid", uid)
-              .eq("pid", data.id)
-              .single();
-            if (solveData && !SolveError) {
-              solve = solveData;
-            }
-          }
-          const numcross = data;
-          // Wipe solution information before handing response to client
-          numcross.solution = undefined;
-          res.send({
-            status: "ok",
-            numcross,
-            solve,
-            attempt,
-          });
+        if (!data) {
+          res.send({ status: "error" });
+          return;
         }
+        data.solution = undefined;
+        res.send({
+          status: "ok",
+          numcross: data,
+        });
+      }
+    );
+
+    server.get(
+      "/api/todays_progress",
+      async (
+        req: TypedRequestQuery<TodaysProgressReq>,
+        resp: TypedResponse<TodaysProgressResp>
+      ) => {
+        console.log("GET /api/todays_progress");
+
+        const { uid, pid } = req.query;
+        let attempt: Attempt | undefined = undefined;
+        let solve: Solve | undefined = undefined;
+        const { data: attemptData, error: attemptError } = await supabase
+          .from("attempts")
+          .select("*")
+          .eq("uid", uid)
+          .eq("pid", pid)
+          .single();
+        if (attemptData && !attemptError) {
+          attempt = {
+            startTime: attemptData.start_time,
+            puzzleId: attemptData.pid,
+            hasCheated: attemptData.has_cheated,
+            scratch: attemptData.jsonb,
+          };
+        }
+        const { data: solveData, error: solveError } = await supabase
+          .from("solves")
+          .select("*")
+          .eq("uid", uid)
+          .eq("pid", pid)
+          .single();
+        if (solveData && !solveError) {
+          solve = solveData;
+        }
+        resp.send({
+          status: "ok",
+          attempt,
+          solve,
+        });
       }
     );
 
