@@ -1,4 +1,4 @@
-import { Attempt, Numcross, Puzzle, Solution } from "./types";
+import { Attempt, Numcross, Puzzle, Solution, Solve } from "./types";
 import { LeaderboardStats, UserStats } from "./stats";
 import { Send, Response } from "express-serve-static-core";
 
@@ -17,6 +17,7 @@ export interface TodaysNumcrossReq {
 }
 export interface TodaysNumcrossResp extends RespBase {
   numcross: Numcross;
+  solve?: Solve;
   attempt?: Attempt;
 }
 
@@ -44,8 +45,16 @@ export interface CheckAttemptReq {
 }
 export interface CheckAttemptResp extends RespBase {
   correct: boolean;
+  solve?: Solve;
   saved?: boolean;
 }
+
+// POST log_solve
+export interface LogSolveReq {
+  userId: string;
+  solve: Solve;
+}
+export interface LogSolveResp extends RespBase {}
 
 // GET user_stats
 export interface UserStatsReq {

@@ -7,8 +7,9 @@ import {
   UserStatsResp,
   AddPuzzleReq,
   AddPuzzleResp,
+  LogSolveResp,
 } from "@/types/api";
-import { Attempt, Numcross } from "@/types/types";
+import { Attempt, Numcross, Solve } from "@/types/types";
 import { LeaderboardStats, UserStats } from "@/types/stats";
 import { toast } from "react-hot-toast";
 import { mineAttempt, storeAttempt } from "./useStorage";
@@ -28,6 +29,7 @@ export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
 
 export async function getTodaysNumcross(userId?: string): Promise<{
   numcross: Numcross;
+  solve?: Solve;
   attempt?: Attempt;
 } | null> {
   // Load the numcross
@@ -50,7 +52,7 @@ export async function getTodaysNumcross(userId?: string): Promise<{
     return { numcross: data.numcross, attempt: attempt || undefined };
   }
 
-  return { numcross: data.numcross, attempt: data.attempt };
+  return { numcross: data.numcross, solve: data.solve, attempt: data.attempt };
 }
 
 export async function checkAttempt(
@@ -76,6 +78,23 @@ export async function checkAttempt(
     // User is logged in and the attempt is correct, but something
     // went wrong saving the attempt
     toast("There was an error saving your solve.", { icon: "🚫" });
+  }
+
+  return data;
+}
+
+export async function logSolve(
+  solve: Solve,
+  userId: string
+): Promise<LogSolveResp | null> {
+  const { data, error } = await postJSON<LogSolveResp>("/api/log_solve", {
+    solve,
+    userId,
+  });
+
+  if (error || !data) {
+    toast("There was an error saving your past solve.", { icon: "🚫" });
+    return null;
   }
 
   return data;
@@ -147,6 +166,7 @@ export default function useApi() {
   return {
     getTodaysNumcross,
     checkAttempt,
+    logSolve,
     updateAttempt,
     getStats,
     getLeaderboard,

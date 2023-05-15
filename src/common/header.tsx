@@ -5,6 +5,7 @@ import {
   WrenchScrewdriverIcon,
   TrophyIcon,
   ShareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import useModal from "@/hooks/useModal";
 import LeaderboardOverlay from "./leaderboard_overlay";
@@ -13,6 +14,7 @@ import SettingsOverlay from "./settings_overlay";
 import HelpOverlay from "./help_overlay";
 import { useRouter } from "next/router";
 import { RWebShare } from "react-web-share";
+import useDev from "@/hooks/useDev";
 
 export default function Header() {
   const [LeaderboardModal, openLeaderboardModal, closeLeaderboardModal] =
@@ -22,6 +24,7 @@ export default function Header() {
   const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
 
   const router = useRouter();
+  const { isDev } = useDev();
 
   const goToIndex = useCallback(() => {
     router.push("/");
@@ -40,6 +43,17 @@ export default function Header() {
           </p>
         </div>
         <div className="flex">
+          {isDev && (
+            <div
+              className="p-1 hover:cursor-pointer"
+              onClick={() => {
+                // Convenient way to clear the cache when developing locally
+                localStorage.clear();
+              }}
+            >
+              <TrashIcon className="w-8 h-8 text-black" />
+            </div>
+          )}
           <RWebShare
             data={{
               text: "I'm playing NumCross. The fact that you aren't is deeply concerning.",

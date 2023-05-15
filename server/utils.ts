@@ -98,11 +98,18 @@ interface DBSolveLike {
   end_time: string;
   did_cheat: boolean;
 }
+
+export function getSolveTime(startDate: Date, endDate: Date) {
+  return (endDate.getTime() - startDate.getTime()) / 1000;
+}
+
 export function getAverageSolveTime(solves: DBSolveLike[]) {
-  let totalSolveTimeMS = solves.reduce((acc, solve) => {
-    const solveTime =
-      new Date(solve.end_time).getTime() - new Date(solve.start_time).getTime();
+  let totalSolveTime = solves.reduce((acc, solve) => {
+    const solveTime = getSolveTime(
+      new Date(solve.start_time),
+      new Date(solve.end_time)
+    );
     return acc + solveTime;
   }, 0);
-  return totalSolveTimeMS / 1000 / solves.length;
+  return totalSolveTime / solves.length;
 }

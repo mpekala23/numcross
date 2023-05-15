@@ -111,15 +111,26 @@ export function streakToString(streak: number) {
   return `${streak}d`;
 }
 
+export function twoDigits(val: number) {
+  const str = `${val}`;
+  if (str.length < 2) {
+    return "0" + str;
+  }
+  return str;
+}
+
+export function getSolveTime(startDate: Date, endDate: Date) {
+  return (endDate.getTime() - startDate.getTime()) / 1000;
+}
+
 export function solveSecondsToString(seconds?: number) {
   if (!seconds) return "-";
-  if (seconds < 60) {
-    return `${seconds}s`;
-  } else if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)}m`;
-  } else if (seconds < 86400) {
-    return `${Math.floor(seconds / 3600)}h`;
-  } else {
-    return `${Math.floor(seconds / 86400)}d`;
+  if (seconds < 3600) {
+    return `${twoDigits(Math.floor(seconds / 60))}:${twoDigits(
+      Math.round(seconds % 60)
+    )}`;
   }
+  return `${twoDigits(Math.floor(seconds / 3600))}:${twoDigits(
+    Math.floor(seconds / 60) % 60
+  )}:${twoDigits(Math.round(seconds % 60))}`;
 }

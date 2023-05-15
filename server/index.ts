@@ -3,7 +3,7 @@ import express from "express";
 import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
-import { Attempt, Solution } from "../src/types/types";
+import { Attempt, Solution, Solve } from "../src/types/types";
 import {
   cellKey,
   getAverageSolveTime,
@@ -17,6 +17,8 @@ import {
   CheckAttemptResp,
   LeaderboardReq,
   LeaderboardResp,
+  LogSolveReq,
+  LogSolveResp,
   TodaysNumcrossReq,
   TodaysNumcrossResp,
   TypedRequestBody,
@@ -81,9 +83,10 @@ app
         // the most recent puzzle that was/is live on or before this date
         const data = await getMostRecentPuzzle();
         if (data) {
-          // Try to load the users attempt from DB
+          // Try to load the users attempt and previous solve from DB
           const { uid } = req.query;
           let attempt: Attempt | undefined = undefined;
+          let solve: Solve | undefined = undefined;
           if (uid) {
             const { data: attemptData, error: attemptError } = await supabase
               .from("attempts")
@@ -99,6 +102,15 @@ app
                 scratch: attemptData.jsonb,
               };
             }
+            const { data: solveData, error: SolveError } = await supabase
+              .from("solves")
+              .select("*")
+              .eq("uid", uid)
+              .eq("pid", data.id)
+              .single();
+            if (solveData && !SolveError) {
+              solve = solveData;
+            }
           }
           const numcross = data;
           // Wipe solution information before handing response to client
@@ -106,6 +118,7 @@ app
           res.send({
             status: "ok",
             numcross,
+            solve,
             attempt,
           });
         }
@@ -221,11 +234,17 @@ app
         }
 
         // If there is no user associated with this attempt, simply send
-        // correct = true, return. It's the client's responsibility to store
+        // correct = true and the time, return. It's the client's responsibility to store
         // the attempt in local storage.
         if (!userId) {
           res.send({
             status: "ok",
+            solve: {
+              puzzleId: attempt.puzzleId,
+              startTime: attempt.startTime,
+              endTime: new Date().toISOString(),
+              didCheat: attempt.hasCheated,
+            },
             correct,
           });
           return;
@@ -247,7 +266,69 @@ app
           res.send({
             status: "ok",
             correct,
+            solve: {
+              puzzleId: checkData.pid,
+              startTime: checkData.start_time,
+              endTime: checkData.end_time,
+              didCheat: checkData.did_cheat,
+            },
             saved: true,
+          });
+          return;
+        }
+
+        const endDate = new Date();
+
+        // If not, we need to insert a row into the solves table
+        const { error: solveError } = await supabase
+          .from("solves")
+          .upsert({
+            uid: userId,
+            pid: attempt.puzzleId,
+            start_time: attempt.startTime,
+            end_time: endDate,
+            did_cheat: attempt.hasCheated,
+          })
+          .select();
+
+        res.send({
+          status: "ok",
+          correct,
+          solve: {
+            puzzleId: attempt.puzzleId,
+            startTime: attempt.startTime,
+            endTime: endDate.toISOString(),
+            didCheat: attempt.hasCheated,
+          },
+          saved: !solveError,
+        });
+      }
+    );
+
+    // The point of this endpoint is to handle the edge case where the user
+    // completes the puzzle without having an account, makes an account, and
+    // then would like to have this solve logged into their account stats
+    server.post(
+      "/api/log_solve",
+      async (
+        req: TypedRequestBody<LogSolveReq>,
+        res: TypedResponse<LogSolveResp>
+      ) => {
+        console.log("POST /api/log_solve");
+        const { solve, userId } = req.body;
+
+        // First check if there's already a row in the solves table
+        const { data: checkData } = await supabase
+          .from("solves")
+          .select()
+          .eq("uid", userId)
+          .eq("pid", solve.puzzleId)
+          .single();
+
+        if (checkData) {
+          // If there is, we're done
+          res.send({
+            status: "ok",
           });
           return;
         }
@@ -257,17 +338,22 @@ app
           .from("solves")
           .upsert({
             uid: userId,
-            pid: attempt.puzzleId,
-            start_time: attempt.startTime,
-            end_time: new Date(),
-            did_cheat: attempt.hasCheated,
+            pid: solve.puzzleId,
+            start_time: solve.startTime,
+            end_time: solve.endTime,
+            did_cheat: solve.didCheat,
           })
           .select();
 
+        if (solveError) {
+          res.send({
+            status: "error",
+          });
+          return;
+        }
+
         res.send({
           status: "ok",
-          correct,
-          saved: !solveError,
         });
       }
     );
