@@ -9,6 +9,8 @@ import {
   AddPuzzleResp,
   LogSolveResp,
   TodaysProgressResp,
+  UsernameResp,
+  SetUsernameResp,
 } from "@/types/api";
 import { Attempt, Numcross, Solve } from "@/types/types";
 import { LeaderboardStats, UserStats } from "@/types/stats";
@@ -161,6 +163,20 @@ export async function getStats(userId?: string): Promise<UserStats | null> {
   };
 }
 
+export async function getUsername(userId: string): Promise<string | null> {
+  const { data } = await getJSON<UsernameResp>("/api/username", {
+    uid: userId,
+  });
+  return data?.username || null;
+}
+
+export async function setUsername(userId: string, username: string | null) {
+  return await postJSON<SetUsernameResp>("/api/set_username", {
+    uid: userId,
+    username,
+  });
+}
+
 export async function getLeaderboard(): Promise<LeaderboardStats | null> {
   const { data, error } = await getJSON<LeaderboardStats>(
     "/api/leaderboard",
@@ -181,6 +197,8 @@ export default function useApi() {
     logSolve,
     updateAttempt,
     getStats,
+    getUsername,
+    setUsername,
     getLeaderboard,
     addPuzzle,
   };

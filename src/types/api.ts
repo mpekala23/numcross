@@ -68,6 +68,21 @@ export interface UserStatsReq {
 }
 export interface UserStatsResp extends RespBase, UserStats {}
 
+// GET username
+export interface UsernameReq {
+  uid: string;
+}
+export interface UsernameResp extends RespBase {
+  username: string | null;
+}
+
+// POST set_username
+export interface SetUsernameReq {
+  uid: string;
+  username: string | null;
+}
+export interface SetUsernameResp extends RespBase {}
+
 // GET leaderboard
 export interface LeaderboardReq {}
 

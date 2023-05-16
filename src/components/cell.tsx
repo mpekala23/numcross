@@ -1,7 +1,6 @@
 import React from "react";
 import { FunctionComponent, useCallback } from "react";
 import classNames from "classnames";
-import { Corner } from "@/components/Corner";
 
 type CellProps = {
   rowidx: number;
@@ -10,7 +9,6 @@ type CellProps = {
   onClick: (rowidx: number, colidx: number) => void;
   state: CellState;
   number: number | null | undefined;
-  fontSize: number;
   rowHeight: number;
   className?: string;
   editable: boolean;
@@ -37,7 +35,6 @@ export const Cell: FunctionComponent<CellProps> = ({
   state,
   number,
   onClick,
-  fontSize,
   rowHeight,
   editable,
   className,
@@ -45,7 +42,6 @@ export const Cell: FunctionComponent<CellProps> = ({
   const onSelect = useCallback(() => {
     onClick(rowidx, colidx);
   }, [rowidx, colidx, onClick]);
-
   return (
     <div
       style={{
@@ -62,10 +58,18 @@ export const Cell: FunctionComponent<CellProps> = ({
           )}
           onClick={onSelect}
         >
-          <Corner>{number}</Corner>
-          <span className={"select-none"} style={{ fontSize }}>
-            {value ?? ""}
+          <span
+            className={"absolute left-1 top-1"}
+            style={{ fontSize: `${rowHeight / 6}px` }}
+          >
+            {number}
           </span>
+          <div
+            className="flex justify-center content-center select-none"
+            style={{ fontSize: `${rowHeight / 2}px` }}
+          >
+            {value ?? ""}
+          </div>
         </div>
       )}
     </div>

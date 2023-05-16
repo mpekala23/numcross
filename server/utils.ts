@@ -52,6 +52,8 @@ export function getStreaks(puzzles: DBPuzzleLike[]): {
     return aDate.getTime() - bDate.getTime();
   });
 
+  console.log(puzzles);
+
   const todayInEST = new Date(getESTDatestring());
   let previousDate = addDays(todayInEST, 1);
   let ix = sortedPuzzles.length - 1;
@@ -74,12 +76,13 @@ export function getStreaks(puzzles: DBPuzzleLike[]): {
     // Tallying for max streak
     if (withinDays(puzzleDate, previousDate, 1)) {
       maxStreakTally += 1;
-      if (maxStreakTally > maxStreak) {
-        maxStreak = maxStreakTally;
-      }
     } else {
-      maxStreakTally = 0;
+      maxStreakTally = 1;
     }
+    if (maxStreakTally > maxStreak) {
+      maxStreak = maxStreakTally;
+    }
+    previousDate = puzzleDate;
 
     ix -= 1;
   }

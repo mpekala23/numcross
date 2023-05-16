@@ -19,6 +19,8 @@ import {
   LeaderboardResp,
   LogSolveReq,
   LogSolveResp,
+  SetUsernameReq,
+  SetUsernameResp,
   TodaysNumcrossReq,
   TodaysNumcrossResp,
   TodaysProgressReq,
@@ -30,6 +32,8 @@ import {
   UpdateAttemptResp,
   UserStatsReq,
   UserStatsResp,
+  UsernameReq,
+  UsernameResp,
 } from "../src/types/api";
 import { LeaderboardEntry } from "../src/types/stats";
 
@@ -439,6 +443,58 @@ app
     );
 
     server.get(
+      "/api/username",
+      async (
+        req: TypedRequestQuery<UsernameReq>,
+        res: TypedResponse<UsernameResp>
+      ) => {
+        console.log("GET /api/username");
+
+        const { uid } = req.query;
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("uid", uid)
+          .single();
+        if (data?.username && !error) {
+          res.send({
+            status: "ok",
+            username: data.username as string,
+          });
+          return;
+        }
+        res.send({
+          status: "ok",
+          username: null,
+        });
+      }
+    );
+
+    server.post(
+      "/api/set_username",
+      async (
+        req: TypedRequestBody<SetUsernameReq>,
+        res: TypedResponse<SetUsernameResp>
+      ) => {
+        const { uid, username } = req.body;
+        const { error } = await supabase
+          .from("profiles")
+          .upsert({
+            uid,
+            username,
+          })
+          .select();
+        if (error) {
+          res.status(500).send({
+            status: "error",
+            errorMessage: error.message,
+          });
+        }
+        res.send({ status: "ok" });
+      }
+    );
+
+    server.get(
       "/api/leaderboard",
       async (
         req: TypedRequestQuery<LeaderboardReq>,
@@ -500,16 +556,15 @@ app
         const map_uid_to_username: { [key: string]: string } = {};
         for (let i = 0; i < top_ten_uids.length; i++) {
           const uid = top_ten_uids[i];
-          const { data: user, error: userError } =
-            await supabase.auth.admin.getUserById(uid);
+          const { data: profile, error: userError } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("uid", uid)
+            .single();
           if (userError) {
-            res.status(500).send({
-              status: "error",
-              errorMessage: "Error: Can't get user stats",
-            });
-            return;
+            map_uid_to_username[uid] = "<no username>";
           } else {
-            map_uid_to_username[uid] = user.user.email || "ERROR";
+            map_uid_to_username[uid] = profile.username || "<no username>";
           }
         }
 

@@ -3,16 +3,12 @@ import React, { FunctionComponent, useState, useCallback } from "react";
 
 interface Props {
   enabled: boolean;
-  divProps?: any;
-  inputProps?: any;
   text: string;
   updateText: (text: string) => void;
 }
 
 export const EditableText: FunctionComponent<Props> = ({
   enabled,
-  divProps,
-  inputProps,
   text,
   updateText,
 }) => {
@@ -39,19 +35,12 @@ export const EditableText: FunctionComponent<Props> = ({
   );
 
   return isInputting ? (
-    <input
-      {...inputProps}
-      onChange={onChange}
-      onBlur={onBlur}
-      autoFocus
-      value={text}
-    />
+    <input onChange={onChange} onBlur={onBlur} autoFocus value={text} />
   ) : (
     <div
-      {...divProps}
       className={classNames(
         enabled ? "hover:cursor-pointer" : "",
-        inputProps.className ?? ""
+        "w-full text-left overflow-auto"
       )}
       onClick={onClick}
     >

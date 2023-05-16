@@ -63,8 +63,6 @@ type ClueMappingsEntry = ClueMappingsEntryCell[];
 type ClueMappingsRow = ClueMappingsEntry[];
 type ClueMappings = ClueMappingsRow[];
 
-const DEFAULT_FONT_SIZE = 36;
-
 export const Crossword: FunctionComponent<Props> = ({
   puzzle,
   scratch,
@@ -81,7 +79,6 @@ export const Crossword: FunctionComponent<Props> = ({
   const { settings } = useSettings();
 
   const contRef = useRef<HTMLDivElement>(null);
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
   const [rowHeight, setRowHeight] = useState(64);
 
   // Get the current clue info
@@ -119,23 +116,22 @@ export const Crossword: FunctionComponent<Props> = ({
         ?.downClue !== undefined;
   }
 
-  const updateFontSize = useCallback(() => {
+  const updatePuzzleSize = useCallback(() => {
     if (!contRef.current) return;
-    setFontSize(contRef.current.clientHeight / (3.2 * puzzle.shape[1]));
-    const vert = contRef.current.clientHeight / puzzle.shape[1];
+    const vert = contRef.current.clientHeight / puzzle.shape[0];
     const horiz = contRef.current.parentElement?.clientWidth
-      ? contRef.current.parentElement?.clientWidth / puzzle.shape[0]
+      ? contRef.current.parentElement?.clientWidth / puzzle.shape[1]
       : 60000;
     setRowHeight(Math.min(vert, horiz));
-  }, [setFontSize, setRowHeight, puzzle.shape]);
+  }, [setRowHeight, puzzle.shape]);
 
   useEffect(() => {
-    updateFontSize();
-    window.addEventListener("resize", updateFontSize);
+    updatePuzzleSize();
+    window.addEventListener("resize", updatePuzzleSize);
     return () => {
-      window.removeEventListener("resize", updateFontSize);
+      window.removeEventListener("resize", updatePuzzleSize);
     };
-  }, [contRef, updateFontSize]);
+  }, [contRef, updatePuzzleSize]);
 
   // Listen for keypresses
   useEffect(() => {
@@ -538,15 +534,14 @@ export const Crossword: FunctionComponent<Props> = ({
     return CellState.INACTIVE;
   };
 
-  const clueFontSize = fontSize / 3;
-
   return (
     <>
+      <div className="h-12" />
       <div
         className={classNames(
-          `relative flex flex-col ${
+          `relative w-full flex flex-col ${
             editable ? "h-60" : "flex-1"
-          } overflow-hidden max-w-[550px] max-h-[550px]`
+          } overflow-hidden`
         )}
         ref={contRef}
       >
@@ -573,7 +568,6 @@ export const Crossword: FunctionComponent<Props> = ({
                     onClick={onClick}
                     editable={editable}
                     state={getState(rowidx, colidx)}
-                    fontSize={fontSize}
                     rowHeight={rowHeight}
                     className={`${rowidx === 0 ? "border-t-4" : ""} ${
                       colidx === 0 ? "border-l-4" : ""
@@ -625,18 +619,19 @@ export const Crossword: FunctionComponent<Props> = ({
           </button>
         </div>
       )}
-      <ClueText
-        text={clueText}
-        number={clueNumber}
-        across={clueInfo?.across}
-        isAcross={isAcross}
-        isDown={isDown}
-        fontSize={clueFontSize * (editable ? 2 : 1)}
-        editable={editable}
-        updateText={updateClueText}
-        addClue={addClue}
-        removeSquare={removeSquare}
-      />
+      <div className="w-full h-36 pb-8">
+        <ClueText
+          text={clueText}
+          number={clueNumber}
+          across={clueInfo?.across}
+          isAcross={isAcross}
+          isDown={isDown}
+          editable={editable}
+          updateText={updateClueText}
+          addClue={addClue}
+          removeSquare={removeSquare}
+        />
+      </div>
     </>
   );
 };

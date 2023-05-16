@@ -106,9 +106,9 @@ export function Numpad({ editable }: Props) {
           handleNumberClick,
           "border-b-4 border-l-4 hover:cursor-default"
         )}
-        {NumberCell("x", handleNumberClick, "border-b-4")}
+        {NumberCell(0, handleNumberClick, "border-b-4")}
         {NumberCell(
-          " ",
+          "x",
           handleNumberClick,
           "border-r-4 border-b-4 hover:cursor-default"
         )}

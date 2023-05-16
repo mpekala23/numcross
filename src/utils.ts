@@ -62,7 +62,8 @@ export async function postJSON<Type>(
       body: JSON.stringify(body),
     });
     if (resp.status !== 200) {
-      throw new Error("Bad response from server");
+      const json = await resp.json();
+      throw new Error(json["errorMessage"]);
     }
     const json = await resp.json();
     return { data: json, error: null };
