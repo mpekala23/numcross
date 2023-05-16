@@ -52,8 +52,6 @@ export function getStreaks(puzzles: DBPuzzleLike[]): {
     return aDate.getTime() - bDate.getTime();
   });
 
-  console.log(puzzles);
-
   const todayInEST = new Date(getESTDatestring());
   let previousDate = addDays(todayInEST, 1);
   let ix = sortedPuzzles.length - 1;

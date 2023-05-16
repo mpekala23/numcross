@@ -7,10 +7,11 @@ import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
-import { isEqual, update } from "lodash";
+import { isEqual } from "lodash";
 import SolvedOverlay from "@/common/solved_overlay";
 import { useUser } from "@supabase/auth-helpers-react";
 import { mineAttempt, mineSolve, storeSolve } from "@/hooks/useStorage";
+import { useStopwatch, useTimer } from "react-timer-hook";
 
 export default function Home() {
   const {
@@ -29,6 +30,7 @@ export default function Home() {
   const [SolvedModal, openSolved, closeSolved] = useModal();
   const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
   const user = useUser();
+  const { seconds } = useStopwatch({ autoStart: true });
 
   // Function that _just_ gets the puzzle
   useEffect(() => {
@@ -137,18 +139,6 @@ export default function Home() {
     }
   }, [solve, shouldPopOff, openSolved]);
 
-  useEffect(() => {
-    const inter = setInterval(() => {
-      setAttempt((attempt) => {
-        if (!attempt) return null;
-        return { ...attempt };
-      });
-    }, 333);
-    return () => {
-      clearInterval(inter);
-    };
-  }, []);
-
   if (!numcross) return <div>Loading...</div>;
 
   if (pageError) return <div>{pageError}</div>;
@@ -164,6 +154,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/logo64_black.png" />
       </Head>
+      {seconds && null}
       <div className="flex w-full flex-1 flex-col justify-center items-center my-8">
         <Crossword
           puzzle={numcross.puzzle}
