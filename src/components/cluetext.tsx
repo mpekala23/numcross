@@ -1,5 +1,6 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { EditableText } from "./EditableText";
+import { solveSecondsToString } from "@/utils";
 
 interface Props {
   text?: string;
@@ -11,6 +12,7 @@ interface Props {
   addClue: (across: boolean) => void;
   updateText: (text: string) => void;
   removeSquare: () => void;
+  seconds: number | null;
 }
 
 export const ClueText: FunctionComponent<Props> = ({
@@ -23,6 +25,7 @@ export const ClueText: FunctionComponent<Props> = ({
   addClue,
   removeSquare,
   updateText,
+  seconds,
 }) => {
   const set =
     text !== undefined && number !== undefined && across !== undefined;
@@ -36,7 +39,12 @@ export const ClueText: FunctionComponent<Props> = ({
         "flex flex-col w-full h-full bg-slate-200 my-4 py-2 px-4 relative"
       }
     >
-      <div className="text-left font-bold">{num}</div>
+      <div className="flex justify-between">
+        <div className="text-left font-bold">{num}</div>
+        <div className="text-left font-bold">
+          Time: {solveSecondsToString(seconds || 0)}
+        </div>
+      </div>
       <EditableText
         text={line}
         updateText={updateText}

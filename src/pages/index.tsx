@@ -137,6 +137,18 @@ export default function Home() {
     }
   }, [solve, shouldPopOff, openSolved]);
 
+  useEffect(() => {
+    const inter = setInterval(() => {
+      setAttempt((attempt) => {
+        if (!attempt) return null;
+        return { ...attempt };
+      });
+    }, 333);
+    return () => {
+      clearInterval(inter);
+    };
+  }, []);
+
   if (!numcross) return <div>Loading...</div>;
 
   if (pageError) return <div>{pageError}</div>;
@@ -158,6 +170,16 @@ export default function Home() {
           scratch={scratch}
           setScratch={setScratch}
           editable={false}
+          seconds={
+            solve
+              ? (new Date(solve.endTime).getTime() -
+                  new Date(solve.startTime).getTime()) /
+                1000
+              : attempt
+              ? (new Date().getTime() - new Date(attempt.startTime).getTime()) /
+                1000
+              : null
+          }
         />
         <Numpad editable={false} />
         <div className="h-8" />

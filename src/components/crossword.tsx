@@ -52,6 +52,7 @@ interface Props {
   setScratch: React.Dispatch<React.SetStateAction<Scratch>>;
   updatePuzzle?: (rowidx: number, colidx: number, clue?: Clue) => void;
   updateShape?: (shape: [number, number]) => void;
+  seconds: number | null;
 }
 
 type ClueMappingsEntryCell = {
@@ -70,6 +71,7 @@ export const Crossword: FunctionComponent<Props> = ({
   editable,
   updatePuzzle,
   updateShape,
+  seconds,
 }) => {
   const [focusedRow, setFocusedRow] = useState<number | undefined>(undefined);
   const [focusedCol, setFocusedCol] = useState<number | undefined>(undefined);
@@ -630,6 +632,7 @@ export const Crossword: FunctionComponent<Props> = ({
           updateText={updateClueText}
           addClue={addClue}
           removeSquare={removeSquare}
+          seconds={seconds}
         />
       </div>
     </>
