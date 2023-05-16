@@ -78,7 +78,7 @@ export function isAttemptFull(attempt: Attempt, puzzle: Puzzle): boolean {
     for (let cx = 0; cx < puzzle.shape[1]; ++cx) {
       if (puzzle.clues[rx][cx].type === "blank") continue;
       const key = cellKey(rx, cx);
-      if (!attempt.scratch[key]) return false;
+      if (attempt.scratch[key] === undefined) return false;
     }
   }
   return true;

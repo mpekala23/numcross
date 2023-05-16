@@ -154,7 +154,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/logo64_black.png" />
       </Head>
-      {seconds && null}
+      {seconds ? "" : null}
       <div className="flex w-full flex-1 flex-col justify-center items-center my-8">
         <Crossword
           puzzle={numcross.puzzle}
