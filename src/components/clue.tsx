@@ -1,6 +1,5 @@
 import React from "react";
 import { FunctionComponent } from "react";
-import { Corner } from "@/components/Corner";
 
 interface Props {
   text?: string;

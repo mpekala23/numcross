@@ -165,6 +165,7 @@ export default function Upload() {
           updatePuzzle={updatePuzzle}
           updateShape={updateShape}
           editable
+          seconds={null}
         />
         <Numpad editable />
         <div className="flex justify-center items-center">
