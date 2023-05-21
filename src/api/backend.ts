@@ -2,20 +2,18 @@ import {
   CheckAttemptReq,
   CheckAttemptResp,
   TodaysNumcrossResp,
-  UpdateAttemptReq,
-  UpdateAttemptResp,
   UserStatsResp,
   AddPuzzleReq,
   AddPuzzleResp,
   LogSolveResp,
-  TodaysProgressResp,
+  GetSolveResp,
   UsernameResp,
   SetUsernameResp,
+  StartAttemptReq,
 } from "@/types/api";
 import { Attempt, Numcross, Solve } from "@/types/types";
 import { LeaderboardStats, UserStats } from "@/types/stats";
 import { toast } from "react-hot-toast";
-import { mineAttempt, mineSolve, storeAttempt } from "./useStorage";
 import { getJSON, postJSON } from "@/utils";
 
 export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
@@ -45,27 +43,27 @@ export async function getTodaysNumcross(): Promise<{
   return { numcross: data.numcross };
 }
 
-export async function getTodaysProgress(
+export async function getSolve(
   userId: string,
-  pid: number
-): Promise<{
-  attempt: Attempt;
-  solve: Solve | null;
-}> {
-  const BLANK_ATTEMPT: Attempt = {
-    puzzleId: pid,
-    startTime: new Date().toISOString(),
-    scratch: {},
-    hasCheated: false,
-  };
-  const { data } = await getJSON<TodaysProgressResp>("/api/todays_progress", {
+  puzzleId: number
+): Promise<Solve | null> {
+  const { data } = await getJSON<GetSolveResp>("/api/get_solve", {
     uid: userId,
-    pid,
+    pid: puzzleId,
   });
-  return {
-    attempt: data?.attempt || BLANK_ATTEMPT,
-    solve: data?.solve || null,
+  return data?.solve || null;
+}
+
+export async function startAttempt(
+  userId: string,
+  puzzleId: number
+): Promise<null> {
+  const start_req: StartAttemptReq = {
+    userId,
+    puzzleId,
   };
+  await postJSON<StartAttemptReq>("/api/start_attempt", start_req);
+  return null;
 }
 
 export async function checkAttempt(
@@ -111,31 +109,6 @@ export async function logSolve(
   }
 
   return data;
-}
-
-export async function updateAttempt(
-  attempt: Attempt,
-  userId?: string
-): Promise<null> {
-  if (!userId) {
-    // Store the attempt in local storage
-    storeAttempt(attempt);
-  } else {
-    const update_req: UpdateAttemptReq = {
-      attempt,
-      userId: userId,
-    };
-
-    const { error } = await postJSON<UpdateAttemptResp>(
-      "/api/update_attempt",
-      update_req
-    );
-
-    if (error) {
-      toast("There was an error saving your attempt.", { icon: "🚫" });
-    }
-  }
-  return null;
 }
 
 export async function getStats(userId?: string): Promise<UserStats | null> {
@@ -187,19 +160,4 @@ export async function getLeaderboard(): Promise<LeaderboardStats | null> {
     return null;
   }
   return data;
-}
-
-export default function useApi() {
-  return {
-    getTodaysNumcross,
-    getTodaysProgress,
-    checkAttempt,
-    logSolve,
-    updateAttempt,
-    getStats,
-    getUsername,
-    setUsername,
-    getLeaderboard,
-    addPuzzle,
-  };
 }

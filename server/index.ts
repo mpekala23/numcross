@@ -15,21 +15,21 @@ import {
   AddPuzzleResp,
   CheckAttemptReq,
   CheckAttemptResp,
+  GetSolveReq,
+  GetSolveResp,
   LeaderboardReq,
   LeaderboardResp,
   LogSolveReq,
   LogSolveResp,
   SetUsernameReq,
   SetUsernameResp,
+  StartAttemptReq,
+  StartAttemptResp,
   TodaysNumcrossReq,
   TodaysNumcrossResp,
-  TodaysProgressReq,
-  TodaysProgressResp,
   TypedRequestBody,
   TypedRequestQuery,
   TypedResponse,
-  UpdateAttemptReq,
-  UpdateAttemptResp,
   UserStatsReq,
   UserStatsResp,
   UsernameReq,
@@ -38,7 +38,7 @@ import {
 import { LeaderboardEntry } from "../src/types/stats";
 
 const env_path =
-  process.env.NODE_ENV === "production" || true // force production
+  process.env.NODE_ENV === "production"
     ? ".env.production"
     : ".env.development";
 dotenv.config({ path: env_path });
@@ -92,7 +92,6 @@ app
           res.send({ status: "error" });
           return;
         }
-        data.solution = undefined;
         res.send({
           status: "ok",
           numcross: data,
@@ -101,30 +100,15 @@ app
     );
 
     server.get(
-      "/api/todays_progress",
+      "/api/get_solve",
       async (
-        req: TypedRequestQuery<TodaysProgressReq>,
-        resp: TypedResponse<TodaysProgressResp>
+        req: TypedRequestQuery<GetSolveReq>,
+        res: TypedResponse<GetSolveResp>
       ) => {
-        console.log("GET /api/todays_progress");
+        console.log("GET /api/get_solve");
 
         const { uid, pid } = req.query;
-        let attempt: Attempt | undefined = undefined;
-        let solve: Solve | undefined = undefined;
-        const { data: attemptData, error: attemptError } = await supabase
-          .from("attempts")
-          .select("*")
-          .eq("uid", uid)
-          .eq("pid", pid)
-          .single();
-        if (attemptData && !attemptError) {
-          attempt = {
-            startTime: attemptData.start_time,
-            puzzleId: attemptData.pid,
-            hasCheated: attemptData.has_cheated,
-            scratch: attemptData.jsonb,
-          };
-        }
+        let solve: Solve | null = null;
         const { data: solveData, error: solveError } = await supabase
           .from("solves")
           .select("*")
@@ -134,9 +118,8 @@ app
         if (solveData && !solveError) {
           solve = solveData;
         }
-        resp.send({
+        res.send({
           status: "ok",
-          attempt,
           solve,
         });
       }
@@ -172,27 +155,31 @@ app
     );
 
     server.post(
-      "/api/update_attempt",
+      "/api/start_attempt",
       async (
-        req: TypedRequestBody<UpdateAttemptReq>,
-        res: TypedResponse<UpdateAttemptResp>
+        req: TypedRequestBody<StartAttemptReq>,
+        res: TypedResponse<StartAttemptResp>
       ) => {
-        console.log("POST /api/update_attempt");
-        const { attempt, userId } = req.body;
+        console.log("POST /api/start_attempt");
+        const { userId, puzzleId } = req.body;
+        const { data: existsData } = await supabase
+          .from("attempts")
+          .select("uid")
+          .eq("uid", userId)
+          .eq("pid", puzzleId);
+        console.log(existsData);
         const { error } = await supabase
           .from("attempts")
           .upsert({
             uid: userId,
-            pid: attempt.puzzleId,
-            start_time: attempt.startTime,
-            has_cheated: attempt.hasCheated,
-            jsonb: attempt.scratch,
+            pid: puzzleId,
+            start_time: new Date().toISOString(),
           })
           .select();
         if (error) {
           res.status(500).send({
             status: "error",
-            errorMessage: "Error: Can't update attempt",
+            errorMessage: "Error: Can't start attempt",
           });
         } else {
           res.send({

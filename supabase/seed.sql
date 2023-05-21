@@ -15,38 +15,14 @@ values
         '2023-02-17 04:32:46.892482+00'
     ),
     (
-        '6148d9ae-9687-4434-804d-a3c4d370fa02',
-        'chris@wirth.com',
-        '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
-        '2023-02-17 04:32:46.892482+00'
-    ),
-    (
-        '6148d9ae-9687-4434-804d-a3c4d370fa03',
-        'siri@prasad.com',
-        '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
-        '2023-02-17 04:32:46.892482+00'
-    ),
-    (
         '6148d9ae-9687-4434-804d-a3c4d370fa04',
         'david@hacker.com',
         '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
         '2023-02-17 04:32:46.892482+00'
     ),
     (
-        '6148d9ae-9687-4434-804d-a3c4d370fa05',
-        'michael@frim.com',
-        '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
-        '2023-02-17 04:32:46.892482+00'
-    ),
-    (
         '6148d9ae-9687-4434-804d-a3c4d370fa06',
         'raj@mittal.com',
-        '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
-        '2023-02-17 04:32:46.892482+00'
-    ),
-    (
-        '6148d9ae-9687-4434-804d-a3c4d370fa07',
-        'troy@powell.com',
         '$2a$10$5ijpbk9hVmO5Luy/vTObj.3dZS1XQKGzzWTsiixha.xD3wmqKJ1ZS',
         '2023-02-17 04:32:46.892482+00'
     ),
@@ -58,12 +34,86 @@ values
     );
 
 insert into puzzles
-    (live_date, difficulty, theme, puzzle, solution)
+    (id, live_date, author, difficulty, puzzle, solution)
 values
     (
-        '2023-03-18',
+        1,
+        now()::DATE - 1,
+        'David Hacker',
         'daily',
-        'test',
         '{"clues":[[{"type":"fillable","downClue":"The answer is 36","acrossClue":"The answer is 36","clueNumber":1},{"type":"fillable","downClue":"The answer is 64","clueNumber":2}],[{"type":"fillable","acrossClue":"The answer is 64","clueNumber":3},{"type":"fillable","clueNumber":null}]],"shape":[2,2]}',
         '{"shape":[2,2],"answers":[[3,6],[6,4]]}'
+    ),
+    (
+        2,
+        now()::DATE - 0,
+        'Raj Mittal',
+        'daily',
+        '{"clues":[[{"type":"fillable","downClue":"The answer is 36","acrossClue":"The answer is 36","clueNumber":1},{"type":"fillable","downClue":"The answer is 64","clueNumber":2}],[{"type":"fillable","acrossClue":"The answer is 64","clueNumber":3},{"type":"fillable","clueNumber":null}]],"shape":[2,2]}',
+        '{"shape":[2,2],"answers":[[3,6],[6,4]]}'
+    );
+
+insert into profiles
+    (uid, username)
+values
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa00',
+        'mark'
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa04',
+        'david'
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa06',
+        'raj'
+    );
+
+insert into attempts
+    (uid, pid, start_time)
+values
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa00',
+        2,
+        now()
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa04',
+        2,
+        now()
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa06',
+        2,
+        now()
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa08',
+        2,
+        now()
+    );
+
+insert into solves
+    (uid, pid, start_time, end_time, time)
+values
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa00',
+        2,
+        now(),
+        now(),
+        70.6
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa06',
+        2,
+        now(),
+        now(),
+        13.1
+    ),
+    (
+        '6148d9ae-9687-4434-804d-a3c4d370fa08',
+        2,
+        now(),
+        now(),
+        45.3
     );

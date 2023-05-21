@@ -17,14 +17,13 @@ export interface TodaysNumcrossResp extends RespBase {
   numcross?: Numcross;
 }
 
-// GET todays_progress
-export interface TodaysProgressReq {
+// GET get_solve
+export interface GetSolveReq {
   uid: string;
   pid: string;
 }
-export interface TodaysProgressResp extends RespBase {
-  solve?: Solve;
-  attempt?: Attempt;
+export interface GetSolveResp extends RespBase {
+  solve: Solve | null;
 }
 
 // POST add_puzzle
@@ -37,12 +36,12 @@ export interface AddPuzzleReq {
 }
 export interface AddPuzzleResp extends RespBase {}
 
-// POST update_attempt
-export interface UpdateAttemptReq {
-  attempt: Attempt;
+// POST start_attempt
+export interface StartAttemptReq {
   userId: string;
+  puzzleId: number;
 }
-export interface UpdateAttemptResp extends RespBase {}
+export interface StartAttemptResp extends RespBase {}
 
 // POST check_attempt
 export interface CheckAttemptReq {

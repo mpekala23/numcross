@@ -27,6 +27,10 @@ export function storeSolve(solve: Solve) {
   localStorage.setItem(`solve-${solve.puzzleId}`, JSON.stringify(solve));
 }
 
+export function forgetSolve(pid: number) {
+  localStorage.removeItem(`solve-${pid}`);
+}
+
 export function mineSettings(): Settings {
   const settings = localStorage.getItem("settings");
   if (!settings) {
@@ -37,15 +41,4 @@ export function mineSettings(): Settings {
 
 export function storeSettings(settings: Settings) {
   localStorage.setItem("settings", JSON.stringify(settings));
-}
-
-export default function useStorage() {
-  return {
-    storeAttempt,
-    mineAttempt,
-    storeSolve,
-    mineSolve,
-    mineSettings,
-    storeSettings,
-  };
 }

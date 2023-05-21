@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useCallback, useEffect, useState } from "react";
-import useApi from "@/hooks/useApi";
 import { Attempt, Numcross, Scratch, Solve } from "@/types/types";
 import { isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
@@ -10,17 +9,17 @@ import { Numpad } from "@/components/numpad";
 import { isEqual } from "lodash";
 import SolvedOverlay from "@/common/solved_overlay";
 import { useUser } from "@supabase/auth-helpers-react";
-import { mineAttempt, mineSolve, storeSolve } from "@/hooks/useStorage";
-import { useStopwatch, useTimer } from "react-timer-hook";
+import {
+  getTodaysNumcross,
+  getSolve,
+  startAttempt,
+  checkAttempt,
+  logSolve,
+} from "@/api/backend";
+import { mineAttempt, mineSolve, storeSolve, forgetSolve } from "@/api/storage";
+import { useStopwatch } from "react-timer-hook";
 
 export default function Home() {
-  const {
-    getTodaysNumcross,
-    getTodaysProgress,
-    checkAttempt,
-    logSolve,
-    updateAttempt,
-  } = useApi();
   const [numcross, setNumcross] = useState<Numcross | null>(null);
   const [scratch, setScratch] = useState<Scratch>({});
   const [attempt, setAttempt] = useState<Attempt | null>(null);
@@ -43,45 +42,45 @@ export default function Home() {
       }
     };
     performGet();
-  }, [getTodaysNumcross]);
+  }, []);
 
-  // A function that gets our progress
+  // Function that _just_ loads our attempt from local storage
   useEffect(() => {
-    if (!numcross) return;
-    const work = async () => {
-      let finalAtt: Attempt | null = null;
+    const asyncWork = async () => {
+      if (!numcross) return;
       const matt = mineAttempt(numcross.id);
+      if (matt) {
+        setAttempt(matt);
+        setScratch(matt.scratch);
+      }
+    };
+    asyncWork();
+  }, [numcross]);
+
+  // Function that _just_ sees if we've already solved this puzzle
+  useEffect(() => {
+    const asyncWork = async () => {
+      if (!numcross) return;
       const msol = mineSolve(numcross.id);
       if (user) {
-        if (matt && msol) {
-          // The user just created an account and solved this puzzle before
-          await updateAttempt(matt, user.id);
+        if (msol) {
+          // Only happens if the user solved this puzzle logged out
+          await startAttempt(user.id, numcross.id);
           await logSolve(msol, user.id);
-          finalAtt = matt;
+          forgetSolve(numcross.id); // TODO: Add a function that will backfill all solves
           setShouldPopOff(false);
           setSolve(msol);
-          // TODO: More granular way of doing this
-          localStorage.clear();
         } else {
-          const progress = await getTodaysProgress(user.id, numcross.id);
-          finalAtt = progress.attempt;
-          setShouldPopOff(!progress.solve);
+          const existSolve = await getSolve(user.id, numcross.id);
+          if (existSolve) {
+            setShouldPopOff(false);
+            setSolve(existSolve);
+          }
         }
-      } else {
-        finalAtt = matt || {
-          puzzleId: numcross.id,
-          startTime: new Date().toISOString(),
-          scratch: {},
-          hasCheated: false,
-        };
-        setShouldPopOff(!msol);
-        setSolve(msol);
       }
-      setAttempt(finalAtt);
-      if (finalAtt) setScratch(finalAtt.scratch);
     };
-    work();
-  }, [user, numcross, getTodaysProgress, logSolve, updateAttempt]);
+    asyncWork();
+  }, [numcross, user]);
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
