@@ -628,7 +628,10 @@ app
           friendData = { friendlist: { friendIds: [] } };
         }
         const friendIds: string[] = friendData.friendlist.friendIds;
-        friendIds.push(userId); // also get your own time
+        const myself = friendIds.indexOf(userId);
+        if (myself === -1) {
+          friendIds.push(userId); // also get your own time
+        }
         const result: PrivateLeaderboardEntry[] = [];
         for (var fx = 0; fx < friendIds.length; fx += 1) {
           const { data: usernameData } = await supabase

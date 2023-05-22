@@ -80,6 +80,23 @@ export default function Home() {
     asyncWork();
   }, [numcross, openStart, startStopwatch]);
 
+  // If you've already solved the puzzle, fills in the squares with
+  // the solution
+  const cheatScratch = useCallback(() => {
+    if (!numcross) return;
+    const shape = numcross.solution.shape;
+    const newScratch: Scratch = {};
+    for (let rx = 0; rx < shape[0]; rx++) {
+      for (let cx = 0; cx < shape[1]; cx++) {
+        const answer = numcross.solution.answers[rx][cx];
+        if (answer === "blank") continue;
+        newScratch[cellKey(rx, cx)] = answer;
+      }
+    }
+    closeStart();
+    setScratch(newScratch);
+  }, [numcross, closeStart]);
+
   // Function that _just_ sees if we've already solved this puzzle
   useEffect(() => {
     const asyncWork = async () => {
@@ -96,6 +113,7 @@ export default function Home() {
         } else {
           const existSolve = await getSolve(user.id, numcross.id);
           if (existSolve) {
+            cheatScratch();
             setShouldPopOff(false);
             setSolve(existSolve);
           }

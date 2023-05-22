@@ -95,13 +95,15 @@ export default function Pair() {
   const { privateLeaderboard, setPrivateLeaderboard } = useHeader();
 
   const editState = useState("");
-  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [_, setLeaderboardError] = useState<string>("");
   const { username, setUsername: setUsernameState } = useUsername();
   const refreshLeaderboard = useCallback(async () => {
     if (!user) return;
     try {
+      setLeaderboardLoading(true);
       const stats = await getPrivateLeaderboard(user.id);
+      setLeaderboardLoading(false);
       if (!stats) {
         setLeaderboardError("Can't get leaderboard. Try again later.");
         setLeaderboardLoading(false);
