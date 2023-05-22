@@ -39,7 +39,7 @@ export default function App({
           <ConfettiContext.Provider
             value={{ confetti, startConfetti: setConfetti }}
           >
-            <Layout currentPage={currentPage}>
+            <Layout currentPage={currentPage || ""}>
               <Component {...pageProps} />
             </Layout>
             <Toaster />

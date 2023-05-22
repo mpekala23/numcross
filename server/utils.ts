@@ -39,8 +39,6 @@ function withinDays(a: Date, b: Date, days: number) {
 // types from the supabase
 interface DBPuzzleLike {
   live_date: string;
-  difficulty: string;
-  theme: string | null;
 }
 export function getStreaks(puzzles: DBPuzzleLike[]): {
   currentStreak: number;
@@ -94,15 +92,7 @@ export function getStreaks(puzzles: DBPuzzleLike[]): {
 // Again, relatively hacky for now, will maybe want to make
 // firmer types from the supabase
 interface DBSolveLike {
-  pid: number;
-  start_time: string;
-  end_time: string;
-  did_cheat: boolean;
   time: number;
-}
-
-export function getSolveTime(startDate: Date, endDate: Date) {
-  return (endDate.getTime() - startDate.getTime()) / 1000;
 }
 
 export function getAverageSolveTime(solves: DBSolveLike[]) {
