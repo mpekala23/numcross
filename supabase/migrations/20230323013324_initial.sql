@@ -1,4 +1,4 @@
-alter table "auth"."users" add column "deleted_at" timestamp with time zone;
+alter table "auth"."users" add column if not exists "deleted_at" timestamp with time zone;
 
 alter table "auth"."users" alter column "phone" set data type text using "phone"::text;
 
@@ -106,11 +106,11 @@ using (false);
 
 
 
-alter table "storage"."buckets" add column "allowed_mime_types" text[];
+alter table "storage"."buckets" add column if not exists "allowed_mime_types" text[];
 
-alter table "storage"."buckets" add column "avif_autodetection" boolean default false;
+alter table "storage"."buckets" add column if not exists "avif_autodetection" boolean default false;
 
-alter table "storage"."buckets" add column "file_size_limit" bigint;
+alter table "storage"."buckets" add column if not exists "file_size_limit" bigint;
 
 set check_function_bodies = off;
 
