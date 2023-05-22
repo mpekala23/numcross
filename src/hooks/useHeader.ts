@@ -7,6 +7,12 @@ export default function useHeader() {
     refreshLeaderboards,
     statsTrigger,
     refreshStats,
+    leaderboard,
+    setLeaderboard,
+    privateLeaderboard,
+    setPrivateLeaderboard,
+    stats,
+    setStats,
   } = useContext(HeaderContext);
 
   return {
@@ -14,5 +20,11 @@ export default function useHeader() {
     refreshLeaderboards,
     statsTrigger,
     refreshStats,
+    leaderboard,
+    setLeaderboard,
+    privateLeaderboard,
+    setPrivateLeaderboard,
+    stats,
+    setStats,
   };
 }

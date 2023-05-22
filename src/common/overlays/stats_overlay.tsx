@@ -3,9 +3,9 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback } from "react";
 import Slink from "../../components/slink";
 import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
+import useHeader from "@/hooks/useHeader";
 
 interface Props {
-  stats: UserStats | null;
   loading: boolean;
   error: string;
   closeModal: () => void;
@@ -22,14 +22,10 @@ function renderStat({ name, value }: { name: string; value: number | string }) {
   );
 }
 
-export default function StatsOverlay({
-  closeModal,
-  stats,
-  loading,
-  error,
-}: Props) {
+export default function StatsOverlay({ closeModal, loading, error }: Props) {
   const supabase = useSupabaseClient();
   const user = useUser();
+  const { stats } = useHeader();
 
   // For rendering a message prompting non-logged in users to log in
   // or create an account

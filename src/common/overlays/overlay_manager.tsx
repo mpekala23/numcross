@@ -12,11 +12,6 @@ import {
   getStats,
   setUsername,
 } from "@/api/backend";
-import {
-  LeaderboardStats,
-  PrivateLeaderboardStats,
-  UserStats,
-} from "@/types/stats";
 import toast from "react-hot-toast";
 import useUsername from "@/hooks/useUsername";
 import useHeader from "@/hooks/useHeader";
@@ -42,8 +37,13 @@ export default function useOverlayManager(): Provides {
   const user = useUser();
   const { leaderboardTrigger, statsTrigger } = useHeader();
 
+  const {
+    setLeaderboard,
+    setPrivateLeaderboard: setMyLeaderboard,
+    setStats,
+  } = useHeader();
+
   // Leaderboard
-  const [leaderboard, setLeaderboard] = useState<LeaderboardStats | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [leaderboardError, setLeaderboardError] = useState<string>("");
   const { username, setUsername: setUsernameState } = useUsername();
@@ -61,7 +61,7 @@ export default function useOverlayManager(): Provides {
       setLeaderboardError("Unknown error while getting the leaderboard.");
       setLeaderboardLoading(false);
     }
-  }, []);
+  }, [setLeaderboard]);
   useEffect(() => {
     refreshLeaderboard();
   }, [refreshLeaderboard, username, leaderboardLoading]);
@@ -87,8 +87,6 @@ export default function useOverlayManager(): Provides {
   );
 
   // My leaderboard
-  const [myLeaderboard, setMyLeaderboard] =
-    useState<PrivateLeaderboardStats | null>(null);
   const [myLeaderboardLoading, setMyLeaderboardLoading] = useState(true);
   const [myLeaderboardError, setMyLeaderboardError] = useState<string>("");
   const refreshMyLeaderboard = useCallback(async () => {
@@ -106,13 +104,12 @@ export default function useOverlayManager(): Provides {
       setMyLeaderboardError("Unknown error while getting the leaderboard.");
       setMyLeaderboardLoading(false);
     }
-  }, [user]);
+  }, [user, setMyLeaderboard]);
   useEffect(() => {
     refreshMyLeaderboard();
   }, [refreshMyLeaderboard, username, leaderboardTrigger]);
 
   // Stats
-  const [stats, setStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState<string>("");
   const refreshUserStats = useCallback(async () => {
@@ -130,7 +127,7 @@ export default function useOverlayManager(): Provides {
       setStatsError("Unknown error while getting stats.");
       setStatsLoading(false);
     }
-  }, [user]);
+  }, [user, setStats]);
   useEffect(() => {
     refreshUserStats();
   }, [refreshUserStats, statsTrigger]);
@@ -141,8 +138,6 @@ export default function useOverlayManager(): Provides {
         <LeaderboardModal>
           <LeaderboardOverlay
             closeModal={closeLeaderboardModal}
-            stats={leaderboard}
-            myStats={myLeaderboard}
             loading={leaderboardLoading}
             error={leaderboardError}
             username={username}
@@ -155,7 +150,6 @@ export default function useOverlayManager(): Provides {
         <StatsModal>
           <StatsOverlay
             closeModal={closeStatsModal}
-            stats={stats}
             loading={statsLoading}
             error={statsError}
           />
@@ -174,15 +168,12 @@ export default function useOverlayManager(): Provides {
     closeStatsModal,
     closeHelpModal,
     closeLeaderboardModal,
-    leaderboard,
     leaderboardError,
     leaderboardLoading,
-    stats,
     statsError,
     statsLoading,
     updateUsername,
     username,
-    myLeaderboard,
   ]);
 
   return {

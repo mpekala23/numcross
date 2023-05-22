@@ -13,6 +13,11 @@ import { NumpadVal, Settings } from "@/types/types";
 import { DEFAULT_SETTINGS } from "@/utils";
 import { usePathname } from "next/navigation";
 import { HeaderContext } from "@/context/HeaderContext";
+import {
+  LeaderboardStats,
+  PrivateLeaderboardStats,
+  UserStats,
+} from "@/types/stats";
 
 export default function App({
   Component,
@@ -31,6 +36,10 @@ export default function App({
   // TODO: Mark is being hacky and lazy. We should move this to redux at some point
   const [leaderboardTrigger, setLeaderboardTrigger] = useState<boolean>(false);
   const [statsTrigger, setStatsTrigger] = useState<boolean>(false);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardStats | null>(null);
+  const [privateLeaderboard, setPrivateLeaderboard] =
+    useState<PrivateLeaderboardStats | null>(null);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
   const currentPage = usePathname();
 
   return (
@@ -44,6 +53,12 @@ export default function App({
           refreshLeaderboards: () => setLeaderboardTrigger((trig) => !trig),
           statsTrigger,
           refreshStats: () => setStatsTrigger((trig) => !trig),
+          leaderboard,
+          setLeaderboard,
+          privateLeaderboard,
+          setPrivateLeaderboard,
+          stats: userStats,
+          setStats: setUserStats,
         }}
       >
         <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>

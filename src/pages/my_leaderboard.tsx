@@ -1,6 +1,7 @@
 import { getPrivateLeaderboard, makeFriends, setUsername } from "@/api/backend";
 import Slink from "@/components/slink";
 import useDev from "@/hooks/useDev";
+import useHeader from "@/hooks/useHeader";
 import useUsername from "@/hooks/useUsername";
 import { PrivateLeaderboardStats } from "@/types/stats";
 import { solveSecondsToString } from "@/utils";
@@ -89,14 +90,13 @@ export default function Pair() {
   const searchParams = useSearchParams();
   const otherId = searchParams.get("with");
   const router = useRouter();
-
   const [myIndex, setMyIndex] = useState<number | null>(null);
 
+  const { privateLeaderboard, setPrivateLeaderboard } = useHeader();
+
   const editState = useState("");
-  const [leaderboard, setLeaderboard] =
-    useState<PrivateLeaderboardStats | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
-  const [leaderboardError, setLeaderboardError] = useState<string>("");
+  const [_, setLeaderboardError] = useState<string>("");
   const { username, setUsername: setUsernameState } = useUsername();
   const refreshLeaderboard = useCallback(async () => {
     if (!user) return;
@@ -107,13 +107,13 @@ export default function Pair() {
         setLeaderboardLoading(false);
         return;
       }
-      setLeaderboard(stats);
+      setPrivateLeaderboard(stats);
       setLeaderboardLoading(false);
     } catch (error) {
       setLeaderboardError("Unknown error while getting the leaderboard.");
       setLeaderboardLoading(false);
     }
-  }, [user]);
+  }, [user, setPrivateLeaderboard]);
   useEffect(() => {
     refreshLeaderboard();
   }, [refreshLeaderboard, username]);
@@ -160,17 +160,17 @@ export default function Pair() {
   useEffect(() => {
     for (
       let ix = 0;
-      ix < (leaderboard?.today ? leaderboard.today.length : 0);
+      ix < (privateLeaderboard?.today ? privateLeaderboard.today.length : 0);
       ix += 1
     ) {
       if (
-        leaderboard?.today &&
-        leaderboard.today[ix].friend.username === username
+        privateLeaderboard?.today &&
+        privateLeaderboard.today[ix].friend.username === username
       ) {
         setMyIndex(ix);
       }
     }
-  }, [username, leaderboard]);
+  }, [username, privateLeaderboard]);
 
   const magicLink = user ? `${baseUrl}/my_leaderboard?with=${user.id}` : "";
   const renderContent = useCallback(() => {
@@ -212,7 +212,7 @@ export default function Pair() {
           </RWebShare>
         </div>
         <div className="mt-4 flex-1 overflow-auto">
-          {leaderboard ? (
+          {privateLeaderboard ? (
             <table className="table-auto w-full">
               <thead>
                 <tr>
@@ -222,7 +222,7 @@ export default function Pair() {
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.today.map((entry, index) => {
+                {privateLeaderboard.today.map((entry, index) => {
                   return (
                     <tr
                       key={index}
@@ -246,7 +246,11 @@ export default function Pair() {
         </div>
       </div>
     );
-  }, [magicLink, leaderboard, myIndex, username]);
+  }, [magicLink, privateLeaderboard, myIndex, username]);
+
+  if (leaderboardLoading) {
+    return <p>Loading</p>;
+  }
 
   return (
     <>

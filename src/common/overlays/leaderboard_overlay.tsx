@@ -1,16 +1,14 @@
-import { LeaderboardStats, PrivateLeaderboardStats } from "@/types/stats";
 import React, { useCallback, useEffect, useState } from "react";
 import Slink from "../../components/slink";
 import { solveSecondsToString } from "@/utils";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
+import useHeader from "@/hooks/useHeader";
 
 interface Props {
   closeModal: () => void;
   updateUsername: (username: string) => void;
   username: string | null;
-  stats: LeaderboardStats | null;
-  myStats: PrivateLeaderboardStats | null;
   loading: boolean;
   error: string;
 }
@@ -69,8 +67,6 @@ export default function LeaderboardOverlay({
   closeModal,
   updateUsername,
   username,
-  stats,
-  myStats,
   loading,
   error,
 }: Props) {
@@ -80,6 +76,7 @@ export default function LeaderboardOverlay({
   const [tab, setTab] = useState<"global" | "private">(
     user ? "private" : "global"
   );
+  const { leaderboard: stats, privateLeaderboard: myStats } = useHeader();
 
   // Update myIndex
   useEffect(() => {
