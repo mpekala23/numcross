@@ -10,9 +10,14 @@ import {
   UsernameResp,
   SetUsernameResp,
   StartAttemptReq,
+  MakeFriendsResp,
 } from "@/types/api";
 import { Attempt, Numcross, Solve } from "@/types/types";
-import { LeaderboardStats, UserStats } from "@/types/stats";
+import {
+  LeaderboardStats,
+  PrivateLeaderboardStats,
+  UserStats,
+} from "@/types/stats";
 import { toast } from "react-hot-toast";
 import { getJSON, postJSON } from "@/utils";
 
@@ -156,4 +161,34 @@ export async function getLeaderboard(): Promise<LeaderboardStats | null> {
     return null;
   }
   return data;
+}
+
+export async function getPrivateLeaderboard(
+  userId: string
+): Promise<PrivateLeaderboardStats | null> {
+  const { data, error } = await getJSON<PrivateLeaderboardStats>(
+    "/api/private_leaderboard",
+    {
+      userId,
+    }
+  );
+  if (error || !data) {
+    toast("There was an error getting your leaderboard.", { icon: "🚫" });
+    return null;
+  }
+  return data;
+}
+
+export async function makeFriends(
+  userId: string,
+  friendId: string
+): Promise<boolean> {
+  const { data, error } = await postJSON<MakeFriendsResp>("/api/make_friends", {
+    userId,
+    friendId,
+  });
+  if (error || !data || data.status === "error") {
+    return false;
+  }
+  return true;
 }

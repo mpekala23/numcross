@@ -1,3 +1,5 @@
+import { Friend } from "./types";
+
 export interface UserStats {
   numPlayed: number;
   numSolved: number;
@@ -6,9 +8,6 @@ export interface UserStats {
   averageSolveTime?: number;
 }
 
-// TODO: right now there is no way for users to add a username.
-// This is getting filled just with email but this should be collected
-// on signup.
 export interface LeaderboardEntry {
   username: string;
   time: number; // in seconds
@@ -19,4 +18,13 @@ export interface LeaderboardEntry {
 export interface LeaderboardStats {
   today: LeaderboardEntry[];
   allTime: LeaderboardEntry[];
+}
+
+export interface PrivateLeaderboardEntry {
+  friend: Friend;
+  time: number | null; // null means they haven't solved it yet
+}
+
+export interface PrivateLeaderboardStats {
+  today: PrivateLeaderboardEntry[];
 }

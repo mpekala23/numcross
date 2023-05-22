@@ -13,6 +13,8 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap"
           rel="stylesheet"
         />
+        <link rel="icon" href="/logo64_black.png" />
+        <link rel="apple-touch-icon" href="/apple_logo64_black.png" />
       </Head>
       <body>
         <Main />

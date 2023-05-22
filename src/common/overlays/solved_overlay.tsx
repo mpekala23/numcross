@@ -38,11 +38,7 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
   return (
     <div className="flex flex-col justify-center align-center">
       <p className="text-3xl font-bold font-title pb-4 text-center">
-        {solve
-          ? solveSecondsToString(
-              getSolveTime(new Date(solve.startTime), new Date(solve.endTime))
-            )
-          : "Congrats!"}
+        {solve ? solveSecondsToString(solve.time) : "Congrats!"}
       </p>
       <p className="text-center font-title text-xl">You solved the puzzle!</p>
       {user ? renderAccountStats() : renderNoAccountPlea()}

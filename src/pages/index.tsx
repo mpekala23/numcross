@@ -143,7 +143,7 @@ export default function Home() {
         puzzleId: numcross.id,
         startTime: attempt.startTime,
         endTime: new Date().toISOString(),
-        time: 0, // TODO: make real
+        time: attempt.time, // TODO: make real
       };
       setSolve(newSolve);
       if (user) {
@@ -191,6 +191,7 @@ export default function Home() {
       setShouldPopOff(false);
       openSolved();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [solve, shouldPopOff, openSolved]);
 
   if (!numcross) return <div>Loading...</div>;
@@ -206,7 +207,6 @@ export default function Home() {
           content="You're probably not smart enough for this."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/logo64_black.png" />
       </Head>
       <div className="flex w-full flex-1 flex-col justify-center items-center my-8">
         <Crossword

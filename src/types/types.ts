@@ -108,3 +108,8 @@ export type NumpadVal =
   | "x"
   | ""
   | "nothing";
+
+export interface Friend {
+  uid: string;
+  username: string;
+}

@@ -11,12 +11,14 @@ import { useRouter } from "next/router";
 import { RWebShare } from "react-web-share";
 import useDev from "@/hooks/useDev";
 import useOverlayManager from "./overlays/overlay_manager";
+import useHeader from "@/hooks/useHeader";
 
 export default function Header() {
   const router = useRouter();
   const { isDev } = useDev();
   const { OverlayManager, openLeaderboard, openHelp, openStats, openSettings } =
     useOverlayManager();
+  const { refreshLeaderboards, refreshStats } = useHeader();
 
   const goToIndex = useCallback(() => {
     router.push("/");
@@ -57,13 +59,25 @@ export default function Header() {
               <ShareIcon className="w-8 h-8 text-black" />
             </div>
           </RWebShare>
-          <div className="p-1 hover:cursor-pointer" onClick={openLeaderboard}>
+          <div
+            className="p-1 hover:cursor-pointer"
+            onClick={() => {
+              refreshLeaderboards();
+              openLeaderboard();
+            }}
+          >
             <TrophyIcon className="w-8 h-8 text-black" />
           </div>
           <div className="p-1 hover:cursor-pointer" onClick={openHelp}>
             <QuestionMarkCircleIcon className="w-8 h-8 text-black" />
           </div>
-          <div className="p-1 hover:cursor-pointer" onClick={openStats}>
+          <div
+            className="p-1 hover:cursor-pointer"
+            onClick={() => {
+              refreshStats();
+              openStats();
+            }}
+          >
             <ChartPieIcon className="w-8 h-8 text-black" />
           </div>
           <div className="p-1 hover:cursor-pointer" onClick={openSettings}>

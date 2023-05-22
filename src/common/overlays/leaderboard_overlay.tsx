@@ -1,4 +1,4 @@
-import { LeaderboardStats } from "@/types/stats";
+import { LeaderboardStats, PrivateLeaderboardStats } from "@/types/stats";
 import React, { useCallback, useEffect, useState } from "react";
 import Slink from "../../components/slink";
 import { solveSecondsToString } from "@/utils";
@@ -10,6 +10,7 @@ interface Props {
   updateUsername: (username: string) => void;
   username: string | null;
   stats: LeaderboardStats | null;
+  myStats: PrivateLeaderboardStats | null;
   loading: boolean;
   error: string;
 }
@@ -65,24 +66,41 @@ function RenderNoUsername(
 }
 
 export default function LeaderboardOverlay({
+  closeModal,
   updateUsername,
   username,
   stats,
+  myStats,
   loading,
   error,
 }: Props) {
   const user = useUser();
   const [myIndex, setMyIndex] = useState<number | null>(null);
   const editState = useState("");
+  const [tab, setTab] = useState<"global" | "private">(
+    user ? "private" : "global"
+  );
 
   // Update myIndex
   useEffect(() => {
-    for (let ix = 0; ix < (stats?.today ? stats.today.length : 0); ix += 1) {
-      if (stats?.today && stats.today[ix].username === username) {
-        setMyIndex(ix);
+    if (tab === "global" || !myStats) {
+      for (let ix = 0; ix < (stats?.today ? stats.today.length : 0); ix += 1) {
+        if (stats?.today && stats.today[ix].username === username) {
+          setMyIndex(ix);
+        }
+      }
+    } else {
+      for (
+        let ix = 0;
+        ix < (myStats?.today ? myStats.today.length : 0);
+        ix += 1
+      ) {
+        if (myStats?.today && myStats.today[ix].friend.username === username) {
+          setMyIndex(ix);
+        }
       }
     }
-  }, [stats, username]);
+  }, [stats, myStats, username, tab]);
 
   // For rendering a little loading spinner
   const renderLoading = useCallback(() => {
@@ -112,6 +130,48 @@ export default function LeaderboardOverlay({
 
     return (
       <div>
+        <div className="flex w-full">
+          <div
+            onClick={() => setTab("global")}
+            className={`${
+              tab === "global"
+                ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
+                : "basis-1/3 bg-slate-200"
+            } p-2 text-center`}
+          >
+            Global
+          </div>
+          <div
+            onClick={() => {
+              if (user) setTab("private");
+              else
+                toast(
+                  "Sorry, you must make an account to access private leaderboards.",
+                  {
+                    icon: "🚫",
+                  }
+                );
+            }}
+            className={`${
+              tab === "private"
+                ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
+                : "basis-1/3 bg-slate-200"
+            } p-2 text-center`}
+          >
+            Private
+          </div>
+        </div>
+        {tab === "private" && (
+          <div className="flex my-2">
+            <p>
+              Want to make changes?{" "}
+              <Slink onClick={closeModal} href="my_leaderboard">
+                Manage Friends
+              </Slink>
+              .
+            </p>
+          </div>
+        )}
         <table className="table-auto w-full">
           <thead>
             <tr>
@@ -120,28 +180,61 @@ export default function LeaderboardOverlay({
               <th className="text-left">Time</th>
             </tr>
           </thead>
-          <tbody>
-            {stats.today.map((user, index) => {
-              return (
-                <tr
-                  key={index}
-                  className={index === myIndex ? "bg-slate-300" : ""}
-                >
-                  <td className="border px-4 py-2">{index}</td>
-                  <td className="border px-4 py-2">
-                    {index === myIndex ? username : user.username}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {solveSecondsToString(user.time)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+          {tab === "global" ? (
+            <tbody>
+              {stats.today.map((user, index) => {
+                return (
+                  <tr
+                    key={index}
+                    className={index === myIndex ? "bg-slate-300" : ""}
+                  >
+                    <td className="border px-4 py-2">{index}</td>
+                    <td className="border px-4 py-2">
+                      {index === myIndex ? username : user.username}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {solveSecondsToString(user.time)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          ) : (
+            <tbody>
+              {(myStats || { today: [] }).today.map((entry, index) => {
+                return (
+                  <tr
+                    key={index}
+                    className={index === myIndex ? "bg-slate-300" : ""}
+                  >
+                    <td className="border px-4 py-2">{index}</td>
+                    <td className="border px-4 py-2">
+                      {index === myIndex ? username : entry.friend.username}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {solveSecondsToString(entry.time || 0)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          )}
         </table>
       </div>
     );
-  }, [loading, error, stats, renderError, renderLoading, myIndex, username]);
+  }, [
+    loading,
+    error,
+    stats,
+    renderError,
+    renderLoading,
+    myIndex,
+    username,
+    tab,
+    closeModal,
+    user,
+    myStats,
+  ]);
 
   if (user && !username) return RenderNoUsername(editState, updateUsername);
 

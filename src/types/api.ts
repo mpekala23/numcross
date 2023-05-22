@@ -1,5 +1,5 @@
 import { Attempt, Numcross, Puzzle, Solution, Solve } from "./types";
-import { LeaderboardStats, UserStats } from "./stats";
+import { LeaderboardStats, PrivateLeaderboardStats, UserStats } from "./stats";
 import { Send, Response } from "express-serve-static-core";
 
 interface RespBase {
@@ -86,6 +86,20 @@ export interface SetUsernameResp extends RespBase {}
 export interface LeaderboardReq {}
 
 export interface LeaderboardResp extends RespBase, LeaderboardStats {}
+
+// GET private_leaderboard
+export interface PrivateLeaderboardReq {
+  userId: string;
+}
+export interface PrivateLeaderboardResp
+  extends RespBase,
+    PrivateLeaderboardStats {}
+
+export interface MakeFriendsReq {
+  userId: string;
+  friendId: string;
+}
+export interface MakeFriendsResp extends RespBase {}
 
 /* ------------------ */
 // START HELPER STUFF FOR EXPRESS BACKEND
