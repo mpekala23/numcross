@@ -7,24 +7,16 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import useModal from "@/hooks/useModal";
-import LeaderboardOverlay from "./leaderboard_overlay";
-import StatsOverlay from "./stats_overlay";
-import SettingsOverlay from "./settings_overlay";
-import HelpOverlay from "./help_overlay";
 import { useRouter } from "next/router";
 import { RWebShare } from "react-web-share";
 import useDev from "@/hooks/useDev";
+import useOverlayManager from "./overlays/overlay_manager";
 
 export default function Header() {
-  const [LeaderboardModal, openLeaderboardModal, closeLeaderboardModal] =
-    useModal();
-  const [HelpModal, openHelpModal, closeHelpModal] = useModal();
-  const [StatsModal, openStatsModal, closeStatsModal] = useModal();
-  const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
-
   const router = useRouter();
   const { isDev } = useDev();
+  const { OverlayManager, openLeaderboard, openHelp, openStats, openSettings } =
+    useOverlayManager();
 
   const goToIndex = useCallback(() => {
     router.push("/");
@@ -61,43 +53,25 @@ export default function Header() {
               title: "NumCross",
             }}
           >
-            <div
-              className="p-1 hover:cursor-pointer"
-              onClick={openLeaderboardModal}
-            >
+            <div className="p-1 hover:cursor-pointer">
               <ShareIcon className="w-8 h-8 text-black" />
             </div>
           </RWebShare>
-          <div
-            className="p-1 hover:cursor-pointer"
-            onClick={openLeaderboardModal}
-          >
+          <div className="p-1 hover:cursor-pointer" onClick={openLeaderboard}>
             <TrophyIcon className="w-8 h-8 text-black" />
           </div>
-          <div className="p-1 hover:cursor-pointer" onClick={openHelpModal}>
+          <div className="p-1 hover:cursor-pointer" onClick={openHelp}>
             <QuestionMarkCircleIcon className="w-8 h-8 text-black" />
           </div>
-          <div className="p-1 hover:cursor-pointer" onClick={openStatsModal}>
+          <div className="p-1 hover:cursor-pointer" onClick={openStats}>
             <ChartPieIcon className="w-8 h-8 text-black" />
           </div>
-          <div className="p-1 hover:cursor-pointer" onClick={openSettingsModal}>
+          <div className="p-1 hover:cursor-pointer" onClick={openSettings}>
             <WrenchScrewdriverIcon className="w-8 h-8 text-black" />
           </div>
         </div>
-
-        <LeaderboardModal>
-          <LeaderboardOverlay closeModal={closeLeaderboardModal} />
-        </LeaderboardModal>
-        <HelpModal>
-          <HelpOverlay closeModal={closeHelpModal} />
-        </HelpModal>
-        <StatsModal>
-          <StatsOverlay closeModal={closeStatsModal} />
-        </StatsModal>
-        <SettingsModal>
-          <SettingsOverlay closeModal={closeSettingsModal} />
-        </SettingsModal>
       </div>
+      <OverlayManager />
     </div>
   );
 }

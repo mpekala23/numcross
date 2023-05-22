@@ -64,8 +64,8 @@ export interface Numcross {
   id: number;
   createdAt: string;
   liveDate: string;
+  author: string;
   difficulty: Difficulty;
-  theme: string;
   puzzle: Puzzle;
   solution: Solution;
 }
@@ -75,15 +75,15 @@ export type Scratch = { [key: string]: number | null };
 export interface Attempt {
   puzzleId: number;
   startTime: string;
-  hasCheated: boolean;
   scratch: Scratch;
+  time: number;
 }
 
 export interface Solve {
   puzzleId: number;
   startTime: string;
   endTime: string;
-  didCheat: boolean;
+  time: number;
 }
 
 export type FillMode = "next" | "nextEmpty" | "stay";

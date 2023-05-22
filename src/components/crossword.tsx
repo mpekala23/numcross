@@ -538,12 +538,12 @@ export const Crossword: FunctionComponent<Props> = ({
 
   return (
     <>
-      <div className="h-12" />
+      <div className={`${editable ? "h-96" : "h-12"}`} />
       <div
         className={classNames(
           `relative w-full flex flex-col ${
-            editable ? "h-60" : "flex-1"
-          } overflow-hidden`
+            editable ? "h-60" : "flex-1 overflow-hidden"
+          }`
         )}
         ref={contRef}
       >
@@ -621,7 +621,7 @@ export const Crossword: FunctionComponent<Props> = ({
           </button>
         </div>
       )}
-      <div className="w-full h-36 pb-8">
+      <div className={`w-full ${editable ? "h-48" : "h-36"} pb-8`}>
         <ClueText
           text={clueText}
           number={clueNumber}

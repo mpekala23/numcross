@@ -1,6 +1,6 @@
+import { getUsername } from "@/api/backend";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
-import { getUsername } from "./useApi";
 
 export default function useUsername() {
   const user = useUser();

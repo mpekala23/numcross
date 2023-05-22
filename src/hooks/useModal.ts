@@ -1,14 +1,23 @@
-import { ReactElement, useCallback, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import Modal from "@/common/modal";
 
-export default function useModal(): [
+interface Props {
+  onOpen?: () => void;
+  onClose?: () => void;
+}
+
+export default function useModal(
+  props?: Props
+): [
   ({ children }: { children: ReactElement | ReactElement[] }) => JSX.Element,
   () => void,
   () => void
 ] {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
 
   const openModal = useCallback(() => {
+    setHasOpenedOnce(true);
     setIsOpen(true);
   }, [setIsOpen]);
 
@@ -22,6 +31,11 @@ export default function useModal(): [
     },
     [isOpen]
   );
+
+  useEffect(() => {
+    if (isOpen && props?.onOpen) props.onOpen();
+    if (!isOpen && hasOpenedOnce && props?.onClose) props.onClose();
+  }, [isOpen, hasOpenedOnce]);
 
   return [partialModal, openModal, closeModal];
 }

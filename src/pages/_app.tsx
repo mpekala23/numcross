@@ -11,6 +11,7 @@ import { SettingsContext } from "@/context/SettingsContext";
 import { ConfettiContext } from "@/context/ConfettiContext";
 import { NumpadVal, Settings } from "@/types/types";
 import { DEFAULT_SETTINGS } from "@/utils";
+import { usePathname } from "next/navigation";
 
 export default function App({
   Component,
@@ -26,6 +27,7 @@ export default function App({
   const [numpadVal, setNumpadVal] = useState<NumpadVal>("nothing");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [confetti, setConfetti] = useState<number>(0);
+  const currentPage = usePathname();
 
   return (
     <SessionContextProvider
@@ -37,7 +39,7 @@ export default function App({
           <ConfettiContext.Provider
             value={{ confetti, startConfetti: setConfetti }}
           >
-            <Layout>
+            <Layout currentPage={currentPage}>
               <Component {...pageProps} />
             </Layout>
             <Toaster />

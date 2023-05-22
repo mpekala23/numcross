@@ -1,6 +1,6 @@
 import {
-  CheckAttemptReq,
-  CheckAttemptResp,
+  VerifyAttemptReq,
+  VerifyAttemptResp,
   TodaysNumcrossResp,
   UserStatsResp,
   AddPuzzleReq,
@@ -66,17 +66,17 @@ export async function startAttempt(
   return null;
 }
 
-export async function checkAttempt(
+export async function verifyAttempt(
   attempt: Attempt,
-  userId?: string
-): Promise<CheckAttemptResp | null> {
+  userId: string
+): Promise<VerifyAttemptResp | null> {
   // Then check if the attempt is correct
-  const check_req: CheckAttemptReq = {
+  const check_req: VerifyAttemptReq = {
     attempt,
-    userId: userId || null,
+    userId,
   };
-  const { data, error } = await postJSON<CheckAttemptResp>(
-    "/api/check_attempt",
+  const { data, error } = await postJSON<VerifyAttemptResp>(
+    "/api/verify_attempt",
     check_req
   );
 
@@ -111,15 +111,11 @@ export async function logSolve(
   return data;
 }
 
-export async function getStats(userId?: string): Promise<UserStats | null> {
+export async function getStats(userId: string): Promise<UserStats | null> {
   // Users must be logged in to get stats?
   // TODO: What do we want the incentive structure to be here?
   // Maybe ideally we just give them limited stats and then prompt them
   // to create an account.
-  if (!userId) {
-    // Right now no stats for non-logged-in users
-    return null;
-  }
   const { data, error } = await getJSON<UserStatsResp>("/api/user_stats", {
     uid: userId,
   });

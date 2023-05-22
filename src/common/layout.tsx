@@ -5,9 +5,10 @@ import useConfetti from "@/hooks/useConfetti";
 
 interface Props {
   children?: JSX.Element | JSX.Element[];
+  currentPage: string;
 }
 
-export default function Layout({ children }: Props) {
+export default function Layout({ children, currentPage }: Props) {
   const { confetti } = useConfetti();
   const [width, setWidth] = React.useState(0);
   const [height, setHeight] = React.useState(0);
@@ -29,7 +30,11 @@ export default function Layout({ children }: Props) {
       />
       <Header />
 
-      <div className="flex flex-1 overflow-hidden flex-col justify-center align-center p-8 max-w-[550px] w-screen self-center">
+      <div
+        className={`flex flex-1 ${
+          currentPage !== "/upload" ? "overflow-hidden" : "overflow-auto"
+        } flex-col justify-center align-center p-8 max-w-[550px] w-screen self-center`}
+      >
         {children}
       </div>
     </div>

@@ -29,10 +29,10 @@ export interface GetSolveResp extends RespBase {
 // POST add_puzzle
 export interface AddPuzzleReq {
   live_date: string;
+  author: string;
   puzzle: Puzzle;
   solution: Solution;
   difficulty: string;
-  theme: string;
 }
 export interface AddPuzzleResp extends RespBase {}
 
@@ -43,15 +43,15 @@ export interface StartAttemptReq {
 }
 export interface StartAttemptResp extends RespBase {}
 
-// POST check_attempt
-export interface CheckAttemptReq {
+// POST verify_attempt
+export interface VerifyAttemptReq {
   attempt: Attempt;
-  userId: string | null;
+  userId: string;
 }
-export interface CheckAttemptResp extends RespBase {
+export interface VerifyAttemptResp extends RespBase {
   correct: boolean;
-  solve?: Solve;
-  saved?: boolean;
+  solve: Solve | null;
+  saved: boolean;
 }
 
 // POST log_solve

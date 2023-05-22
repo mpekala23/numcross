@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useCallback, useState, useEffect } from "react";
-import useApi from "@/hooks/useApi";
 import { Arr, Arr2D, cellKey } from "@/utils";
 import { Numpad } from "@/components/numpad";
 import { cloneDeep } from "lodash";
@@ -15,6 +14,7 @@ import {
 } from "@/types/types";
 import { AddPuzzleReq } from "@/types/api";
 import { useUser } from "@supabase/auth-helpers-react";
+import { addPuzzle } from "@/api/backend";
 
 const DEFAULT_PUZZLE: Puzzle = {
   shape: [2, 2],
@@ -29,10 +29,9 @@ const BLANK_CLUE: BlankClue = {
 };
 
 export default function Upload() {
-  const { addPuzzle } = useApi();
   const [live_date, setLiveDate] = useState("");
   const [difficulty, setDifficulty] = useState("");
-  const [theme, setTheme] = useState("");
+  const [author, setAuthor] = useState("");
   const [scratch, setScratch] = useState<Scratch>({});
   const [puzzle, setPuzzle] = useState<Puzzle>(cloneDeep(DEFAULT_PUZZLE));
   const [disabled, setDisabled] = useState(false);
@@ -60,7 +59,7 @@ export default function Upload() {
         answers,
       },
       live_date,
-      theme,
+      author,
       puzzle,
       difficulty,
     };
@@ -68,7 +67,7 @@ export default function Upload() {
     setDisabled(true);
     await addPuzzle(data);
     setDisabled(false);
-  }, [addPuzzle, setDisabled, puzzle, scratch, live_date, theme, difficulty]);
+  }, [setDisabled, puzzle, scratch, live_date, author, difficulty]);
 
   const updatePuzzle = useCallback(
     (rowidx: number, colidx: number, clue?: Clue) => {
@@ -168,6 +167,22 @@ export default function Upload() {
           seconds={null}
         />
         <Numpad editable />
+        <div className="flex justify-center items-center">
+          <input
+            type="text"
+            className="bg-slate-200 py-6 px-12 my-2"
+            placeholder="Author"
+            onChange={(e) => setAuthor(e.target.value)}
+          ></input>
+        </div>
+        <div className="flex justify-center items-center">
+          <input
+            type="text"
+            className="bg-slate-200 py-6 px-12 my-2"
+            placeholder="Difficulty"
+            onChange={(e) => setDifficulty(e.target.value)}
+          ></input>
+        </div>
         <div className="flex justify-center items-center">
           <input
             type="date"

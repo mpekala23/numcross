@@ -3,7 +3,7 @@ import express from "express";
 import next from "next";
 import bodyParser from "body-parser";
 import { createClient } from "@supabase/supabase-js";
-import { Attempt, Solution, Solve } from "../src/types/types";
+import { Solution, Solve } from "../src/types/types";
 import {
   cellKey,
   getAverageSolveTime,
@@ -13,8 +13,6 @@ import {
 import {
   AddPuzzleReq,
   AddPuzzleResp,
-  CheckAttemptReq,
-  CheckAttemptResp,
   GetSolveReq,
   GetSolveResp,
   LeaderboardReq,
@@ -34,6 +32,8 @@ import {
   UserStatsResp,
   UsernameReq,
   UsernameResp,
+  VerifyAttemptReq,
+  VerifyAttemptResp,
 } from "../src/types/api";
 import { LeaderboardEntry } from "../src/types/stats";
 
@@ -94,7 +94,15 @@ app
         }
         res.send({
           status: "ok",
-          numcross: data,
+          numcross: {
+            id: data.id,
+            createdAt: data.created_at,
+            liveDate: data.live_date,
+            author: data.author,
+            difficulty: data.difficulty,
+            puzzle: data.puzzle,
+            solution: data.solution,
+          },
         });
       }
     );
@@ -116,7 +124,12 @@ app
           .eq("pid", pid)
           .single();
         if (solveData && !solveError) {
-          solve = solveData;
+          solve = {
+            puzzleId: solveData.pid,
+            startTime: solveData.start_time,
+            endTime: solveData.end_time,
+            time: solveData.time,
+          };
         }
         res.send({
           status: "ok",
@@ -136,12 +149,13 @@ app
           .insert({
             live_date: req.body.live_date,
             puzzle: req.body.puzzle,
+            author: req.body.author,
             solution: req.body.solution,
             difficulty: req.body.difficulty,
-            theme: req.body.theme,
           })
           .select();
         if (error) {
+          console.log("error", error);
           res.status(500).send({
             status: "error",
             errorMessage: "Error: Can't add puzzle",
@@ -161,13 +175,22 @@ app
         res: TypedResponse<StartAttemptResp>
       ) => {
         console.log("POST /api/start_attempt");
+
         const { userId, puzzleId } = req.body;
         const { data: existsData } = await supabase
           .from("attempts")
           .select("uid")
           .eq("uid", userId)
-          .eq("pid", puzzleId);
-        console.log(existsData);
+          .eq("pid", puzzleId)
+          .single();
+        if (existsData) {
+          // We've already logged this attempt
+          res.send({
+            status: "ok",
+          });
+          return;
+        }
+
         const { error } = await supabase
           .from("attempts")
           .upsert({
@@ -190,14 +213,16 @@ app
     );
 
     server.post(
-      "/api/check_attempt",
+      "/api/verify_attempt",
       async (
-        req: TypedRequestBody<CheckAttemptReq>,
-        res: TypedResponse<CheckAttemptResp>
+        req: TypedRequestBody<VerifyAttemptReq>,
+        res: TypedResponse<VerifyAttemptResp>
       ) => {
+        console.log("verify_attempt");
+
         // Get the relevant puzzle
         const { attempt, userId } = req.body;
-        const { data, error } = await supabase
+        const { data: numcross, error } = await supabase
           .from("puzzles")
           .select()
           .eq("id", attempt.puzzleId)
@@ -211,7 +236,31 @@ app
           return;
         }
 
-        const solution: Solution = data.solution;
+        // First check if there's already a row in the solves table
+        const { data: checkData } = await supabase
+          .from("solves")
+          .select()
+          .eq("uid", userId)
+          .eq("pid", attempt.puzzleId)
+          .single();
+
+        if (checkData) {
+          // If there is, we're done
+          res.send({
+            status: "ok",
+            correct: true,
+            solve: {
+              puzzleId: checkData.pid,
+              startTime: checkData.start_time,
+              endTime: checkData.end_time,
+              time: checkData.solve,
+            },
+            saved: true,
+          });
+          return;
+        }
+
+        const solution: Solution = numcross.solution;
 
         // Test that the attempt is correct
         let correct = true;
@@ -232,58 +281,16 @@ app
           // If the attempt is incorrect, send correct = false, return
           res.send({
             status: "ok",
+            solve: null,
             correct,
+            saved: false,
           });
           return;
         }
 
-        // If there is no user associated with this attempt, simply send
-        // correct = true and the time, return. It's the client's responsibility to store
-        // the attempt in local storage.
-        if (!userId) {
-          res.send({
-            status: "ok",
-            solve: {
-              puzzleId: attempt.puzzleId,
-              startTime: attempt.startTime,
-              endTime: new Date().toISOString(),
-              didCheat: attempt.hasCheated,
-            },
-            correct,
-          });
-          return;
-        }
-
-        // This correct attempt is associated with an already existing
-        // user
-
-        // First check if there's already a row in the solves table
-        const { data: checkData } = await supabase
-          .from("solves")
-          .select()
-          .eq("uid", userId)
-          .eq("pid", attempt.puzzleId)
-          .single();
-
-        if (checkData) {
-          // If there is, we're done
-          res.send({
-            status: "ok",
-            correct,
-            solve: {
-              puzzleId: checkData.pid,
-              startTime: checkData.start_time,
-              endTime: checkData.end_time,
-              didCheat: checkData.did_cheat,
-            },
-            saved: true,
-          });
-          return;
-        }
-
+        // The attempt is correct
+        // We need to insert a row into the solves table
         const endDate = new Date();
-
-        // If not, we need to insert a row into the solves table
         const { error: solveError } = await supabase
           .from("solves")
           .upsert({
@@ -291,7 +298,7 @@ app
             pid: attempt.puzzleId,
             start_time: attempt.startTime,
             end_time: endDate,
-            did_cheat: attempt.hasCheated,
+            time: attempt.time,
           })
           .select();
 
@@ -302,7 +309,7 @@ app
             puzzleId: attempt.puzzleId,
             startTime: attempt.startTime,
             endTime: endDate.toISOString(),
-            didCheat: attempt.hasCheated,
+            time: attempt.time,
           },
           saved: !solveError,
         });
@@ -319,6 +326,7 @@ app
         res: TypedResponse<LogSolveResp>
       ) => {
         console.log("POST /api/log_solve");
+
         const { solve, userId } = req.body;
 
         // First check if there's already a row in the solves table
@@ -345,7 +353,7 @@ app
             pid: solve.puzzleId,
             start_time: solve.startTime,
             end_time: solve.endTime,
-            did_cheat: solve.didCheat,
+            time: solve.time,
           })
           .select();
 
@@ -369,8 +377,8 @@ app
         res: TypedResponse<UserStatsResp>
       ) => {
         console.log("GET /api/user_stats");
-        const { uid } = req.query;
 
+        const { uid } = req.query;
         // Get all their attempts
         const { data: attemptsData, error: attemptsError } = await supabase
           .from("attempts")
@@ -476,6 +484,7 @@ app
             status: "error",
             errorMessage: error.message,
           });
+          return;
         }
         res.send({ status: "ok" });
       }
@@ -498,11 +507,10 @@ app
           return;
         }
 
-        const { data: solvesData, error: solvesError } = await supabase
+        const { data: todaysSolves, error: solvesError } = await supabase
           .from("solves")
           .select("*")
-          .eq("pid", data.id)
-          .eq("did_cheat", false);
+          .eq("pid", data.id);
         if (solvesError) {
           res.status(500).send({
             status: "error",
@@ -511,53 +519,36 @@ app
           return;
         }
 
-        const todaysSolves: any[] = [];
+        const solvesWithUsernames: any[] = [];
 
-        solvesData.forEach((solve) => {
-          const extendedSolve = {
-            ...solve,
-            time:
-              (new Date(solve.end_time).getTime() -
-                new Date(solve.start_time).getTime()) /
-              1000,
-          };
-
-          if (solve.pid === data.id) {
-            todaysSolves.push(extendedSolve);
-          }
-        });
+        await Promise.all(
+          todaysSolves.map((solve) => {
+            return new Promise<void>(async (resolve, reject) => {
+              const { data: usernameData } = await supabase
+                .from("profiles")
+                .select("username")
+                .eq("uid", solve.uid)
+                .single();
+              if (usernameData) {
+                solvesWithUsernames.push({
+                  ...solve,
+                  username: usernameData.username,
+                });
+              }
+              resolve();
+            });
+          })
+        );
 
         // Sort by time ascending
-        todaysSolves.sort((a, b) => a.time - b.time);
+        solvesWithUsernames.sort((a, b) => a.time - b.time);
 
         // Get the top 10
-        const todays_top_10 = todaysSolves.slice(0, 10);
-        const top_ten_uids: string[] = [];
-
-        todays_top_10.forEach((solve) => {
-          if (!top_ten_uids.includes(solve.uid)) {
-            top_ten_uids.push(solve.uid);
-          }
-        });
-
-        const map_uid_to_username: { [key: string]: string } = {};
-        for (let i = 0; i < top_ten_uids.length; i++) {
-          const uid = top_ten_uids[i];
-          const { data: profile, error: userError } = await supabase
-            .from("profiles")
-            .select("username")
-            .eq("uid", uid)
-            .single();
-          if (userError) {
-            map_uid_to_username[uid] = "<no username>";
-          } else {
-            map_uid_to_username[uid] = profile.username || "<no username>";
-          }
-        }
+        const todays_top_10 = solvesWithUsernames.slice(0, 10);
 
         const today: LeaderboardEntry[] = todays_top_10.map((solve) => {
           return {
-            username: map_uid_to_username[solve.uid],
+            username: solve.username,
             time: solve.time,
             streak: -1,
             numSolved: -1,

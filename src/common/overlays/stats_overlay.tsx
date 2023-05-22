@@ -1,11 +1,13 @@
-import useApi from "@/hooks/useApi";
 import { UserStats } from "@/types/stats";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import React, { useCallback, useEffect, useState } from "react";
-import Slink from "../components/slink";
+import React, { useCallback } from "react";
+import Slink from "../../components/slink";
 import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
 
 interface Props {
+  stats: UserStats | null;
+  loading: boolean;
+  error: string;
   closeModal: () => void;
 }
 
@@ -20,32 +22,14 @@ function renderStat({ name, value }: { name: string; value: number | string }) {
   );
 }
 
-export default function StatsOverlay({ closeModal }: Props) {
+export default function StatsOverlay({
+  closeModal,
+  stats,
+  loading,
+  error,
+}: Props) {
   const supabase = useSupabaseClient();
-  const { getStats } = useApi();
   const user = useUser();
-  const [stats, setStats] = useState<UserStats | null>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    const doWork = async () => {
-      try {
-        const stats = await getStats(user?.id);
-        if (!stats) {
-          setError("No stats found.");
-          setLoading(false);
-          return;
-        }
-        setStats(stats);
-        setLoading(false);
-      } catch (error) {
-        setError("Unknown error while getting stats.");
-        setLoading(false);
-      }
-    };
-    doWork();
-  }, [getStats, user]);
 
   // For rendering a message prompting non-logged in users to log in
   // or create an account

@@ -35,15 +35,15 @@ export const ClueText: FunctionComponent<Props> = ({
 
   return (
     <div
-      className={
-        "flex flex-col w-full h-full bg-slate-200 my-4 py-2 px-4 relative"
-      }
+      className={`flex flex-col w-full h-full bg-slate-200 my-4 py-2 px-4 relative`}
     >
       <div className="flex justify-between">
         <div className="text-left font-bold">{num}</div>
-        <div className="text-left font-bold">
-          Time: {solveSecondsToString(seconds || 0)}
-        </div>
+        {!editable && (
+          <div className="text-left font-bold">
+            Time: {solveSecondsToString(seconds || 0)}
+          </div>
+        )}
       </div>
       <EditableText
         text={line}
@@ -54,7 +54,7 @@ export const ClueText: FunctionComponent<Props> = ({
         <div className="text-center">
           {!isAcross && (
             <button
-              className="mt-3 py-3 px-10 mr-5 rounded-sm bg-slate-100"
+              className="mt-3 py-3 px-2 mr-5 rounded-sm bg-slate-100"
               onClick={() => {
                 addClue(true);
               }}
@@ -64,7 +64,7 @@ export const ClueText: FunctionComponent<Props> = ({
           )}
           {!isDown && (
             <button
-              className="mt-3 py-3 px-10 rounded-sm bg-slate-100"
+              className="mt-3 py-3 px-2 rounded-sm bg-slate-100"
               onClick={() => {
                 addClue(false);
               }}
@@ -74,7 +74,7 @@ export const ClueText: FunctionComponent<Props> = ({
           )}
           {
             <button
-              className="mt-3 ml-3 py-3 px-10 rounded-sm bg-red-200"
+              className="mt-3 ml-3 py-3 px-2 rounded-sm bg-red-200"
               onClick={removeSquare}
             >
               Clear Square
