@@ -4,6 +4,8 @@ import React, { useCallback } from "react";
 import Slink from "../../components/slink";
 import Stats from "../../components/stats"
 
+// David Devlog: I refactored some of this code into a stats component to make it easier to render in other places.
+
 interface Props {
   stats: UserStats | null;
   loading: boolean;
