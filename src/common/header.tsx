@@ -21,7 +21,6 @@ export default function Header() {
   const goToIndex = useCallback(() => {
     router.push("/");
   }, [router]);
-
   return (
     <div className="flex justify-around items-center border-b-2 border-slate-200 p-2">
       <div className="flex justify-between items-center w-full max-w-[550px]">

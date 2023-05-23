@@ -65,6 +65,10 @@ export default function Home() {
   }, []);
 
   // Function that _just_ loads our attempt from local storage
+  // NOTE TO MARK: I think this startStopwatch is extraneous; the stopwatch was still working for me.
+  // In any event it caused the whole page to re-render every second which was causing bugs so I took it out.
+  // If it needs to go back in be sure to do so safely
+
   useEffect(() => {
     const asyncWork = async () => {
       if (!numcross) return;
@@ -72,13 +76,13 @@ export default function Home() {
       if (matt) {
         setAttempt(matt);
         setScratch(matt.scratch);
-        startStopwatch();
+        // startStopwatch();
       } else {
         openStart();
       }
     };
     asyncWork();
-  }, [numcross, openStart, startStopwatch]);
+  }, [numcross, openStart]);
 
   // Function that _just_ sees if we've already solved this puzzle
   useEffect(() => {
@@ -145,7 +149,8 @@ export default function Home() {
         endTime: new Date().toISOString(),
         time: 0, // TODO: make real
       };
-      setSolve(newSolve);
+      if (!isEqual(newSolve, solve)) {
+        setSolve(newSolve);}
       if (user) {
         // NOTE: This call might fail, right now we just ignore it
         verifyAttempt(attempt, user.id);
@@ -169,7 +174,7 @@ export default function Home() {
     }
   }, [attempt, lastAttempt, solve, setLastAttempt, checkPuzzle]);
 
-  const incrementTime = useCallback(() => {
+ const incrementTime = useCallback(() => {
     if (!attempt) return;
     const newAttempt = {
       ...attempt,
@@ -197,6 +202,7 @@ export default function Home() {
 
   if (pageError) return <div>{pageError}</div>;
 
+  console.log('big bootie')
   return (
     <>
       <Head>
