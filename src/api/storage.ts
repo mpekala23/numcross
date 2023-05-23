@@ -42,3 +42,15 @@ export function mineSettings(): Settings {
 export function storeSettings(settings: Settings) {
   localStorage.setItem("settings", JSON.stringify(settings));
 }
+
+export function storeCatch(caught: boolean) {
+  localStorage.setItem("caught", JSON.stringify(caught));
+}
+
+export function mineCatch(): boolean {
+  const caught = localStorage.getItem("caught");
+  if (!caught) {
+    return false;
+  }
+  return JSON.parse(caught);
+}

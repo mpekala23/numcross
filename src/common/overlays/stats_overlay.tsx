@@ -114,8 +114,9 @@ export default function StatsOverlay({ closeModal, loading, error }: Props) {
       {user && (
         <Slink
           onClick={() => {
-            localStorage.clear();
-            supabase.auth.signOut();
+            supabase.auth.signOut().then(() => {
+              localStorage.clear();
+            });
           }}
           href=""
         >

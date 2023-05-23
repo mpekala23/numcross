@@ -22,9 +22,12 @@ import {
   storeSolve,
   forgetSolve,
   storeAttempt,
+  mineCatch,
+  storeCatch,
 } from "@/api/storage";
 import { useStopwatch } from "react-timer-hook";
 import StartOverlay from "@/components/start_overlay";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [numcross, setNumcross] = useState<Numcross | null>(null);
@@ -50,6 +53,16 @@ export default function Home() {
   const [solve, setSolve] = useState<Solve | null>(null);
   const [SolvedModal, openSolved, closeSolved] = useModal();
   const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
+  const router = useRouter();
+
+  // Catch user id for mobile
+  useEffect(() => {
+    const caught = mineCatch();
+    if (!caught && user) {
+      storeCatch(true);
+      router.replace("/catch_user?uid=" + user.id);
+    }
+  }, [router, user]);
 
   // Function that _just_ gets the puzzle
   useEffect(() => {

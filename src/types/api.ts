@@ -101,6 +101,13 @@ export interface MakeFriendsReq {
 }
 export interface MakeFriendsResp extends RespBase {}
 
+// POST register_mobile_token
+export interface RegisterMobileTokenReq {
+  userId: string;
+  token: string;
+}
+export interface RegisterMobileTokenResp extends RespBase {}
+
 /* ------------------ */
 // START HELPER STUFF FOR EXPRESS BACKEND
 

@@ -23,6 +23,8 @@ import {
   MakeFriendsResp,
   PrivateLeaderboardReq,
   PrivateLeaderboardResp,
+  RegisterMobileTokenReq,
+  RegisterMobileTokenResp,
   SetUsernameReq,
   SetUsernameResp,
   StartAttemptReq,
@@ -42,7 +44,7 @@ import {
 import { LeaderboardEntry, PrivateLeaderboardEntry } from "../src/types/stats";
 
 const env_path =
-  process.env.NODE_ENV === "production" || true
+  process.env.NODE_ENV === "production" || true // force production
     ? ".env.production"
     : ".env.development";
 dotenv.config({ path: env_path });
@@ -656,6 +658,26 @@ app
           status: "ok",
           today: result,
         });
+      }
+    );
+
+    server.post(
+      "/api/register_mobile_token",
+      async (
+        req: TypedRequestBody<RegisterMobileTokenReq>,
+        res: TypedResponse<RegisterMobileTokenResp>
+      ) => {
+        console.log("POST /api/register_mobile_token");
+
+        const { error, data } = await supabase
+          .from("mobile_push_tokens")
+          .upsert({
+            uid: req.body.userId,
+            token: req.body.token,
+          })
+          .select();
+        console.log(error, data);
+        res.send({ status: "ok" });
       }
     );
 
