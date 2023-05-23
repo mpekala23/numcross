@@ -2,24 +2,13 @@ import { UserStats } from "@/types/stats";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback } from "react";
 import Slink from "../../components/slink";
-import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
+import Stats from "../../components/stats"
 
 interface Props {
   stats: UserStats | null;
   loading: boolean;
   error: string;
   closeModal: () => void;
-}
-
-function renderStat({ name, value }: { name: string; value: number | string }) {
-  return (
-    <div className="flex flex-col justify-center items-center">
-      {value && <p className="text-2xl font-title px-4">{value}</p>}
-      <p className="text-xs text-center h-8 font-body px-4 text-slate-600">
-        {name}
-      </p>
-    </div>
-  );
 }
 
 export default function StatsOverlay({
@@ -74,33 +63,9 @@ export default function StatsOverlay({
     if (!user?.id) return renderNotLoggedIn();
     if (loading) return renderLoading();
     if (error.length > 0 || (!loading && !stats)) return renderError(error);
-    if (!stats) return renderError("No stats found. Are you logged in?");
-
-    return (
-      <div>
-        <div className="flex justify-around">
-          {renderStat({ name: "Played", value: stats.numPlayed })}
-          {renderStat({
-            name: "Win %",
-            value: asPercentage(stats.numSolved, stats.numPlayed),
-          })}
-          {renderStat({
-            name: "Avg. Solve Time",
-            value: solveSecondsToString(stats.averageSolveTime),
-          })}
-        </div>
-        <div className="flex justify-around">
-          {renderStat({
-            name: "Current Streak",
-            value: streakToString(stats.currentStreak),
-          })}
-          {renderStat({
-            name: "Max Streak",
-            value: streakToString(stats.maxStreak),
-          })}
-        </div>
-      </div>
-    );
+    return(
+      <Stats stats={stats} />
+    )
   }, [
     user?.id,
     loading,

@@ -1,9 +1,12 @@
 import Slink from "@/components/slink";
 import useConfetti from "@/hooks/useConfetti";
 import { Solve } from "@/types/types";
+import { UserStats } from "@/types/stats";
 import { getSolveTime, solveSecondsToString } from "@/utils";
 import { useUser } from "@supabase/auth-helpers-react";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { getStats } from "@/api/backend";
+import Stats from "../../components/stats";
 
 interface Props {
   closeModal: () => void;
@@ -18,9 +21,31 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
     startConfetti();
   }, [startConfetti]);
 
+
+  // DAVID DEVLOG: rendering stats
+  // to-do: handle loading
+
+  const [stats, setStats] = useState<UserStats | null>(null);
+
+  const refreshUserStats = useCallback(async () => {
+    if (!user) return;
+    const stats = await getStats(user.id);
+    setStats(stats);
+  }, [user]);
+
+  useEffect(() => {
+    refreshUserStats();
+  }, [refreshUserStats]);
+
   const renderAccountStats = useCallback(() => {
-    return <div />;
-  }, []);
+    return (
+    <div>
+      <div className="justify-around pt-4">
+        <Stats stats={stats} />
+      </div>
+    </div>
+    )
+  }, [stats]);
 
   const renderNoAccountPlea = useCallback(() => {
     return (

@@ -418,13 +418,13 @@ app
         let currentStreak = -1;
         let maxStreak = -1;
         if (!solvedPuzzlesError) {
-          const streaks = getStreaks(solvedPuzzles);
+          const streaks = getStreaks(solvedPuzzles as any);
           currentStreak = streaks.currentStreak;
           maxStreak = streaks.maxStreak;
         }
 
         const averageSolveTime =
-          solvesData.length > 0 ? getAverageSolveTime(solvesData) : undefined;
+          solvesData.length > 0 ? getAverageSolveTime(solvesData as any) : undefined;
 
         res.send({
           status: "ok",
