@@ -20,7 +20,7 @@ export const cellKey = (rowidx: number, colidx: number) => {
 
 export const parseCellKey = (key: string) => {
   const l = key.split(",");
-  if (l.length != 2) {
+  if (l.length !== 2) {
     return [-1, -1];
   }
   return [parseFloat(l[0]), parseFloat(l[1])];

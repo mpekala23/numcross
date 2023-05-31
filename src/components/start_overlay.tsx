@@ -49,12 +49,13 @@ export default function StartOverlay({
         </p>
         <p>
           NumCross is a daily puzzle for the mathematically inclined. Puzzles
-          refresh at midnigh and generally get harder as the week goes on
+          refresh at midnight and generally get harder as the week goes on
           (Monday - Sunday).
         </p>
         <p className="py-2">Here are some tips to get started:</p>
         <ul className="list-disc pl-4">
           <li>Numbers cannot start with a leading 0.</li>
+          <li>Clues sometimes depend on each other.</li>
           <li>
             If you get stuck on a clue, don't hesitate to move on and come back
             to it.

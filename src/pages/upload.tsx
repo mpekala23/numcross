@@ -47,7 +47,7 @@ export default function Upload() {
     for (let i = 0; i < puzzle.shape[0]; i++) {
       for (let j = 0; j < puzzle.shape[1]; j++) {
         const num = scratch[cellKey(i, j)];
-        if (puzzle.clues[i][j].type != "blank" && num !== null) {
+        if (puzzle.clues[i][j].type !== "blank" && num !== null) {
           answers[i][j] = num;
         }
       }

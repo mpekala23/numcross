@@ -19,6 +19,12 @@ import {
   LeaderboardResp,
   LogSolveReq,
   LogSolveResp,
+  MakeFriendsReq,
+  MakeFriendsResp,
+  PrivateLeaderboardReq,
+  PrivateLeaderboardResp,
+  RegisterMobileTokenReq,
+  RegisterMobileTokenResp,
   SetUsernameReq,
   SetUsernameResp,
   StartAttemptReq,
@@ -35,7 +41,7 @@ import {
   VerifyAttemptReq,
   VerifyAttemptResp,
 } from "../src/types/api";
-import { LeaderboardEntry } from "../src/types/stats";
+import { LeaderboardEntry, PrivateLeaderboardEntry } from "../src/types/stats";
 
 const env_path =
   process.env.NODE_ENV === "production"
@@ -75,6 +81,28 @@ app
       } else {
         return data;
       }
+    };
+
+    // NOTE: Is directional, adds uid2 to uid1s list (assumes called twice elsewhere)
+    const makeFriends = async (
+      uid1: string,
+      uid2: string
+    ): Promise<boolean> => {
+      let { data: existFriendlist } = await supabase
+        .from("private_leaderboards")
+        .select("friendlist")
+        .eq("uid", uid1)
+        .single();
+      if (!existFriendlist) existFriendlist = { friendlist: { friendIds: [] } };
+      const friendIds = existFriendlist.friendlist.friendIds;
+      const checkExist = friendIds.find((id: string) => id === uid2);
+      if (!!checkExist) return true;
+      friendIds.push(uid2);
+      await supabase
+        .from("private_leaderboards")
+        .upsert({ uid: uid1, friendlist: { friendIds } })
+        .select();
+      return true;
     };
 
     server.get(
@@ -218,7 +246,7 @@ app
         req: TypedRequestBody<VerifyAttemptReq>,
         res: TypedResponse<VerifyAttemptResp>
       ) => {
-        console.log("verify_attempt");
+        console.log("POST verify_attempt");
 
         // Get the relevant puzzle
         const { attempt, userId } = req.body;
@@ -418,13 +446,13 @@ app
         let currentStreak = -1;
         let maxStreak = -1;
         if (!solvedPuzzlesError) {
-          const streaks = getStreaks(solvedPuzzles as any);
+          const streaks = getStreaks(solvedPuzzles);
           currentStreak = streaks.currentStreak;
           maxStreak = streaks.maxStreak;
         }
 
         const averageSolveTime =
-          solvesData.length > 0 ? getAverageSolveTime(solvesData as any) : undefined;
+          solvesData.length > 0 ? getAverageSolveTime(solvesData) : undefined;
 
         res.send({
           status: "ok",
@@ -561,6 +589,95 @@ app
           today,
           allTime,
         });
+      }
+    );
+
+    server.post(
+      "/api/make_friends",
+      async (
+        req: TypedRequestBody<MakeFriendsReq>,
+        res: TypedResponse<MakeFriendsResp>
+      ) => {
+        console.log("POST /api/make_friends");
+
+        const { userId, friendId } = req.body;
+        const oneWay = await makeFriends(userId, friendId);
+        const otherWay = await makeFriends(friendId, userId);
+        if (!oneWay || !otherWay) {
+          res.status(500).send({ status: "error" });
+          return;
+        }
+        res.send({ status: "ok" });
+      }
+    );
+
+    server.get(
+      "/api/private_leaderboard",
+      async (
+        req: TypedRequestQuery<PrivateLeaderboardReq>,
+        res: TypedResponse<PrivateLeaderboardResp>
+      ) => {
+        console.log("GET /api/private_leaderboard");
+
+        const { userId } = req.query;
+        const numcross = await getMostRecentPuzzle();
+        let { data: friendData } = await supabase
+          .from("private_leaderboards")
+          .select("friendlist")
+          .eq("uid", userId)
+          .single();
+        if (!friendData) {
+          friendData = { friendlist: { friendIds: [] } };
+        }
+        const friendIds: string[] = friendData.friendlist.friendIds;
+        const myself = friendIds.indexOf(userId);
+        if (myself === -1) {
+          friendIds.push(userId); // also get your own time
+        }
+        const result: PrivateLeaderboardEntry[] = [];
+        for (var fx = 0; fx < friendIds.length; fx += 1) {
+          const { data: usernameData } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("uid", friendIds[fx])
+            .single();
+          const { data: timeData } = await supabase
+            .from("solves")
+            .select("time")
+            .eq("uid", friendIds[fx])
+            .eq("pid", numcross.id)
+            .single();
+          if (!usernameData) return;
+          result.push({
+            friend: { username: usernameData.username, uid: friendIds[fx] },
+            time: timeData?.time || null,
+          });
+        }
+        result.sort((a, b) => (a.time || 9999999) - (b.time || 9999999));
+        res.send({
+          status: "ok",
+          today: result,
+        });
+      }
+    );
+
+    server.post(
+      "/api/register_mobile_token",
+      async (
+        req: TypedRequestBody<RegisterMobileTokenReq>,
+        res: TypedResponse<RegisterMobileTokenResp>
+      ) => {
+        console.log("POST /api/register_mobile_token");
+
+        const { error, data } = await supabase
+          .from("mobile_push_tokens")
+          .upsert({
+            uid: req.body.userId,
+            token: req.body.token,
+          })
+          .select();
+        console.log(error, data);
+        res.send({ status: "ok" });
       }
     );
 

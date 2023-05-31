@@ -23,12 +23,10 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
     startConfetti();
   }, [startConfetti]);
 
-
   // DAVID DEVLOG: rendering stats
 
   const [stats, setStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-
 
   const refreshUserStats = useCallback(async () => {
     if (!user) return;
@@ -37,23 +35,23 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
     setStatsLoading(false);
   }, [user]);
 
-   useEffect(() => {
+  useEffect(() => {
     refreshUserStats();
-  }, [refreshUserStats])
+  }, [refreshUserStats]);
 
   const renderAccountStats = useCallback(() => {
-    if(statsLoading) {
+    if (statsLoading) {
       return (
-      <div className="justify-around pt-4">
-        <p>Stats Loading...</p>
-      </div>
-      )
+        <div className="justify-around pt-4">
+          <p>Stats Loading...</p>
+        </div>
+      );
     }
     return (
       <div className="justify-around pt-4">
         <Stats stats={stats} />
       </div>
-    )
+    );
   }, [stats, statsLoading]);
 
   const renderNoAccountPlea = useCallback(() => {
@@ -69,35 +67,38 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
     );
   }, []);
 
-const solveTime = useMemo(() => {
-    return (solve ?  solveSecondsToString(
-      getSolveTime(new Date(solve.startTime), new Date(solve.endTime))
-    )
-  : "Congrats!")
+  const solveTime = useMemo(() => {
+    return solve
+      ? solveSecondsToString(
+          getSolveTime(new Date(solve.startTime), new Date(solve.endTime))
+        )
+      : "Congrats!";
+  }, [solve]);
 
-  }, [solve])
-
-
-// rendering share
+  // rendering share
 
   return (
     <div className="flex flex-col justify-center align-center">
       <p className="text-3xl font-bold font-title pb-4 text-center">
-        {solveTime}
+        {solve ? solveSecondsToString(solve.time) : "Congrats!"}
       </p>
       <p className="text-center font-title text-xl">You solved the puzzle!</p>
       {user ? renderAccountStats() : renderNoAccountPlea()}
       <RWebShare
-          data={{
-            text: "My NumCross time was " + solveTime + ". Think you can beat me?",
-            url: "https://numcross.com",
-            title: "NumCross",
-          }}
-        >
+        data={{
+          text:
+            "My NumCross time was " + solveTime + ". Think you can beat me?",
+          url: "https://numcross.com",
+          title: "NumCross",
+        }}
+      >
         <div className="p-1 hover:cursor-pointer flex justify-center border-2 w-2/3 m-auto">
-        <ShareIcon className="w-8 h-8 text-black inline-block" /><p className="pl-3 inline-block font-bold text-center pt-1">Share Your Time </p>
+          <ShareIcon className="w-8 h-8 text-black inline-block" />
+          <p className="pl-3 inline-block font-bold text-center pt-1">
+            Share Your Time{" "}
+          </p>
         </div>
-    </RWebShare>
+      </RWebShare>
     </div>
   );
 }

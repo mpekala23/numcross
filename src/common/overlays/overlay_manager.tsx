@@ -6,10 +6,15 @@ import LeaderboardOverlay from "./leaderboard_overlay";
 import SettingsOverlay from "./settings_overlay";
 import StatsOverlay from "./stats_overlay";
 import { useUser } from "@supabase/auth-helpers-react";
-import { getLeaderboard, getStats, setUsername } from "@/api/backend";
-import { LeaderboardStats, UserStats } from "@/types/stats";
+import {
+  getLeaderboard,
+  getPrivateLeaderboard,
+  getStats,
+  setUsername,
+} from "@/api/backend";
 import toast from "react-hot-toast";
 import useUsername from "@/hooks/useUsername";
+import useHeader from "@/hooks/useHeader";
 
 interface Provides {
   OverlayManager: () => ReactElement;
@@ -30,9 +35,15 @@ export default function useOverlayManager(): Provides {
   const [StatsModal, openStatsModal, closeStatsModal] = useModal();
   const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
   const user = useUser();
+  const { leaderboardTrigger, statsTrigger } = useHeader();
+
+  const {
+    setLeaderboard,
+    setPrivateLeaderboard: setMyLeaderboard,
+    setStats,
+  } = useHeader();
 
   // Leaderboard
-  const [leaderboard, setLeaderboard] = useState<LeaderboardStats | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [leaderboardError, setLeaderboardError] = useState<string>("");
   const { username, setUsername: setUsernameState } = useUsername();
@@ -50,10 +61,10 @@ export default function useOverlayManager(): Provides {
       setLeaderboardError("Unknown error while getting the leaderboard.");
       setLeaderboardLoading(false);
     }
-  }, []);
+  }, [setLeaderboard]);
   useEffect(() => {
     refreshLeaderboard();
-  }, [refreshLeaderboard, username]);
+  }, [refreshLeaderboard, username, leaderboardLoading]);
   const updateUsername = useCallback(
     async (newUsername: string) => {
       if (!user) return;
@@ -75,8 +86,30 @@ export default function useOverlayManager(): Provides {
     [user, setUsernameState]
   );
 
+  // My leaderboard
+  const [myLeaderboardLoading, setMyLeaderboardLoading] = useState(true);
+  const [myLeaderboardError, setMyLeaderboardError] = useState<string>("");
+  const refreshMyLeaderboard = useCallback(async () => {
+    if (!user) return;
+    try {
+      const stats = await getPrivateLeaderboard(user.id);
+      if (!stats) {
+        setLeaderboardError("Can't get leaderboard. Try again later.");
+        setMyLeaderboardLoading(false);
+        return;
+      }
+      setMyLeaderboard(stats);
+      setMyLeaderboardLoading(false);
+    } catch (error) {
+      setMyLeaderboardError("Unknown error while getting the leaderboard.");
+      setMyLeaderboardLoading(false);
+    }
+  }, [user, setMyLeaderboard]);
+  useEffect(() => {
+    refreshMyLeaderboard();
+  }, [refreshMyLeaderboard, username, leaderboardTrigger]);
+
   // Stats
-  const [stats, setStats] = useState<UserStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState<string>("");
   const refreshUserStats = useCallback(async () => {
@@ -94,10 +127,10 @@ export default function useOverlayManager(): Provides {
       setStatsError("Unknown error while getting stats.");
       setStatsLoading(false);
     }
-  }, [user]);
+  }, [user, setStats]);
   useEffect(() => {
     refreshUserStats();
-  }, [refreshUserStats]);
+  }, [refreshUserStats, statsTrigger]);
 
   const OverlayManager = useCallback(() => {
     return (
@@ -105,7 +138,6 @@ export default function useOverlayManager(): Provides {
         <LeaderboardModal>
           <LeaderboardOverlay
             closeModal={closeLeaderboardModal}
-            stats={leaderboard}
             loading={leaderboardLoading}
             error={leaderboardError}
             username={username}
@@ -118,7 +150,6 @@ export default function useOverlayManager(): Provides {
         <StatsModal>
           <StatsOverlay
             closeModal={closeStatsModal}
-            stats={stats}
             loading={statsLoading}
             error={statsError}
           />
@@ -137,10 +168,8 @@ export default function useOverlayManager(): Provides {
     closeStatsModal,
     closeHelpModal,
     closeLeaderboardModal,
-    leaderboard,
     leaderboardError,
     leaderboardLoading,
-    stats,
     statsError,
     statsLoading,
     updateUsername,

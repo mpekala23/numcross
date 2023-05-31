@@ -19,10 +19,8 @@ export default function HelpOverlay({ closeModal }: Props) {
       <ul className="list-disc pl-4">
         <li>Numbers cannot start with a leading 0.</li>
         <li>
-          For the leaderboard and stats, your time starts as soon as the puzzle
-          goes live and ends when you solve it. There is no pausing, and
-          cheating will be detected and invalidate scores from appearing on the
-          leaderboard.
+          Some clues build off each other. If you get stuck or a clue doesn't
+          make sense, explore the rest of the puzzle.
         </li>
       </ul>
     </div>

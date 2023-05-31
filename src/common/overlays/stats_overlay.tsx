@@ -1,26 +1,19 @@
-import { UserStats } from "@/types/stats";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback } from "react";
 import Slink from "../../components/slink";
-import Stats from "../../components/stats"
-
-// David Devlog: I refactored some of this code into a stats component to make it easier to render in other places.
+import Stats from "../../components/stats";
+import useHeader from "@/hooks/useHeader";
 
 interface Props {
-  stats: UserStats | null;
   loading: boolean;
   error: string;
   closeModal: () => void;
 }
 
-export default function StatsOverlay({
-  closeModal,
-  stats,
-  loading,
-  error,
-}: Props) {
+export default function StatsOverlay({ closeModal, loading, error }: Props) {
   const supabase = useSupabaseClient();
   const user = useUser();
+  const { stats } = useHeader();
 
   // For rendering a message prompting non-logged in users to log in
   // or create an account
@@ -65,9 +58,7 @@ export default function StatsOverlay({
     if (!user?.id) return renderNotLoggedIn();
     if (loading) return renderLoading();
     if (error.length > 0 || (!loading && !stats)) return renderError(error);
-    return(
-      <Stats stats={stats} />
-    )
+    return <Stats stats={stats} />;
   }, [
     user?.id,
     loading,
@@ -85,7 +76,9 @@ export default function StatsOverlay({
       {user && (
         <Slink
           onClick={() => {
-            supabase.auth.signOut();
+            supabase.auth.signOut().then(() => {
+              localStorage.clear();
+            });
           }}
           href=""
         >

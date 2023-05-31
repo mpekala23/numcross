@@ -37,14 +37,11 @@ function withinDays(a: Date, b: Date, days: number) {
 
 // Relatively hacky interface, will maybe eventually want to get firmer
 // types from the supabase
-interface DBPuzzleLike {
-  live_date: string;
-}
-export function getStreaks(puzzles: DBPuzzleLike[]): {
+export function getStreaks(puzzles: any): {
   currentStreak: number;
   maxStreak: number;
 } {
-  const sortedPuzzles = puzzles.sort((a, b) => {
+  const sortedPuzzles = puzzles.sort((a: any, b: any) => {
     const aDate = new Date(a.live_date);
     const bDate = new Date(b.live_date);
     return aDate.getTime() - bDate.getTime();
@@ -89,14 +86,8 @@ export function getStreaks(puzzles: DBPuzzleLike[]): {
   };
 }
 
-// Again, relatively hacky for now, will maybe want to make
-// firmer types from the supabase
-interface DBSolveLike {
-  time: number;
-}
-
-export function getAverageSolveTime(solves: DBSolveLike[]) {
-  let totalSolveTime = solves.reduce((acc, solve) => {
+export function getAverageSolveTime(solves: any) {
+  let totalSolveTime = solves.reduce((acc: number, solve: any) => {
     return acc + solve.time;
   }, 0);
   return totalSolveTime / solves.length;

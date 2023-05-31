@@ -22,9 +22,12 @@ import {
   storeSolve,
   forgetSolve,
   storeAttempt,
+  mineCatch,
+  storeCatch,
 } from "@/api/storage";
 import { useStopwatch } from "react-timer-hook";
 import StartOverlay from "@/components/start_overlay";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [numcross, setNumcross] = useState<Numcross | null>(null);
@@ -50,6 +53,16 @@ export default function Home() {
   const [solve, setSolve] = useState<Solve | null>(null);
   const [SolvedModal, openSolved, closeSolved] = useModal();
   const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
+  const router = useRouter();
+
+  // Catch user id for mobile
+  useEffect(() => {
+    const caught = mineCatch();
+    if (!caught && user) {
+      storeCatch(true);
+      router.replace("/catch_user?uid=" + user.id);
+    }
+  }, [router, user]);
 
   // Function that _just_ gets the puzzle
   useEffect(() => {
@@ -76,13 +89,30 @@ export default function Home() {
       if (matt) {
         setAttempt(matt);
         setScratch(matt.scratch);
-        // startStopwatch();
+        startStopwatch();
       } else {
         openStart();
       }
     };
     asyncWork();
-  }, [numcross, openStart]);
+  }, [numcross, openStart, startStopwatch]);
+
+  // If you've already solved the puzzle, fills in the squares with
+  // the solution
+  const cheatScratch = useCallback(() => {
+    if (!numcross) return;
+    const shape = numcross.solution.shape;
+    const newScratch: Scratch = {};
+    for (let rx = 0; rx < shape[0]; rx++) {
+      for (let cx = 0; cx < shape[1]; cx++) {
+        const answer = numcross.solution.answers[rx][cx];
+        if (answer === "blank") continue;
+        newScratch[cellKey(rx, cx)] = answer;
+      }
+    }
+    closeStart();
+    setScratch(newScratch);
+  }, [numcross, closeStart]);
 
   // Function that _just_ sees if we've already solved this puzzle
   useEffect(() => {
@@ -100,6 +130,7 @@ export default function Home() {
         } else {
           const existSolve = await getSolve(user.id, numcross.id);
           if (existSolve) {
+            cheatScratch();
             setShouldPopOff(false);
             setSolve(existSolve);
           }
@@ -107,7 +138,7 @@ export default function Home() {
       }
     };
     asyncWork();
-  }, [numcross, user]);
+  }, [numcross, user, cheatScratch]);
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
@@ -147,10 +178,11 @@ export default function Home() {
         puzzleId: numcross.id,
         startTime: attempt.startTime,
         endTime: new Date().toISOString(),
-        time: 0, // TODO: make real
+        time: attempt.time, // TODO: make real
       };
       if (!isEqual(newSolve, solve)) {
-        setSolve(newSolve);}
+        setSolve(newSolve);
+      }
       if (user) {
         // NOTE: This call might fail, right now we just ignore it
         verifyAttempt(attempt, user.id);
@@ -174,7 +206,7 @@ export default function Home() {
     }
   }, [attempt, lastAttempt, solve, setLastAttempt, checkPuzzle]);
 
- const incrementTime = useCallback(() => {
+  const incrementTime = useCallback(() => {
     if (!attempt) return;
     const newAttempt = {
       ...attempt,
@@ -196,13 +228,14 @@ export default function Home() {
       setShouldPopOff(false);
       openSolved();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [solve, shouldPopOff, openSolved]);
 
   if (!numcross) return <div>Loading...</div>;
 
   if (pageError) return <div>{pageError}</div>;
 
-  console.log('big bootie')
+  console.log("big bootie");
   return (
     <>
       <Head>
@@ -212,7 +245,6 @@ export default function Home() {
           content="You're probably not smart enough for this."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/logo64_black.png" />
       </Head>
       <div className="flex w-full flex-1 flex-col justify-center items-center my-8">
         <Crossword
