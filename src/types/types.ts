@@ -114,4 +114,9 @@ export interface Friend {
   username: string;
 }
 
-export type LoadingStatus = "idle" | "loading" | "success" | "error";
+export type LoadingStatus =
+  | "idle"
+  | "loading"
+  | "success"
+  | "error"
+  | "reloading";

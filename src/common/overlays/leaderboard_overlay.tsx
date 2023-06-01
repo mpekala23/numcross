@@ -3,14 +3,17 @@ import Slink from "../../components/slink";
 import { solveSecondsToString } from "@/utils";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
-import useHeader from "@/hooks/useHeader";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import ReactLoading from "react-loading";
+import {
+  refreshPrivateLeaderboard,
+  refreshPublicLeaderboard,
+} from "@/redux/slices/leaderboards";
 
 interface Props {
   closeModal: () => void;
   updateUsername: (username: string) => void;
   username: string | null;
-  loading: boolean;
-  error: string;
 }
 
 function RenderNoUsername(
@@ -67,45 +70,67 @@ export default function LeaderboardOverlay({
   closeModal,
   updateUsername,
   username,
-  loading,
-  error,
 }: Props) {
   const user = useUser();
+  const dispatch = useAppDispatch();
   const [myIndex, setMyIndex] = useState<number | null>(null);
   const editState = useState("");
   const [tab, setTab] = useState<"global" | "private">(
     user ? "private" : "global"
   );
-  const { leaderboard: stats, privateLeaderboard: myStats } = useHeader();
+  const {
+    privateStatus,
+    private: privateLeaderboard,
+    publicStatus,
+    public: publicLeaderboard,
+  } = useAppSelector((state) => state.leaderboards);
+
+  useEffect(() => {
+    dispatch(refreshPublicLeaderboard());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(refreshPrivateLeaderboard({ userId: user.id }));
+    }
+  }, [dispatch, user]);
 
   // Update myIndex
   useEffect(() => {
-    if (tab === "global" || !myStats) {
-      for (let ix = 0; ix < (stats?.today ? stats.today.length : 0); ix += 1) {
-        if (stats?.today && stats.today[ix].username === username) {
+    if (tab === "global" || !privateLeaderboard) {
+      for (
+        let ix = 0;
+        ix < (publicLeaderboard?.today ? publicLeaderboard.today.length : 0);
+        ix += 1
+      ) {
+        if (
+          publicLeaderboard?.today &&
+          publicLeaderboard.today[ix].username === username
+        ) {
           setMyIndex(ix);
         }
       }
     } else {
       for (
         let ix = 0;
-        ix < (myStats?.today ? myStats.today.length : 0);
+        ix < (privateLeaderboard?.today ? privateLeaderboard.today.length : 0);
         ix += 1
       ) {
-        if (myStats?.today && myStats.today[ix].friend.username === username) {
+        if (
+          privateLeaderboard?.today &&
+          privateLeaderboard.today[ix].friend.username === username
+        ) {
           setMyIndex(ix);
         }
       }
     }
-  }, [stats, myStats, username, tab]);
+  }, [publicLeaderboard, privateLeaderboard, username, tab]);
 
   // For rendering a little loading spinner
   const renderLoading = useCallback(() => {
     return (
-      <div className="flex h-16 justify-center items-center">
-        <div className="w-4 h-4 border-dashed border-2 border-slate-600 animate-spin" />
-        <p className="text-xl font-body px-4">Loading...</p>
-        <div className="w-4 h-4 border-dashed border-2 border-slate-600 animate-spin" />
+      <div className="flex w-full flex-1 justify-center items-center">
+        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
       </div>
     );
   }, []);
@@ -121,9 +146,13 @@ export default function LeaderboardOverlay({
 
   // For rendering the content, once loaded without error
   const renderContent = useCallback(() => {
-    if (loading) return renderLoading();
-    if (error.length > 0 || (!loading && !stats)) return renderError(error);
-    if (!stats) return renderError("No stats found. Are you logged in?");
+    if (
+      (tab === "global" && publicStatus === "loading") ||
+      (tab === "private" && privateStatus === "loading")
+    )
+      return renderLoading();
+    if (!publicLeaderboard && !privateLeaderboard)
+      return renderError("No stats found. Are you logged in?");
 
     return (
       <div>
@@ -179,7 +208,7 @@ export default function LeaderboardOverlay({
           </thead>
           {tab === "global" ? (
             <tbody>
-              {stats.today.map((user, index) => {
+              {(publicLeaderboard || { today: [] }).today.map((user, index) => {
                 return (
                   <tr
                     key={index}
@@ -198,31 +227,32 @@ export default function LeaderboardOverlay({
             </tbody>
           ) : (
             <tbody>
-              {(myStats || { today: [] }).today.map((entry, index) => {
-                return (
-                  <tr
-                    key={index}
-                    className={index === myIndex ? "bg-slate-300" : ""}
-                  >
-                    <td className="border px-4 py-2">{index}</td>
-                    <td className="border px-4 py-2">
-                      {index === myIndex ? username : entry.friend.username}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {solveSecondsToString(entry.time || 0)}
-                    </td>
-                  </tr>
-                );
-              })}
+              {(privateLeaderboard || { today: [] }).today.map(
+                (entry, index) => {
+                  return (
+                    <tr
+                      key={index}
+                      className={index === myIndex ? "bg-slate-300" : ""}
+                    >
+                      <td className="border px-4 py-2">{index}</td>
+                      <td className="border px-4 py-2">
+                        {index === myIndex ? username : entry.friend.username}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {solveSecondsToString(entry.time || 0)}
+                      </td>
+                    </tr>
+                  );
+                }
+              )}
             </tbody>
           )}
         </table>
       </div>
     );
   }, [
-    loading,
-    error,
-    stats,
+    privateLeaderboard,
+    publicLeaderboard,
     renderError,
     renderLoading,
     myIndex,
@@ -230,7 +260,8 @@ export default function LeaderboardOverlay({
     tab,
     closeModal,
     user,
-    myStats,
+    privateStatus,
+    publicStatus,
   ]);
 
   if (user && !username) return RenderNoUsername(editState, updateUsername);

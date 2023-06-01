@@ -30,6 +30,8 @@ import {
   setSolve,
   verifyAttempt,
 } from "@/redux/slices/progress";
+import ReactLoading from "react-loading";
+import { refreshUserStats } from "@/redux/slices/stats";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -100,6 +102,7 @@ export default function Home() {
   useEffect(() => {
     if (!user || !numcross) return;
     dispatch(fetchSolve({ userId: user.id, puzzleId: numcross.id }));
+    dispatch(refreshUserStats({ userId: user.id }));
   }, [dispatch, user, numcross]);
 
   // If you've already solved the puzzle, fills in the squares with
@@ -140,14 +143,15 @@ export default function Home() {
   // Function that sees if the logged in user has already solved this puzzle
   useEffect(() => {
     if (fetchSolveStatus !== "success" || !solve) return;
-    dispatch(
-      setAttempt({
-        puzzleId: solve.puzzleId,
-        startTime: solve.startTime,
-        scratch: {},
-        time: solve.time,
-      })
-    );
+    const newAttempt = {
+      puzzleId: solve.puzzleId,
+      startTime: solve.startTime,
+      scratch: {},
+      time: solve.time,
+    };
+    dispatch(setAttempt(newAttempt));
+    storeAttempt(newAttempt);
+    setLastAttempt(newAttempt);
     cheatScratch();
     setShouldPopOff(false);
     pauseStopwatch();
@@ -204,6 +208,12 @@ export default function Home() {
     }
   }, [dispatch, numcross, attempt, solve, user]);
 
+  useEffect(() => {
+    if (verifyAttemptStatus === "success" && solve && user) {
+      dispatch(refreshUserStats({ userId: user.id }));
+    }
+  }, [dispatch, solve, user, verifyAttemptStatus]);
+
   // Update the attempt in local storage on change
   useEffect(() => {
     if (attempt && !isEqual(attempt, lastAttempt) && !solve) {
@@ -239,7 +249,13 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [solve, shouldPopOff, openSolved]);
 
-  if (!numcross) return <div>Loading...</div>;
+  if (!numcross || puzzleStatus !== "success") {
+    return (
+      <div className="flex w-full flex-1 justify-center items-center">
+        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
+      </div>
+    );
+  }
 
   return (
     <>

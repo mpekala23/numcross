@@ -4,8 +4,10 @@ import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import { useEffect } from "react";
 import Slink from "@/components/slink";
 import { useRouter } from "next/router";
+import useDev from "@/hooks/useDev";
 
 export default function SignupPage() {
+  const { baseUrl } = useDev();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function SignupPage() {
       <p className="text-xl">Sign up</p>
       <Auth
         view="sign_up"
-        redirectTo=""
+        redirectTo={`${baseUrl}`}
         appearance={{
           theme: ThemeSupa,
           variables: {

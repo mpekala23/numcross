@@ -1,9 +1,9 @@
-import { getPrivateLeaderboard, makeFriends, setUsername } from "@/api/backend";
+import { backendMakeFriends, backendSetUsername } from "@/api/backend";
 import Slink from "@/components/slink";
 import useDev from "@/hooks/useDev";
-import useHeader from "@/hooks/useHeader";
 import useUsername from "@/hooks/useUsername";
-import { PrivateLeaderboardStats } from "@/types/stats";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { refreshPrivateLeaderboard } from "@/redux/slices/leaderboards";
 import { solveSecondsToString } from "@/utils";
 import { ClipboardIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -12,6 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import ReactLoading from "react-loading";
 import { RWebShare } from "react-web-share";
 
 function RenderLoggedOut() {
@@ -83,42 +84,28 @@ function RenderNoUsername(
   );
 }
 
-export default function Pair() {
+export default function MyLeaderboard() {
   const user = useUser();
   const { baseUrl } = useDev();
+  const dispatch = useAppDispatch();
 
   const searchParams = useSearchParams();
   const otherId = searchParams.get("with");
   const router = useRouter();
   const [myIndex, setMyIndex] = useState<number | null>(null);
 
-  const { privateLeaderboard, setPrivateLeaderboard } = useHeader();
+  const { privateStatus, private: privateLeaderboard } = useAppSelector(
+    (state) => state.leaderboards
+  );
 
   const editState = useState("");
-  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const [_, setLeaderboardError] = useState<string>("");
   const { username, setUsername: setUsernameState } = useUsername();
-  const refreshLeaderboard = useCallback(async () => {
-    if (!user) return;
-    try {
-      setLeaderboardLoading(true);
-      const stats = await getPrivateLeaderboard(user.id);
-      setLeaderboardLoading(false);
-      if (!stats) {
-        setLeaderboardError("Can't get leaderboard. Try again later.");
-        setLeaderboardLoading(false);
-        return;
-      }
-      setPrivateLeaderboard(stats);
-      setLeaderboardLoading(false);
-    } catch (error) {
-      setLeaderboardError("Unknown error while getting the leaderboard.");
-      setLeaderboardLoading(false);
-    }
-  }, [user, setPrivateLeaderboard]);
+
   useEffect(() => {
-    refreshLeaderboard();
-  }, [refreshLeaderboard, username]);
+    if (!user || (username?.length || 0) <= 0) return;
+    dispatch(refreshPrivateLeaderboard({ userId: user.id }));
+  }, [dispatch, username, user]);
+
   const updateUsername = useCallback(
     async (newUsername: string) => {
       if (!user) return;
@@ -128,7 +115,7 @@ export default function Pair() {
         });
         return;
       }
-      const { data, error } = await setUsername(user.id, newUsername);
+      const { data, error } = await backendSetUsername(user.id, newUsername);
       if (data?.status === "ok") {
         setUsernameState(newUsername);
       } else if (error?.message?.includes("duplicate")) {
@@ -144,7 +131,7 @@ export default function Pair() {
   useEffect(() => {
     if (!otherId || otherId.length <= 0 || !user) return;
 
-    makeFriends(user.id, otherId).then((result) => {
+    backendMakeFriends(user.id, otherId).then((result) => {
       if (result) {
         // clears the params
         const { pathname } = router;
@@ -250,8 +237,12 @@ export default function Pair() {
     );
   }, [magicLink, privateLeaderboard, myIndex, username]);
 
-  if (leaderboardLoading) {
-    return <p>Loading</p>;
+  if (privateStatus === "loading") {
+    return (
+      <div className="flex w-full flex-1 justify-center items-center">
+        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
+      </div>
+    );
   }
 
   return (

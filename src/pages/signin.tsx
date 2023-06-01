@@ -4,8 +4,10 @@ import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
 import { useEffect } from "react";
 import Slink from "@/components/slink";
 import { useRouter } from "next/router";
+import useDev from "@/hooks/useDev";
 
 export default function LoginPage() {
+  const { baseUrl } = useDev();
   const supabaseClient = useSupabaseClient();
   const user = useUser();
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function LoginPage() {
       <p className="text-xl">Sign in</p>
       <Auth
         view="sign_in"
-        redirectTo="https://numcross.com"
+        redirectTo={`${baseUrl}`}
         appearance={{
           theme: ThemeSupa,
           variables: {

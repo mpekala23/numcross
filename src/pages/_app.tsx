@@ -8,16 +8,9 @@ import Layout from "@/common/layout";
 import { Toaster } from "react-hot-toast";
 import { NumpadContext } from "@/context/NumpadContext";
 import { SettingsContext } from "@/context/SettingsContext";
-import { ConfettiContext } from "@/context/ConfettiContext";
 import { NumpadVal, Settings } from "@/types/types";
 import { DEFAULT_SETTINGS } from "@/utils";
 import { usePathname } from "next/navigation";
-import { HeaderContext } from "@/context/HeaderContext";
-import {
-  LeaderboardStats,
-  PrivateLeaderboardStats,
-  UserStats,
-} from "@/types/stats";
 import { Provider } from "react-redux";
 import store from "@/redux/store";
 
@@ -34,14 +27,6 @@ export default function App({
 
   const [numpadVal, setNumpadVal] = useState<NumpadVal>("nothing");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [confetti, setConfetti] = useState<number>(0);
-  // TODO: Mark is being hacky and lazy. We should move this to redux at some point
-  const [leaderboardTrigger, setLeaderboardTrigger] = useState<boolean>(false);
-  const [statsTrigger, setStatsTrigger] = useState<boolean>(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardStats | null>(null);
-  const [privateLeaderboard, setPrivateLeaderboard] =
-    useState<PrivateLeaderboardStats | null>(null);
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
   const currentPage = usePathname();
 
   return (
@@ -50,33 +35,14 @@ export default function App({
         supabaseClient={supabaseClient}
         initialSession={pageProps.initialSession}
       >
-        <HeaderContext.Provider
-          value={{
-            leaderboardTrigger,
-            refreshLeaderboards: () => setLeaderboardTrigger((trig) => !trig),
-            statsTrigger,
-            refreshStats: () => setStatsTrigger((trig) => !trig),
-            leaderboard,
-            setLeaderboard,
-            privateLeaderboard,
-            setPrivateLeaderboard,
-            stats: userStats,
-            setStats: setUserStats,
-          }}
-        >
-          <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>
-            <SettingsContext.Provider value={{ settings, setSettings }}>
-              <ConfettiContext.Provider
-                value={{ confetti, startConfetti: setConfetti }}
-              >
-                <Layout currentPage={currentPage || ""}>
-                  <Component {...pageProps} />
-                </Layout>
-                <Toaster />
-              </ConfettiContext.Provider>
-            </SettingsContext.Provider>
-          </NumpadContext.Provider>
-        </HeaderContext.Provider>
+        <NumpadContext.Provider value={{ numpadVal, setNumpadVal }}>
+          <SettingsContext.Provider value={{ settings, setSettings }}>
+            <Layout currentPage={currentPage || ""}>
+              <Component {...pageProps} />
+            </Layout>
+            <Toaster />
+          </SettingsContext.Provider>
+        </NumpadContext.Provider>
       </SessionContextProvider>
     </Provider>
   );

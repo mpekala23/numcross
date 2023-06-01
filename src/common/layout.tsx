@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Header from "./header";
 import Confetti from "react-confetti";
-import useConfetti from "@/hooks/useConfetti";
+import { useAppSelector } from "@/redux/hooks";
 
 interface Props {
   children?: JSX.Element | JSX.Element[];
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function Layout({ children, currentPage }: Props) {
-  const { confetti } = useConfetti();
+  const confetti = useAppSelector((state) => state.progress.confetti);
   const [width, setWidth] = React.useState(0);
   const [height, setHeight] = React.useState(0);
 

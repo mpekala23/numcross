@@ -1,13 +1,10 @@
 import Slink from "@/components/slink";
-import useConfetti from "@/hooks/useConfetti";
 import { Solve } from "@/types/types";
-import { UserStats } from "@/types/stats";
 import { getSolveTime, solveSecondsToString } from "@/utils";
 import { useUser } from "@supabase/auth-helpers-react";
 import { RWebShare } from "react-web-share";
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback } from "react";
 import { ShareIcon } from "@heroicons/react/24/outline";
-import { getStats } from "@/api/backend";
 import Stats from "../../components/stats";
 
 interface Props {
@@ -16,43 +13,15 @@ interface Props {
 }
 
 export default function SolvedOverlay({ closeModal, solve }: Props) {
-  const { startConfetti } = useConfetti();
   const user = useUser();
 
-  useEffect(() => {
-    startConfetti();
-  }, [startConfetti]);
-
-  // DAVID DEVLOG: rendering stats
-
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
-
-  const refreshUserStats = useCallback(async () => {
-    if (!user) return;
-    const stats = await getStats(user.id);
-    setStats(stats);
-    setStatsLoading(false);
-  }, [user]);
-
-  useEffect(() => {
-    refreshUserStats();
-  }, [refreshUserStats]);
-
   const renderAccountStats = useCallback(() => {
-    if (statsLoading) {
-      return (
-        <div className="justify-around pt-4">
-          <p>Stats Loading...</p>
-        </div>
-      );
-    }
     return (
       <div className="justify-around pt-4">
-        <Stats stats={stats} />
+        <Stats />
       </div>
     );
-  }, [stats, statsLoading]);
+  }, []);
 
   const renderNoAccountPlea = useCallback(() => {
     return (
@@ -67,15 +36,11 @@ export default function SolvedOverlay({ closeModal, solve }: Props) {
     );
   }, []);
 
-  const solveTime = useMemo(() => {
-    return solve
-      ? solveSecondsToString(
-          getSolveTime(new Date(solve.startTime), new Date(solve.endTime))
-        )
-      : "Congrats!";
-  }, [solve]);
-
-  // rendering share
+  const solveTime = solve
+    ? solveSecondsToString(
+        getSolveTime(new Date(solve.startTime), new Date(solve.endTime))
+      )
+    : "Congrats!";
 
   return (
     <div className="flex flex-col justify-center align-center">

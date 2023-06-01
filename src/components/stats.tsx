@@ -1,6 +1,7 @@
-import { UserStats } from "@/types/stats";
 import React, { useCallback } from "react";
 import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
+import { useAppSelector } from "@/redux/hooks";
+import ReactLoading from "react-loading";
 
 function renderStat({ name, value }: { name: string; value: number | string }) {
   return (
@@ -12,10 +13,9 @@ function renderStat({ name, value }: { name: string; value: number | string }) {
     </div>
   );
 }
-interface Props {
-  stats: UserStats | null
-}
-export default function Stats({stats}: Props) {
+
+export default function Stats() {
+  const { status, userStats } = useAppSelector((state) => state.stats);
 
   const renderError = useCallback((errorString: string) => {
     return (
@@ -24,28 +24,34 @@ export default function Stats({stats}: Props) {
       </div>
     );
   }, []);
-  if (!stats) return renderError("No stats found. Are you logged in?");
+
+  if (status !== "success") {
+    <ReactLoading height={100} width={100} type={"cubes"} color="#111" />;
+  }
+
+  if (!userStats) return renderError("No stats found. Are you logged in?");
+
   return (
     <div>
       <div className="flex justify-around">
-        {renderStat({ name: "Played", value: stats.numPlayed })}
+        {renderStat({ name: "Played", value: userStats.numPlayed })}
         {renderStat({
           name: "Win %",
-          value: asPercentage(stats.numSolved, stats.numPlayed),
+          value: asPercentage(userStats.numSolved, userStats.numPlayed),
         })}
         {renderStat({
           name: "Avg. Solve Time",
-          value: solveSecondsToString(stats.averageSolveTime),
+          value: solveSecondsToString(userStats.averageSolveTime),
         })}
       </div>
       <div className="flex justify-around">
         {renderStat({
           name: "Current Streak",
-          value: streakToString(stats.currentStreak),
+          value: streakToString(userStats.currentStreak),
         })}
         {renderStat({
           name: "Max Streak",
-          value: streakToString(stats.maxStreak),
+          value: streakToString(userStats.maxStreak),
         })}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { getUsername } from "@/api/backend";
+import { backendGetUsername } from "@/api/backend";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ export default function useUsername() {
   useEffect(() => {
     const dowork = async () => {
       if (user) {
-        const newUsername = await getUsername(user.id);
+        const newUsername = await backendGetUsername(user.id);
         setUsername(newUsername);
       }
     };
