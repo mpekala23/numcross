@@ -35,16 +35,13 @@ export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
 
 export async function getTodaysNumcross(): Promise<{
   numcross: Numcross;
-} | null> {
-  // Load the numcross
+}> {
   const { data, error } = await getJSON<TodaysNumcrossResp>(
     "/api/todays_numcross"
   );
   if (error || !data?.numcross) {
-    toast("There was an error getting today's puzzle.", { icon: "🚫" });
-    return null;
+    throw Error("There was an error getting today's puzzle.");
   }
-
   return { numcross: data.numcross };
 }
 

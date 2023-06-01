@@ -113,3 +113,5 @@ export interface Friend {
   uid: string;
   username: string;
 }
+
+export type LoadingStatus = "idle" | "loading" | "success" | "error";

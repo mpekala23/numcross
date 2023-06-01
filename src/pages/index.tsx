@@ -2,7 +2,7 @@ import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useCallback, useEffect, useState } from "react";
 import { Attempt, Numcross, Scratch, Solve } from "@/types/types";
-import { cellKey, isAttemptFull } from "@/utils";
+import { cellKey, getESTDatestring, isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
@@ -28,12 +28,18 @@ import {
 import { useStopwatch } from "react-timer-hook";
 import StartOverlay from "@/components/start_overlay";
 import { useRouter } from "next/router";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { refreshTodaysNumcross } from "@/redux/slices/puzzles";
 
 export default function Home() {
-  const [numcross, setNumcross] = useState<Numcross | null>(null);
+  const { status: puzzleStatus, puzzleMap } = useAppSelector(
+    (state) => state.puzzles
+  );
+  const numcross = puzzleMap[getESTDatestring()] || null;
+  const dispatch = useAppDispatch();
+
   const [scratch, setScratch] = useState<Scratch>({});
   const [attempt, setAttempt] = useState<Attempt | null>(null);
-  const [pageError, setPageError] = useState<string | null>(null);
   const [shouldPopOff, setShouldPopOff] = useState(true);
   const { seconds, start: startStopwatch } = useStopwatch();
   const user = useUser();
@@ -66,15 +72,7 @@ export default function Home() {
 
   // Function that _just_ gets the puzzle
   useEffect(() => {
-    const performGet: () => Promise<void> = async () => {
-      const result = await getTodaysNumcross();
-      if (!result) {
-        setPageError("Error loading today's numcross");
-      } else {
-        setNumcross(result.numcross);
-      }
-    };
-    performGet();
+    dispatch(refreshTodaysNumcross());
   }, []);
 
   // Function that _just_ loads our attempt from local storage
@@ -232,8 +230,6 @@ export default function Home() {
   }, [solve, shouldPopOff, openSolved]);
 
   if (!numcross) return <div>Loading...</div>;
-
-  if (pageError) return <div>{pageError}</div>;
 
   console.log("big bootie");
   return (
