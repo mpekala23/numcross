@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import progressReducer from "./slices/progress";
 import puzzlesReducer from "./slices/puzzles";
 
 const store = configureStore({
   reducer: {
+    progress: progressReducer,
     puzzles: puzzlesReducer,
   },
 });

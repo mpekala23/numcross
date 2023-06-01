@@ -1,21 +1,15 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useCallback, useEffect, useState } from "react";
-import { Attempt, Numcross, Scratch, Solve } from "@/types/types";
-import { cellKey, getESTDatestring, isAttemptFull } from "@/utils";
+import { Attempt, Scratch, Solve } from "@/types/types";
+import { cellKey, isAttemptFull } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
 import { isEqual } from "lodash";
 import SolvedOverlay from "@/common/overlays/solved_overlay";
 import { useUser } from "@supabase/auth-helpers-react";
-import {
-  getTodaysNumcross,
-  getSolve,
-  startAttempt,
-  verifyAttempt,
-  logSolve,
-} from "@/api/backend";
+import { backendStartAttempt, backendLogSolve } from "@/api/backend";
 import {
   mineAttempt,
   mineSolve,
@@ -30,35 +24,46 @@ import StartOverlay from "@/components/start_overlay";
 import { useRouter } from "next/router";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { refreshTodaysNumcross } from "@/redux/slices/puzzles";
+import {
+  fetchSolve,
+  setAttempt,
+  setSolve,
+  verifyAttempt,
+} from "@/redux/slices/progress";
 
 export default function Home() {
-  const { status: puzzleStatus, puzzleMap } = useAppSelector(
+  const dispatch = useAppDispatch();
+  const { status: puzzleStatus, today: numcross } = useAppSelector(
     (state) => state.puzzles
   );
-  const numcross = puzzleMap[getESTDatestring()] || null;
-  const dispatch = useAppDispatch();
+  const { attempt, solve, fetchSolveStatus, verifyAttemptStatus } =
+    useAppSelector((state) => state.progress);
+  const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
 
   const [scratch, setScratch] = useState<Scratch>({});
-  const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [shouldPopOff, setShouldPopOff] = useState(true);
-  const { seconds, start: startStopwatch } = useStopwatch();
+  const {
+    seconds,
+    start: startStopwatch,
+    pause: pauseStopwatch,
+  } = useStopwatch();
   const user = useUser();
   const [StartModal, openStart, closeStart] = useModal({
     onClose: () => {
       if (!numcross) return;
-      setAttempt({
-        puzzleId: numcross.id,
-        startTime: new Date().toISOString(),
-        scratch: {},
-        time: 0,
-      });
-      if (user) startAttempt(user.id, numcross.id);
+      dispatch(
+        setAttempt({
+          puzzleId: numcross.id,
+          startTime: new Date().toISOString(),
+          scratch: {},
+          time: 0,
+        })
+      );
+      if (user) backendStartAttempt(user.id, numcross.id);
       startStopwatch();
     },
   });
-  const [solve, setSolve] = useState<Solve | null>(null);
   const [SolvedModal, openSolved, closeSolved] = useModal();
-  const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
   const router = useRouter();
 
   // Catch user id for mobile
@@ -73,13 +78,9 @@ export default function Home() {
   // Function that _just_ gets the puzzle
   useEffect(() => {
     dispatch(refreshTodaysNumcross());
-  }, []);
+  }, [dispatch]);
 
   // Function that _just_ loads our attempt from local storage
-  // NOTE TO MARK: I think this startStopwatch is extraneous; the stopwatch was still working for me.
-  // In any event it caused the whole page to re-render every second which was causing bugs so I took it out.
-  // If it needs to go back in be sure to do so safely
-
   useEffect(() => {
     const asyncWork = async () => {
       if (!numcross) return;
@@ -94,6 +95,12 @@ export default function Home() {
     };
     asyncWork();
   }, [numcross, openStart, startStopwatch]);
+
+  // Function that _just_ starts getting solve from backend if there's a user
+  useEffect(() => {
+    if (!user || !numcross) return;
+    dispatch(fetchSolve({ userId: user.id, puzzleId: numcross.id }));
+  }, [dispatch, user, numcross]);
 
   // If you've already solved the puzzle, fills in the squares with
   // the solution
@@ -112,39 +119,46 @@ export default function Home() {
     setScratch(newScratch);
   }, [numcross, closeStart]);
 
-  // Function that _just_ sees if we've already solved this puzzle
+  // Function that sees if we solved this puzzle logged out
   useEffect(() => {
     const asyncWork = async () => {
-      if (!numcross) return;
+      if (!numcross || !user) return;
       const msol = mineSolve(numcross.id);
-      if (user) {
-        if (msol) {
-          // Only happens if the user solved this puzzle logged out
-          await startAttempt(user.id, numcross.id);
-          await logSolve(msol, user.id);
-          forgetSolve(numcross.id); // TODO: Add a function that will backfill all solves
-          setShouldPopOff(false);
-          setSolve(msol);
-        } else {
-          const existSolve = await getSolve(user.id, numcross.id);
-          if (existSolve) {
-            cheatScratch();
-            setShouldPopOff(false);
-            setSolve(existSolve);
-          }
-        }
+      if (msol) {
+        // Only happens if the user solved this puzzle logged out
+        await backendStartAttempt(user.id, numcross.id);
+        await backendLogSolve(msol, user.id);
+        forgetSolve(numcross.id); // TODO: Add a function that will backfill all solves
+        setShouldPopOff(false);
+        dispatch(setSolve(msol));
+        pauseStopwatch();
       }
     };
     asyncWork();
-  }, [numcross, user, cheatScratch]);
+  }, [dispatch, numcross, user, cheatScratch, pauseStopwatch]);
+
+  // Function that sees if the logged in user has already solved this puzzle
+  useEffect(() => {
+    if (fetchSolveStatus !== "success" || !solve) return;
+    dispatch(
+      setAttempt({
+        puzzleId: solve.puzzleId,
+        startTime: solve.startTime,
+        scratch: {},
+        time: solve.time,
+      })
+    );
+    cheatScratch();
+    setShouldPopOff(false);
+    pauseStopwatch();
+  }, [dispatch, fetchSolveStatus, solve, cheatScratch, pauseStopwatch]);
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
-    setAttempt((a) => {
-      if (!a || a.scratch === scratch) return a;
-      return { ...a, scratch };
-    });
-  }, [scratch]);
+    if (!attempt) return;
+    dispatch(setAttempt({ ...attempt, scratch }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, scratch]);
 
   const checkPuzzle = useCallback(() => {
     // Puzzle must be loaded, an attempt must've been started, it must not already
@@ -152,7 +166,7 @@ export default function Home() {
     if (
       !numcross ||
       !attempt ||
-      solve != null ||
+      solve !== null ||
       !isAttemptFull(attempt, numcross.puzzle)
     ) {
       return;
@@ -176,26 +190,21 @@ export default function Home() {
         puzzleId: numcross.id,
         startTime: attempt.startTime,
         endTime: new Date().toISOString(),
-        time: attempt.time, // TODO: make real
+        time: attempt.time,
       };
-      if (!isEqual(newSolve, solve)) {
-        setSolve(newSolve);
-      }
+      dispatch(setSolve(newSolve));
       if (user) {
         // NOTE: This call might fail, right now we just ignore it
-        verifyAttempt(attempt, user.id);
+        dispatch(verifyAttempt({ userId: user.id }));
       } else {
         storeSolve(newSolve);
       }
     } else {
       toast("Puzzle incorrect", { icon: "😑", id: "incorrect" });
     }
-  }, [numcross, attempt, solve, user]);
+  }, [dispatch, numcross, attempt, solve, user]);
 
-  // Update the attempt over API on change
-  // Check the attempt if it's full
-  // NOTE: Short circuits if the attempt is nul123l or if
-  // the puzzle has already been solved
+  // Update the attempt in local storage on change
   useEffect(() => {
     if (attempt && !isEqual(attempt, lastAttempt) && !solve) {
       storeAttempt(attempt);
@@ -205,13 +214,13 @@ export default function Home() {
   }, [attempt, lastAttempt, solve, setLastAttempt, checkPuzzle]);
 
   const incrementTime = useCallback(() => {
-    if (!attempt) return;
+    if (!attempt || solve) return;
     const newAttempt = {
       ...attempt,
       time: attempt.time + 1,
     };
-    setAttempt(newAttempt);
-  }, [attempt, setAttempt]);
+    dispatch(setAttempt(newAttempt));
+  }, [dispatch, attempt, solve]);
 
   useEffect(() => {
     incrementTime();
@@ -223,6 +232,7 @@ export default function Home() {
     if (solve && shouldPopOff) {
       toast.remove();
       toast("Puzzle solved!", { icon: "🎉", duration: 1000 });
+      pauseStopwatch();
       setShouldPopOff(false);
       openSolved();
     }
@@ -231,7 +241,6 @@ export default function Home() {
 
   if (!numcross) return <div>Loading...</div>;
 
-  console.log("big bootie");
   return (
     <>
       <Head>

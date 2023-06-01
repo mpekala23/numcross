@@ -33,7 +33,7 @@ export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
   return null;
 }
 
-export async function getTodaysNumcross(): Promise<{
+export async function backendGetTodaysNumcross(): Promise<{
   numcross: Numcross;
 }> {
   const { data, error } = await getJSON<TodaysNumcrossResp>(
@@ -45,33 +45,35 @@ export async function getTodaysNumcross(): Promise<{
   return { numcross: data.numcross };
 }
 
-export async function getSolve(
+export async function backendGetSolve(
   userId: string,
   puzzleId: number
 ): Promise<Solve | null> {
-  const { data } = await getJSON<GetSolveResp>("/api/get_solve", {
+  const { data, error } = await getJSON<GetSolveResp>("/api/get_solve", {
     uid: userId,
     pid: puzzleId,
   });
+  if (error) {
+    throw Error("No previous solve");
+  }
   return data?.solve || null;
 }
 
-export async function startAttempt(
+export async function backendStartAttempt(
   userId: string,
   puzzleId: number
-): Promise<null> {
+): Promise<void> {
   const start_req: StartAttemptReq = {
     userId,
     puzzleId,
   };
   await postJSON<StartAttemptReq>("/api/start_attempt", start_req);
-  return null;
 }
 
-export async function verifyAttempt(
+export async function backendVerifyAttempt(
   attempt: Attempt,
   userId: string
-): Promise<VerifyAttemptResp | null> {
+): Promise<VerifyAttemptResp> {
   // Then check if the attempt is correct
   const check_req: VerifyAttemptReq = {
     attempt,
@@ -82,9 +84,8 @@ export async function verifyAttempt(
     check_req
   );
 
-  if (error || !data) {
-    toast("There was an error submitting your attempt.", { icon: "🚫" });
-    return null;
+  if (error || !data || data.errorMessage) {
+    throw Error("There was an error submitting your attempt.");
   }
 
   if (data.correct && userId && !data.saved) {
@@ -96,7 +97,7 @@ export async function verifyAttempt(
   return data;
 }
 
-export async function logSolve(
+export async function backendLogSolve(
   solve: Solve,
   userId: string
 ): Promise<LogSolveResp | null> {

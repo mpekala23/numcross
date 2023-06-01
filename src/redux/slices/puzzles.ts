@@ -1,24 +1,25 @@
-import { getTodaysNumcross } from "@/api/backend";
+import { backendGetTodaysNumcross } from "@/api/backend";
 import { LoadingStatus, Numcross } from "@/types/types";
-import { getESTDatestring } from "@/utils";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-hot-toast";
 
 // State
 export interface PuzzlesState {
   status: LoadingStatus;
-  puzzleMap: { [key: string]: Numcross };
+  today: Numcross | null;
+  archive: { [key: string]: Numcross };
 }
 const INITIAL_STATE: PuzzlesState = {
   status: "idle",
-  puzzleMap: {},
+  today: null,
+  archive: {},
 };
 
-// Actions
+// Async actions
 export const refreshTodaysNumcross = createAsyncThunk(
   "puzzles/refreshTodaysNumcross",
   async () => {
-    const response = await getTodaysNumcross();
+    const response = await backendGetTodaysNumcross();
     return response.numcross;
   }
 );
@@ -35,7 +36,7 @@ export const puzzlesSlice = createSlice({
       })
       .addCase(refreshTodaysNumcross.fulfilled, (state, action) => {
         state.status = "success";
-        state.puzzleMap[getESTDatestring()] = action.payload;
+        state.today = action.payload;
       })
       .addCase(refreshTodaysNumcross.rejected, (state, action) => {
         state.status = "error";
