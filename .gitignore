@@ -45,3 +45,6 @@ next-env.d.ts
 # other
 package-lock.json
 yarn.lock
+
+# infra
+infra/venv
