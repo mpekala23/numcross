@@ -2,7 +2,7 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
+  content: ["./src/**/*.{html,js,jsx,ts,tsx,md,mdx}"],
   theme: {
     extend: {
       fontFamily: {
@@ -23,5 +23,5 @@ module.exports = {
       pattern: /grid-rows-*/,
     },
   ],
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };

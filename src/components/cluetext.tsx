@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { EditableText } from "./EditableText";
 import { solveSecondsToString } from "@/utils";
 

@@ -238,6 +238,7 @@ export const Crossword: FunctionComponent<Props> = ({
         break;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     focusedCol,
     focusedRow,
@@ -316,6 +317,7 @@ export const Crossword: FunctionComponent<Props> = ({
         break;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     focusedCol,
     focusedRow,
@@ -347,7 +349,7 @@ export const Crossword: FunctionComponent<Props> = ({
         return s2;
       });
     },
-    [setScratch, updatePuzzle]
+    [setScratch, updatePuzzle, editable]
   );
 
   useEffect(() => {
@@ -447,6 +449,8 @@ export const Crossword: FunctionComponent<Props> = ({
       focusedCol,
       focusedRow,
       clueMappings,
+      editable,
+      updatePuzzle,
     ]
   );
 

@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { Crossword } from "@/components/crossword";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { Arr, Arr2D, cellKey } from "@/utils";
 import { Numpad } from "@/components/numpad";
 import { cloneDeep } from "lodash";
@@ -14,7 +14,7 @@ import {
 } from "@/types/types";
 import { AddPuzzleReq } from "@/types/api";
 import { useUser } from "@supabase/auth-helpers-react";
-import { addPuzzle } from "@/api/backend";
+import { backendAddPuzzle } from "@/api/backend";
 
 const DEFAULT_PUZZLE: Puzzle = {
   shape: [2, 2],
@@ -65,7 +65,7 @@ export default function Upload() {
     };
 
     setDisabled(true);
-    await addPuzzle(data);
+    await backendAddPuzzle(data);
     setDisabled(false);
   }, [setDisabled, puzzle, scratch, live_date, author, difficulty]);
 
@@ -101,35 +101,32 @@ export default function Upload() {
     [setPuzzle]
   );
 
-  const updateShape = useCallback(
-    (shape: [number, number]) => {
-      setPuzzle((puzzle) => {
-        const copy = cloneDeep(puzzle);
-        const prevShape = copy.shape;
-        copy.shape = cloneDeep(shape);
-        if (prevShape[0] < shape[0]) {
-          copy.clues.push(
-            ...Arr2D(shape[0] - prevShape[0], prevShape[1], BLANK_CLUE)
-          );
-        } else if (prevShape[0] > shape[0]) {
-          copy.clues = copy.clues.slice(0, shape[0]);
-        }
+  const updateShape = useCallback((shape: [number, number]) => {
+    setPuzzle((puzzle) => {
+      const copy = cloneDeep(puzzle);
+      const prevShape = copy.shape;
+      copy.shape = cloneDeep(shape);
+      if (prevShape[0] < shape[0]) {
+        copy.clues.push(
+          ...Arr2D(shape[0] - prevShape[0], prevShape[1], BLANK_CLUE)
+        );
+      } else if (prevShape[0] > shape[0]) {
+        copy.clues = copy.clues.slice(0, shape[0]);
+      }
 
-        if (prevShape[1] < shape[1]) {
-          copy.clues.forEach((r) => {
-            r.push(...Arr(shape[1] - prevShape[1], BLANK_CLUE));
-          });
-        } else if (prevShape[1] > shape[1]) {
-          copy.clues.map((r) => {
-            return r.slice(0, shape[1]);
-          });
-        }
+      if (prevShape[1] < shape[1]) {
+        copy.clues.forEach((r) => {
+          r.push(...Arr(shape[1] - prevShape[1], BLANK_CLUE));
+        });
+      } else if (prevShape[1] > shape[1]) {
+        copy.clues.map((r) => {
+          return r.slice(0, shape[1]);
+        });
+      }
 
-        return copy;
-      });
-    },
-    [updatePuzzle]
-  );
+      return copy;
+    });
+  }, []);
 
   const setDate = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

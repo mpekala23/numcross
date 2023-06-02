@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import useSettings from "@/hooks/useSettings";
 import { RadioGroup } from "@headlessui/react";
 import { Settings, FillMode, DeleteMode } from "@/types/types";
+import useDev from "@/hooks/useDev";
 
 interface Props {
   closeModal: () => void;
@@ -62,6 +63,7 @@ function renderOption<T extends string>({
 
 export default function SettingsOverlay({ closeModal }: Props) {
   const { settings, setSettings } = useSettings();
+  const { version } = useDev();
 
   const updateFillMode = useCallback(
     (value: FillMode) => {
@@ -81,7 +83,8 @@ export default function SettingsOverlay({ closeModal }: Props) {
 
   return (
     <div className="flex flex-col justify-center align-center">
-      <p className="text-2xl font-bold font-title pb-4">Settings</p>
+      <p className="text-2xl font-bold font-title">Settings</p>
+      <p className="text-sm pb-4 text-gray-700">Version {version}</p>
       <RadioGroup value={settings.fillMode} onChange={updateFillMode}>
         <RadioGroup.Label className="mb-8 text-xl">Fill Mode</RadioGroup.Label>
         {renderOption<FillMode>({

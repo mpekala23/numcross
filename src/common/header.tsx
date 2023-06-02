@@ -11,26 +11,27 @@ import { useRouter } from "next/router";
 import { RWebShare } from "react-web-share";
 import useDev from "@/hooks/useDev";
 import useOverlayManager from "./overlays/overlay_manager";
-import useHeader from "@/hooks/useHeader";
+import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
   const { isDev } = useDev();
   const { OverlayManager, openLeaderboard, openHelp, openStats, openSettings } =
     useOverlayManager();
-  const { refreshLeaderboards, refreshStats } = useHeader();
 
   const goToIndex = useCallback(() => {
     router.push("/");
   }, [router]);
-
   return (
     <div className="flex justify-around items-center border-b-2 border-slate-200 p-2">
       <div className="flex justify-between items-center w-full max-w-[550px]">
         <div className="flex pt-2 hover:cursor-pointer" onClick={goToIndex}>
-          <img
-            src="logo64_black.png"
+          <Image
+            src={"/logo64_black.png"}
             className="w-8 h-8 -translate-y-1 mr-[1px]"
+            width={80}
+            height={80}
+            alt="The NumCross logo of a pixelated blackboard bold N"
           />
           <p className="text-2xl font-bold font-title hover:cursor-pointer">
             UMCROSS
@@ -59,13 +60,7 @@ export default function Header() {
               <ShareIcon className="w-8 h-8 text-black" />
             </div>
           </RWebShare>
-          <div
-            className="p-1 hover:cursor-pointer"
-            onClick={() => {
-              refreshLeaderboards();
-              openLeaderboard();
-            }}
-          >
+          <div className="p-1 hover:cursor-pointer" onClick={openLeaderboard}>
             <TrophyIcon className="w-8 h-8 text-black" />
           </div>
           <div className="p-1 hover:cursor-pointer" onClick={openHelp}>
@@ -74,7 +69,6 @@ export default function Header() {
           <div
             className="p-1 hover:cursor-pointer"
             onClick={() => {
-              refreshStats();
               openStats();
             }}
           >

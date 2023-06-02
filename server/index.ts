@@ -44,7 +44,7 @@ import {
 import { LeaderboardEntry, PrivateLeaderboardEntry } from "../src/types/stats";
 
 const env_path =
-  process.env.NODE_ENV === "production" || true // force production
+  process.env.NODE_ENV === "production"
     ? ".env.production"
     : ".env.development";
 dotenv.config({ path: env_path });

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import useModal from "@/hooks/useModal";
 import { ReactElement } from "react";
 import HelpOverlay from "./help_overlay";
@@ -6,15 +6,9 @@ import LeaderboardOverlay from "./leaderboard_overlay";
 import SettingsOverlay from "./settings_overlay";
 import StatsOverlay from "./stats_overlay";
 import { useUser } from "@supabase/auth-helpers-react";
-import {
-  getLeaderboard,
-  getPrivateLeaderboard,
-  getStats,
-  setUsername,
-} from "@/api/backend";
+import { backendSetUsername } from "@/api/backend";
 import toast from "react-hot-toast";
 import useUsername from "@/hooks/useUsername";
-import useHeader from "@/hooks/useHeader";
 
 interface Provides {
   OverlayManager: () => ReactElement;
@@ -35,36 +29,8 @@ export default function useOverlayManager(): Provides {
   const [StatsModal, openStatsModal, closeStatsModal] = useModal();
   const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
   const user = useUser();
-  const { leaderboardTrigger, statsTrigger } = useHeader();
 
-  const {
-    setLeaderboard,
-    setPrivateLeaderboard: setMyLeaderboard,
-    setStats,
-  } = useHeader();
-
-  // Leaderboard
-  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
-  const [leaderboardError, setLeaderboardError] = useState<string>("");
-  const { username, setUsername: setUsernameState } = useUsername();
-  const refreshLeaderboard = useCallback(async () => {
-    try {
-      const stats = await getLeaderboard();
-      if (!stats) {
-        setLeaderboardError("Can't get leaderboard. Try again later.");
-        setLeaderboardLoading(false);
-        return;
-      }
-      setLeaderboard(stats);
-      setLeaderboardLoading(false);
-    } catch (error) {
-      setLeaderboardError("Unknown error while getting the leaderboard.");
-      setLeaderboardLoading(false);
-    }
-  }, [setLeaderboard]);
-  useEffect(() => {
-    refreshLeaderboard();
-  }, [refreshLeaderboard, username, leaderboardLoading]);
+  const { username, setUsername } = useUsername();
   const updateUsername = useCallback(
     async (newUsername: string) => {
       if (!user) return;
@@ -74,63 +40,17 @@ export default function useOverlayManager(): Provides {
         });
         return;
       }
-      const { data, error } = await setUsername(user.id, newUsername);
+      const { data, error } = await backendSetUsername(user.id, newUsername);
       if (data?.status === "ok") {
-        setUsernameState(newUsername);
+        setUsername(newUsername);
       } else if (error?.message?.includes("duplicate")) {
         toast("Sorry, that username is taken.", { icon: "🚫" });
       } else {
         toast("Something strange went wrong...", { icon: "🚫" });
       }
     },
-    [user, setUsernameState]
+    [user, setUsername]
   );
-
-  // My leaderboard
-  const [myLeaderboardLoading, setMyLeaderboardLoading] = useState(true);
-  const [myLeaderboardError, setMyLeaderboardError] = useState<string>("");
-  const refreshMyLeaderboard = useCallback(async () => {
-    if (!user) return;
-    try {
-      const stats = await getPrivateLeaderboard(user.id);
-      if (!stats) {
-        setLeaderboardError("Can't get leaderboard. Try again later.");
-        setMyLeaderboardLoading(false);
-        return;
-      }
-      setMyLeaderboard(stats);
-      setMyLeaderboardLoading(false);
-    } catch (error) {
-      setMyLeaderboardError("Unknown error while getting the leaderboard.");
-      setMyLeaderboardLoading(false);
-    }
-  }, [user, setMyLeaderboard]);
-  useEffect(() => {
-    refreshMyLeaderboard();
-  }, [refreshMyLeaderboard, username, leaderboardTrigger]);
-
-  // Stats
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState<string>("");
-  const refreshUserStats = useCallback(async () => {
-    try {
-      if (!user) return;
-      const stats = await getStats(user.id);
-      if (!stats) {
-        setStatsError("No stats found.");
-        setStatsLoading(false);
-        return;
-      }
-      setStats(stats);
-      setStatsLoading(false);
-    } catch (error) {
-      setStatsError("Unknown error while getting stats.");
-      setStatsLoading(false);
-    }
-  }, [user, setStats]);
-  useEffect(() => {
-    refreshUserStats();
-  }, [refreshUserStats, statsTrigger]);
 
   const OverlayManager = useCallback(() => {
     return (
@@ -138,8 +58,6 @@ export default function useOverlayManager(): Provides {
         <LeaderboardModal>
           <LeaderboardOverlay
             closeModal={closeLeaderboardModal}
-            loading={leaderboardLoading}
-            error={leaderboardError}
             username={username}
             updateUsername={updateUsername}
           />
@@ -148,11 +66,7 @@ export default function useOverlayManager(): Provides {
           <HelpOverlay closeModal={closeHelpModal} />
         </HelpModal>
         <StatsModal>
-          <StatsOverlay
-            closeModal={closeStatsModal}
-            loading={statsLoading}
-            error={statsError}
-          />
+          <StatsOverlay closeModal={closeStatsModal} />
         </StatsModal>
         <SettingsModal>
           <SettingsOverlay closeModal={closeSettingsModal} />
@@ -168,10 +82,6 @@ export default function useOverlayManager(): Provides {
     closeStatsModal,
     closeHelpModal,
     closeLeaderboardModal,
-    leaderboardError,
-    leaderboardLoading,
-    statsError,
-    statsLoading,
     updateUsername,
     username,
   ]);

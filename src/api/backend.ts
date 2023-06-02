@@ -21,7 +21,7 @@ import {
 import { toast } from "react-hot-toast";
 import { getJSON, postJSON } from "@/utils";
 
-export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
+export async function backendAddPuzzle(data: AddPuzzleReq): Promise<null> {
   const error = (await postJSON<AddPuzzleResp>("/api/add_puzzle", data)).error;
 
   if (error) {
@@ -33,48 +33,47 @@ export async function addPuzzle(data: AddPuzzleReq): Promise<null> {
   return null;
 }
 
-export async function getTodaysNumcross(): Promise<{
+export async function backendGetTodaysNumcross(): Promise<{
   numcross: Numcross;
-} | null> {
-  // Load the numcross
+}> {
   const { data, error } = await getJSON<TodaysNumcrossResp>(
     "/api/todays_numcross"
   );
   if (error || !data?.numcross) {
-    toast("There was an error getting today's puzzle.", { icon: "🚫" });
-    return null;
+    throw Error("There was an error getting today's puzzle.");
   }
-
   return { numcross: data.numcross };
 }
 
-export async function getSolve(
+export async function backendGetSolve(
   userId: string,
   puzzleId: number
 ): Promise<Solve | null> {
-  const { data } = await getJSON<GetSolveResp>("/api/get_solve", {
+  const { data, error } = await getJSON<GetSolveResp>("/api/get_solve", {
     uid: userId,
     pid: puzzleId,
   });
+  if (error) {
+    throw Error("No previous solve");
+  }
   return data?.solve || null;
 }
 
-export async function startAttempt(
+export async function backendStartAttempt(
   userId: string,
   puzzleId: number
-): Promise<null> {
+): Promise<void> {
   const start_req: StartAttemptReq = {
     userId,
     puzzleId,
   };
   await postJSON<StartAttemptReq>("/api/start_attempt", start_req);
-  return null;
 }
 
-export async function verifyAttempt(
+export async function backendVerifyAttempt(
   attempt: Attempt,
   userId: string
-): Promise<VerifyAttemptResp | null> {
+): Promise<VerifyAttemptResp> {
   // Then check if the attempt is correct
   const check_req: VerifyAttemptReq = {
     attempt,
@@ -85,9 +84,8 @@ export async function verifyAttempt(
     check_req
   );
 
-  if (error || !data) {
-    toast("There was an error submitting your attempt.", { icon: "🚫" });
-    return null;
+  if (error || !data || data.errorMessage) {
+    throw Error("There was an error submitting your attempt.");
   }
 
   if (data.correct && userId && !data.saved) {
@@ -99,7 +97,7 @@ export async function verifyAttempt(
   return data;
 }
 
-export async function logSolve(
+export async function backendLogSolve(
   solve: Solve,
   userId: string
 ): Promise<LogSolveResp | null> {
@@ -116,17 +114,13 @@ export async function logSolve(
   return data;
 }
 
-export async function getStats(userId: string): Promise<UserStats | null> {
+export async function backendGetStats(userId: string): Promise<UserStats> {
   // Users must be logged in to get stats?
-  // TODO: What do we want the incentive structure to be here?
-  // Maybe ideally we just give them limited stats and then prompt them
-  // to create an account.
   const { data, error } = await getJSON<UserStatsResp>("/api/user_stats", {
     uid: userId,
   });
   if (error || !data) {
-    toast("There was an error getting your stats.", { icon: "🚫" });
-    return null;
+    throw Error("There was an error getting your stats.");
   }
   return {
     numPlayed: data.numPlayed,
@@ -137,35 +131,39 @@ export async function getStats(userId: string): Promise<UserStats | null> {
   };
 }
 
-export async function getUsername(userId: string): Promise<string | null> {
+export async function backendGetUsername(
+  userId: string
+): Promise<string | null> {
   const { data } = await getJSON<UsernameResp>("/api/username", {
     uid: userId,
   });
   return data?.username || null;
 }
 
-export async function setUsername(userId: string, username: string | null) {
+export async function backendSetUsername(
+  userId: string,
+  username: string | null
+) {
   return await postJSON<SetUsernameResp>("/api/set_username", {
     uid: userId,
     username,
   });
 }
 
-export async function getLeaderboard(): Promise<LeaderboardStats | null> {
+export async function backendGetLeaderboard(): Promise<LeaderboardStats> {
   const { data, error } = await getJSON<LeaderboardStats>(
     "/api/leaderboard",
     {}
   );
   if (error || !data) {
-    toast("There was an error getting the leaderboard.", { icon: "🚫" });
-    return null;
+    throw Error("There was an error getting the leaderboard.");
   }
   return data;
 }
 
-export async function getPrivateLeaderboard(
+export async function backendGetPrivateLeaderboard(
   userId: string
-): Promise<PrivateLeaderboardStats | null> {
+): Promise<PrivateLeaderboardStats> {
   const { data, error } = await getJSON<PrivateLeaderboardStats>(
     "/api/private_leaderboard",
     {
@@ -173,13 +171,12 @@ export async function getPrivateLeaderboard(
     }
   );
   if (error || !data) {
-    toast("There was an error getting your leaderboard.", { icon: "🚫" });
-    return null;
+    throw Error("There was an error getting your leaderboard.");
   }
   return data;
 }
 
-export async function makeFriends(
+export async function backendMakeFriends(
   userId: string,
   friendId: string
 ): Promise<boolean> {

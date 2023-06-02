@@ -35,6 +35,7 @@ export default function useModal(
   useEffect(() => {
     if (isOpen && props?.onOpen) props.onOpen();
     if (!isOpen && hasOpenedOnce && props?.onClose) props.onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, hasOpenedOnce]);
 
   return [partialModal, openModal, closeModal];
