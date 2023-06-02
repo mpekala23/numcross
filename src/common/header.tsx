@@ -11,6 +11,8 @@ import { useRouter } from "next/router";
 import { RWebShare } from "react-web-share";
 import useDev from "@/hooks/useDev";
 import useOverlayManager from "./overlays/overlay_manager";
+import Logo from "../../public/logo64_black.png";
+import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
@@ -25,9 +27,10 @@ export default function Header() {
     <div className="flex justify-around items-center border-b-2 border-slate-200 p-2">
       <div className="flex justify-between items-center w-full max-w-[550px]">
         <div className="flex pt-2 hover:cursor-pointer" onClick={goToIndex}>
-          <img
-            src="logo64_black.png"
+          <Image
+            src={Logo}
             className="w-8 h-8 -translate-y-1 mr-[1px]"
+            alt="The NumCross logo of a pixelated blackboard bold N"
           />
           <p className="text-2xl font-bold font-title hover:cursor-pointer">
             UMCROSS
