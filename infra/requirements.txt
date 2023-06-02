@@ -1,0 +1,2 @@
+click==8.1.3
+-e git+ssh://git@github.com/fingoldin/numcross.git@03f682cce9209e7ac196c65aa7da90c43a7f11b1#egg=package&subdirectory=infra
