@@ -47,6 +47,6 @@ package-lock.json
 yarn.lock
 
 # infra
-# infra/venv
-# infra/package.egg-info
-# infra/__pycache__
+infra/venv
+infra/package.egg-info
+infra/__pycache__
