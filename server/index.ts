@@ -282,7 +282,7 @@ app
               puzzleId: checkData.pid,
               startTime: checkData.start_time,
               endTime: checkData.end_time,
-              heatmap: attempt.heatmap,
+              heatmap: attempt.heatmap || {},
               time: checkData.solve,
             },
             saved: true,
@@ -341,7 +341,7 @@ app
             startTime: attempt.startTime,
             endTime: endDate.toISOString(),
             time: attempt.time,
-            heatmap: attempt.heatmap,
+            heatmap: attempt.heatmap || {},
           },
           saved: !solveError,
         });

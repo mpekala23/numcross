@@ -174,6 +174,10 @@ export default function Home() {
   // Function to update the heatmap
   const updateHeatmap = useCallback(() => {
     if (!attempt || !numcross) return;
+    if (!attempt.heatmap) {
+      dispatch(setAttempt({ ...attempt, heatmap: {} }));
+      return;
+    }
     const shape = numcross.solution.shape;
     const newHeatmap: Scratch = {};
     let update = false;
@@ -233,7 +237,7 @@ export default function Home() {
         puzzleId: numcross.id,
         startTime: attempt.startTime,
         endTime: new Date().toISOString(),
-        heatmap: attempt.heatmap,
+        heatmap: attempt.heatmap || {},
         time: attempt.time,
       };
       dispatch(setSolve(newSolve));

@@ -76,7 +76,7 @@ export interface Attempt {
   puzzleId: number;
   startTime: string;
   scratch: Scratch;
-  heatmap: Scratch;
+  heatmap?: Scratch;
   time: number;
 }
 
