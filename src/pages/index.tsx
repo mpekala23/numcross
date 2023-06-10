@@ -58,6 +58,7 @@ export default function Home() {
           puzzleId: numcross.id,
           startTime: new Date().toISOString(),
           scratch: {},
+          heatmap: {},
           time: 0,
         })
       );
@@ -88,7 +89,7 @@ export default function Home() {
   // Function that _just_ loads our attempt from local storage
   useEffect(() => {
     const asyncWork = async () => {
-      if (!numcross) return;
+      if (!numcross || solve) return;
       const matt = mineAttempt(numcross.id);
       if (matt) {
         dispatch(setAttempt(matt));
@@ -99,7 +100,7 @@ export default function Home() {
       }
     };
     asyncWork();
-  }, [dispatch, numcross, openStart, startStopwatch]);
+  }, [dispatch, numcross, openStart, startStopwatch, solve]);
 
   // Function that _just_ starts getting solve from backend if there's a user
   useEffect(() => {
@@ -152,6 +153,7 @@ export default function Home() {
       puzzleId: solve.puzzleId,
       startTime: solve.startTime,
       scratch: {},
+      heatmap: {},
       time: solve.time,
     };
     dispatch(setAttempt(newAttempt));
@@ -168,6 +170,31 @@ export default function Home() {
     dispatch(setAttempt({ ...attempt, scratch }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, scratch]);
+
+  // Function to update the heatmap
+  const updateHeatmap = useCallback(() => {
+    if (!attempt || !numcross) return;
+    const shape = numcross.solution.shape;
+    const newHeatmap = { ...attempt.heatmap };
+    let update = false;
+    for (let rx = 0; rx < shape[0]; rx++) {
+      for (let cx = 0; cx < shape[1]; cx++) {
+        const answer = numcross.solution.answers[rx][cx];
+        if (answer === "blank") continue;
+        const guess = attempt.scratch[cellKey(rx, cx)];
+        if (guess === answer && attempt.heatmap[cellKey(rx, cx)] == null) {
+          newHeatmap[cellKey(rx, cx)] = attempt.time;
+          update = true;
+        }
+      }
+    }
+    if (update) dispatch(setAttempt({ ...attempt, heatmap: newHeatmap }));
+  }, [numcross, attempt, dispatch]);
+
+  // Effect to update the heatmap when needed
+  useEffect(() => {
+    updateHeatmap();
+  }, [updateHeatmap]);
 
   const checkPuzzle = useCallback(() => {
     // Puzzle must be loaded, an attempt must've been started, it must not already
@@ -199,6 +226,7 @@ export default function Home() {
         puzzleId: numcross.id,
         startTime: attempt.startTime,
         endTime: new Date().toISOString(),
+        heatmap: attempt.heatmap,
         time: attempt.time,
       };
       dispatch(setSolve(newSolve));

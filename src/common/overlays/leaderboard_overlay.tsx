@@ -9,6 +9,7 @@ import {
   refreshPublicLeaderboard,
 } from "@/redux/slices/leaderboards";
 import Loading from "../loading";
+import { ArrowUturnRightIcon } from "@heroicons/react/24/solid";
 
 interface Props {
   closeModal: () => void;
@@ -93,7 +94,7 @@ export default function LeaderboardOverlay({
     if (user) {
       dispatch(refreshPrivateLeaderboard({ userId: user.id }));
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, username]);
 
   // Update myIndex
   useEffect(() => {
@@ -126,8 +127,14 @@ export default function LeaderboardOverlay({
         }
       }
     }
-    setMyIndex(null);
-  }, [publicLeaderboard, privateLeaderboard, username, tab]);
+  }, [
+    publicLeaderboard,
+    privateLeaderboard,
+    username,
+    tab,
+    publicStatus,
+    privateStatus,
+  ]);
 
   // For rendering a little loading spinner
   const renderLoading = useCallback(() => {
@@ -160,34 +167,48 @@ export default function LeaderboardOverlay({
     return (
       <div>
         <div className="flex w-full">
-          <div
-            onClick={() => setTab("global")}
-            className={`${
-              tab === "global"
-                ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
-                : "basis-1/3 bg-slate-200"
-            } p-2 text-center`}
-          >
-            Global
-          </div>
-          <div
-            onClick={() => {
-              if (user) setTab("private");
-              else
-                toast(
-                  "Sorry, you must make an account to access private leaderboards.",
-                  {
-                    icon: "🚫",
-                  }
-                );
-            }}
-            className={`${
-              tab === "private"
-                ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
-                : "basis-1/3 bg-slate-200"
-            } p-2 text-center`}
-          >
-            Private
+          <div className="flex w-full">
+            <div
+              onClick={() => setTab("global")}
+              className={`${
+                tab === "global"
+                  ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
+                  : "basis-1/3 bg-slate-200"
+              } p-2 text-center`}
+            >
+              Global
+            </div>
+            <div
+              onClick={() => {
+                if (user) setTab("private");
+                else
+                  toast(
+                    "Sorry, you must make an account to access private leaderboards.",
+                    {
+                      icon: "🚫",
+                    }
+                  );
+              }}
+              className={`${
+                tab === "private"
+                  ? "basis-2/3 border-t-2 border-x-2 border-slate-200"
+                  : "basis-1/3 bg-slate-200"
+              } p-2 text-center`}
+            >
+              Private
+            </div>
+            {false && (
+              <div
+                className="p-1 hover:cursor-pointer"
+                onClick={() => {
+                  if (user)
+                    dispatch(refreshPrivateLeaderboard({ userId: user.id }));
+                  dispatch(refreshPublicLeaderboard());
+                }}
+              >
+                <ArrowUturnRightIcon className="w-8 h-8 text-black" />
+              </div>
+            )}
           </div>
         </div>
         {tab === "private" && (
@@ -265,6 +286,7 @@ export default function LeaderboardOverlay({
     user,
     privateStatus,
     publicStatus,
+    dispatch,
   ]);
 
   if (user && !username) return RenderNoUsername(editState, updateUsername);

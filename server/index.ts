@@ -157,6 +157,7 @@ app
             startTime: solveData.start_time,
             endTime: solveData.end_time,
             time: solveData.time,
+            heatmap: solveData.heatmap,
           };
         }
         res.send({
@@ -281,6 +282,7 @@ app
               puzzleId: checkData.pid,
               startTime: checkData.start_time,
               endTime: checkData.end_time,
+              heatmap: attempt.heatmap,
               time: checkData.solve,
             },
             saved: true,
@@ -327,6 +329,7 @@ app
             start_time: attempt.startTime,
             end_time: endDate,
             time: attempt.time,
+            heatmap: attempt.heatmap,
           })
           .select();
 
@@ -338,6 +341,7 @@ app
             startTime: attempt.startTime,
             endTime: endDate.toISOString(),
             time: attempt.time,
+            heatmap: attempt.heatmap,
           },
           saved: !solveError,
         });
@@ -382,6 +386,7 @@ app
             start_time: solve.startTime,
             end_time: solve.endTime,
             time: solve.time,
+            heatmap: solve.heatmap,
           })
           .select();
 
@@ -676,7 +681,6 @@ app
             token: req.body.token,
           })
           .select();
-        console.log(error, data);
         res.send({ status: "ok" });
       }
     );

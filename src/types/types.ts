@@ -76,6 +76,7 @@ export interface Attempt {
   puzzleId: number;
   startTime: string;
   scratch: Scratch;
+  heatmap: Scratch;
   time: number;
 }
 
@@ -84,6 +85,7 @@ export interface Solve {
   startTime: string;
   endTime: string;
   time: number;
+  heatmap: Scratch;
 }
 
 export type FillMode = "next" | "nextEmpty" | "stay";

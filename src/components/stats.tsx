@@ -1,7 +1,8 @@
 import React, { useCallback } from "react";
 import { asPercentage, solveSecondsToString, streakToString } from "@/utils";
 import { useAppSelector } from "@/redux/hooks";
-import ReactLoading from "react-loading";
+import Heatmap from "./heatmap";
+import Loading from "@/common/loading";
 
 function renderStat({ name, value }: { name: string; value: number | string }) {
   return (
@@ -26,7 +27,7 @@ export default function Stats() {
   }, []);
 
   if (status !== "success") {
-    <ReactLoading height={100} width={100} type={"cubes"} color="#111" />;
+    <Loading />;
   }
 
   if (!userStats) return renderError("No stats found. Are you logged in?");
@@ -54,6 +55,7 @@ export default function Stats() {
           value: streakToString(userStats.maxStreak),
         })}
       </div>
+      <Heatmap />
     </div>
   );
 }

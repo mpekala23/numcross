@@ -1,4 +1,5 @@
 import { backendMakeFriends, backendSetUsername } from "@/api/backend";
+import Loading from "@/common/loading";
 import Slink from "@/components/slink";
 import useDev from "@/hooks/useDev";
 import useUsername from "@/hooks/useUsername";
@@ -12,7 +13,6 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import ReactLoading from "react-loading";
 import { RWebShare } from "react-web-share";
 
 function RenderLoggedOut() {
@@ -240,7 +240,7 @@ export default function MyLeaderboard() {
   if (privateStatus === "loading") {
     return (
       <div className="flex w-full flex-1 justify-center items-center">
-        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
+        <Loading />
       </div>
     );
   }

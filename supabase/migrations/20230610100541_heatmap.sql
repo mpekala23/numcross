@@ -1,0 +1,1 @@
+alter table "public"."solves" add column "heatmap" jsonb;

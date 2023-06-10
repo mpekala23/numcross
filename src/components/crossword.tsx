@@ -16,6 +16,8 @@ import {
 } from "@/types/types";
 import { useNumpad } from "@/hooks/useNumpad";
 import useSettings from "@/hooks/useSettings";
+import Heatmap from "./heatmap";
+import { useAppSelector } from "@/redux/hooks";
 
 const DEFAULT_CLUE: Clue = {
   type: "fillable",
@@ -79,6 +81,7 @@ export const Crossword: FunctionComponent<Props> = ({
   const [clueMappings, setClueMappings] = useState<ClueMappings>([]);
   const { numpadVal, setNumpadVal } = useNumpad();
   const { settings } = useSettings();
+  const attempt = useAppSelector((state) => state.progress.attempt);
 
   const contRef = useRef<HTMLDivElement>(null);
   const [rowHeight, setRowHeight] = useState(64);

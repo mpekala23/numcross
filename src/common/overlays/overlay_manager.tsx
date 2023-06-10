@@ -9,6 +9,8 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { backendSetUsername } from "@/api/backend";
 import toast from "react-hot-toast";
 import useUsername from "@/hooks/useUsername";
+import { useAppDispatch } from "@/redux/hooks";
+import { refreshPrivateLeaderboard } from "@/redux/slices/leaderboards";
 
 interface Provides {
   OverlayManager: () => ReactElement;
@@ -29,6 +31,7 @@ export default function useOverlayManager(): Provides {
   const [StatsModal, openStatsModal, closeStatsModal] = useModal();
   const [SettingsModal, openSettingsModal, closeSettingsModal] = useModal();
   const user = useUser();
+  const dispatch = useAppDispatch();
 
   const { username, setUsername } = useUsername();
   const updateUsername = useCallback(
@@ -43,13 +46,14 @@ export default function useOverlayManager(): Provides {
       const { data, error } = await backendSetUsername(user.id, newUsername);
       if (data?.status === "ok") {
         setUsername(newUsername);
+        dispatch(refreshPrivateLeaderboard({ userId: user.id }));
       } else if (error?.message?.includes("duplicate")) {
         toast("Sorry, that username is taken.", { icon: "🚫" });
       } else {
         toast("Something strange went wrong...", { icon: "🚫" });
       }
     },
-    [user, setUsername]
+    [user, setUsername, dispatch]
   );
 
   const OverlayManager = useCallback(() => {
