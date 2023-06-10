@@ -154,3 +154,9 @@ export const getESTDatestring = () => {
     splitSlashes[1]
   )}`;
 };
+
+export async function sleep(time: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+}

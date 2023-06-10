@@ -2,7 +2,7 @@ import Head from "next/head";
 import { Crossword } from "@/components/crossword";
 import React, { useCallback, useEffect, useState } from "react";
 import { Attempt, Scratch, Solve } from "@/types/types";
-import { cellKey, isAttemptFull } from "@/utils";
+import { cellKey, isAttemptFull, sleep } from "@/utils";
 import { toast } from "react-hot-toast";
 import useModal from "@/hooks/useModal";
 import { Numpad } from "@/components/numpad";
@@ -30,8 +30,8 @@ import {
   setSolve,
   verifyAttempt,
 } from "@/redux/slices/progress";
-import ReactLoading from "react-loading";
 import { refreshUserStats } from "@/redux/slices/stats";
+import Loading from "@/common/loading";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -73,7 +73,10 @@ export default function Home() {
     const caught = mineCatch();
     if (!caught && user) {
       storeCatch(true);
-      router.replace("/catch_user?uid=" + user.id);
+      router.push(`/?uid=${user.id}`);
+      setTimeout(() => {
+        router.push("/");
+      }, 100);
     }
   }, [router, user]);
 
@@ -88,7 +91,7 @@ export default function Home() {
       if (!numcross) return;
       const matt = mineAttempt(numcross.id);
       if (matt) {
-        setAttempt(matt);
+        dispatch(setAttempt(matt));
         setScratch(matt.scratch);
         startStopwatch();
       } else {
@@ -96,13 +99,15 @@ export default function Home() {
       }
     };
     asyncWork();
-  }, [numcross, openStart, startStopwatch]);
+  }, [dispatch, numcross, openStart, startStopwatch]);
 
   // Function that _just_ starts getting solve from backend if there's a user
   useEffect(() => {
     if (!user || !numcross) return;
-    dispatch(fetchSolve({ userId: user.id, puzzleId: numcross.id }));
-    dispatch(refreshUserStats({ userId: user.id }));
+    sleep(1000).then(() => {
+      dispatch(fetchSolve({ userId: user.id, puzzleId: numcross.id }));
+      dispatch(refreshUserStats({ userId: user.id }));
+    });
   }, [dispatch, user, numcross]);
 
   // If you've already solved the puzzle, fills in the squares with
@@ -159,7 +164,7 @@ export default function Home() {
 
   // Effect to make sure the "scratch" is updated in the attempt
   useEffect(() => {
-    if (!attempt) return;
+    if (!attempt || solve) return;
     dispatch(setAttempt({ ...attempt, scratch }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, scratch]);
@@ -223,19 +228,15 @@ export default function Home() {
     }
   }, [attempt, lastAttempt, solve, setLastAttempt, checkPuzzle]);
 
-  const incrementTime = useCallback(() => {
+  useEffect(() => {
     if (!attempt || solve) return;
     const newAttempt = {
       ...attempt,
       time: attempt.time + 1,
     };
     dispatch(setAttempt(newAttempt));
-  }, [dispatch, attempt, solve]);
-
-  useEffect(() => {
-    incrementTime();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seconds]);
+  }, [dispatch, solve, seconds]);
 
   // Fun stuff on solve
   useEffect(() => {
@@ -252,7 +253,7 @@ export default function Home() {
   if (!numcross || puzzleStatus !== "success") {
     return (
       <div className="flex w-full flex-1 justify-center items-center">
-        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
+        <Loading />
       </div>
     );
   }

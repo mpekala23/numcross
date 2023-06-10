@@ -4,11 +4,11 @@ import { solveSecondsToString } from "@/utils";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "react-hot-toast";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import ReactLoading from "react-loading";
 import {
   refreshPrivateLeaderboard,
   refreshPublicLeaderboard,
 } from "@/redux/slices/leaderboards";
+import Loading from "../loading";
 
 interface Props {
   closeModal: () => void;
@@ -108,6 +108,7 @@ export default function LeaderboardOverlay({
           publicLeaderboard.today[ix].username === username
         ) {
           setMyIndex(ix);
+          return;
         }
       }
     } else {
@@ -121,16 +122,18 @@ export default function LeaderboardOverlay({
           privateLeaderboard.today[ix].friend.username === username
         ) {
           setMyIndex(ix);
+          return;
         }
       }
     }
+    setMyIndex(null);
   }, [publicLeaderboard, privateLeaderboard, username, tab]);
 
   // For rendering a little loading spinner
   const renderLoading = useCallback(() => {
     return (
       <div className="flex w-full flex-1 justify-center items-center">
-        <ReactLoading height={100} width={100} type={"cubes"} color="#111" />
+        <Loading />
       </div>
     );
   }, []);
