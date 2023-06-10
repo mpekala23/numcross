@@ -175,16 +175,23 @@ export default function Home() {
   const updateHeatmap = useCallback(() => {
     if (!attempt || !numcross) return;
     const shape = numcross.solution.shape;
-    const newHeatmap = { ...attempt.heatmap };
+    const newHeatmap: Scratch = {};
     let update = false;
     for (let rx = 0; rx < shape[0]; rx++) {
       for (let cx = 0; cx < shape[1]; cx++) {
         const answer = numcross.solution.answers[rx][cx];
         if (answer === "blank") continue;
         const guess = attempt.scratch[cellKey(rx, cx)];
-        if (guess === answer && attempt.heatmap[cellKey(rx, cx)] == null) {
+        if (
+          guess === answer &&
+          (attempt.heatmap[cellKey(rx, cx)] === null ||
+            attempt.heatmap[cellKey(rx, cx)] === undefined)
+        ) {
           newHeatmap[cellKey(rx, cx)] = attempt.time;
           update = true;
+        } else {
+          newHeatmap[cellKey(rx, cx)] =
+            attempt.heatmap[cellKey(rx, cx)] || null;
         }
       }
     }

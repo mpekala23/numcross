@@ -40,7 +40,11 @@ export const refreshPrivateLeaderboard = createAsyncThunk(
 export const leaderboardsSlice = createSlice({
   name: "leaderboards",
   initialState: INITIAL_STATE,
-  reducers: {},
+  reducers: {
+    resetLeaderboards: (state) => {
+      state = { ...INITIAL_STATE };
+    },
+  },
   extraReducers(builder) {
     builder
       // refreshPublicLeaderboard
@@ -72,4 +76,5 @@ export const leaderboardsSlice = createSlice({
   },
 });
 
+export const { resetLeaderboards } = leaderboardsSlice.actions;
 export default leaderboardsSlice.reducer;

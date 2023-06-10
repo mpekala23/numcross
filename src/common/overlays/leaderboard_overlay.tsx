@@ -98,6 +98,7 @@ export default function LeaderboardOverlay({
 
   // Update myIndex
   useEffect(() => {
+    setMyIndex(null);
     if (tab === "global" || !privateLeaderboard) {
       for (
         let ix = 0;

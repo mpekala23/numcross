@@ -46,6 +46,9 @@ export const puzzlesSlice = createSlice({
   name: "puzzles",
   initialState: INITIAL_STATE,
   reducers: {
+    resetProgress: (state) => {
+      state = { ...INITIAL_STATE };
+    },
     setAttempt: (state, action: PayloadAction<Attempt>) => {
       state.attempt = action.payload;
     },
@@ -88,5 +91,5 @@ export const puzzlesSlice = createSlice({
   },
 });
 
-export const { setAttempt, setSolve } = puzzlesSlice.actions;
+export const { resetProgress, setAttempt, setSolve } = puzzlesSlice.actions;
 export default puzzlesSlice.reducer;

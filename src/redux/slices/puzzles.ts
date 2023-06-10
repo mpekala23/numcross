@@ -28,7 +28,11 @@ export const refreshTodaysNumcross = createAsyncThunk(
 export const puzzlesSlice = createSlice({
   name: "puzzles",
   initialState: INITIAL_STATE,
-  reducers: {},
+  reducers: {
+    resetPuzzles: (state) => {
+      state = { ...INITIAL_STATE };
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(refreshTodaysNumcross.pending, (state) => {
@@ -45,4 +49,5 @@ export const puzzlesSlice = createSlice({
   },
 });
 
+export const { resetPuzzles } = puzzlesSlice.actions;
 export default puzzlesSlice.reducer;

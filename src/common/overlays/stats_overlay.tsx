@@ -2,6 +2,12 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import React, { useCallback } from "react";
 import Slink from "../../components/slink";
 import Stats from "../../components/stats";
+import { useAppDispatch } from "@/redux/hooks";
+import { resetLeaderboards } from "@/redux/slices/leaderboards";
+import { resetProgress } from "@/redux/slices/progress";
+import { resetPuzzles } from "@/redux/slices/puzzles";
+import { resetStats } from "@/redux/slices/stats";
+import { useRouter } from "next/router";
 
 interface Props {
   closeModal: () => void;
@@ -10,6 +16,8 @@ interface Props {
 export default function StatsOverlay({ closeModal }: Props) {
   const supabase = useSupabaseClient();
   const user = useUser();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
   // For rendering a message prompting non-logged in users to log in
   // or create an account
@@ -44,6 +52,11 @@ export default function StatsOverlay({ closeModal }: Props) {
           onClick={() => {
             supabase.auth.signOut().then(() => {
               localStorage.clear();
+              dispatch(resetLeaderboards());
+              dispatch(resetProgress());
+              dispatch(resetPuzzles());
+              dispatch(resetStats());
+              router.push("/signin");
             });
           }}
           href=""

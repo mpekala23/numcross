@@ -2,7 +2,9 @@ import { useAppSelector } from "@/redux/hooks";
 import { Range, cellKey } from "@/utils";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-function val2color(val: number): string {
+function val2color(val: number | null): string {
+  if (val === null || val === undefined) return "rgb(0,0,0)"; // black squares
+  val = val * Math.sqrt(val);
   return `rgb(50, ${((1 - val) * 255) / 2 + 50}, ${(1 - val) * 255})`;
 }
 
@@ -68,16 +70,16 @@ export default function Heatmap() {
               style={{ height: `${rowHeight}px` }}
             >
               {Range(numcross.puzzle.shape[1]).map((colidx) => {
+                let val = solve.heatmap[cellKey(rowidx, colidx)];
+                val =
+                  val !== null && val !== undefined ? val / solve.time : null;
                 return (
                   <div
                     key={cellKey(rowidx, colidx)}
                     style={{
                       height: rowHeight,
                       width: rowHeight,
-                      backgroundColor: val2color(
-                        (solve.heatmap[cellKey(rowidx, colidx)] || 0) /
-                          solve.time
-                      ),
+                      backgroundColor: val2color(val),
                     }}
                   />
                 );

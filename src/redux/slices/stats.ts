@@ -26,7 +26,11 @@ export const refreshUserStats = createAsyncThunk(
 export const statsSlice = createSlice({
   name: "stats",
   initialState: INITIAL_STATE,
-  reducers: {},
+  reducers: {
+    resetStats: (state) => {
+      state = { ...INITIAL_STATE };
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(refreshUserStats.pending, (state) => {
@@ -43,4 +47,5 @@ export const statsSlice = createSlice({
   },
 });
 
+export const { resetStats } = statsSlice.actions;
 export default statsSlice.reducer;
