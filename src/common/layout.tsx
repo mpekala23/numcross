@@ -32,7 +32,7 @@ export default function Layout({ children, currentPage }: Props) {
 
       <div
         className={`flex flex-1 ${
-          currentPage !== "/upload" ? "overflow-hidden" : "overflow-auto"
+          currentPage !== "/admin/upload" ? "overflow-hidden" : "overflow-auto"
         } flex-col justify-center align-center p-8 max-w-[550px] w-screen self-center`}
       >
         {children}
